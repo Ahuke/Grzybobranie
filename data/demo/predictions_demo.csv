@@ -1,0 +1,31 @@
+target_date,area_id,species_filter,predicted_yield_pcs_per_h,abundance_class,confidence_score,habitat_match_note,generated_at,model_version,is_demo
+2026-10-31,0201,all,41.2,WYSYP,0.92,"Bory Dolnośląskie: 84% sosny, opad 52.5 mm z 14 dni, ciepła noc (7.5°C)",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0206,all,21.4,WYSYP,0.85,"Karkonosze: wysoka wilgotność gleby (0.36), chłodniejsze noce (3.9°C)",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0208,all,27.8,WYSYP,0.89,"Kotlina Kłodzka: 86% świerka i buka, opad 59.2 mm z 14 dni",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0212,all,15.6,SREDNIO,0.81,"Las mieszany (38% sosna, 31% dąb/buk), umiarkowany opad",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0220,all,9.4,SREDNIO,0.76,"Wzgórza Trzebnickie: niższa wilgotność gleby (0.21)",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0264,all,1.8,BRAK,0.45,,2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0201,podgrzybek_brunatny,38.5,WYSYP,0.95,"Idealne siedlisko: 84% borów sosnowych na siedlisku świeżym",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0206,podgrzybek_brunatny,12.0,SREDNIO,0.78,"Przewaga borów świerkowych (56%), chłodne noce",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0208,podgrzybek_brunatny,14.5,SREDNIO,0.80,"Drzewostan świerkowy (58%), dobre uwilgotnienie",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0212,podgrzybek_brunatny,11.2,SREDNIO,0.79,"Udział sosny 38% i świerka 26.5%",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0220,podgrzybek_brunatny,6.8,SREDNIO,0.72,"Bory sosnowe 54%, ale niższy opad z 7 dni (11 mm)",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0264,podgrzybek_brunatny,0.5,BRAK,0.40,"Niska lesistość miejska (7.6%)",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0201,borowik_szlachetny,8.4,SREDNIO,0.74,"Mały udział dębu i buka (8.5%), głównie bory sosnowe",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0206,borowik_szlachetny,18.2,SREDNIO,0.86,"Wysoki udział świerka (56.2%) i buka/dębu (24.5%)",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0208,borowik_szlachetny,25.0,WYSYP,0.91,"Optymalny drzewostan: 28.4% buk/dąb + 58% świerk, wysoka wilgotność",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0212,borowik_szlachetny,10.5,SREDNIO,0.82,"Drzewostan dębowo-bukowy 31%",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0220,borowik_szlachetny,5.2,SREDNIO,0.70,"Dąbrowy i buczyny 36.2%, ale przesuszona ściółka",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0264,borowik_szlachetny,1.1,BRAK,0.42,"Lasy parkowe i łęgowe, brak danych o wilgotności gleby",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0201,kurka,14.0,SREDNIO,0.88,"Bory sosnowe z mchem (84.2% sosny)",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0206,kurka,3.5,BRAK,0.65,"Niski udział sosny (14%), zbyt niskie temperatury nocne",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0208,kurka,4.1,BRAK,0.68,"Końcówka sezonu na kurkę w wyższych partiach gór",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0212,kurka,7.8,SREDNIO,0.77,"Lasy mieszane świeże",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0220,kurka,3.2,BRAK,0.66,"Zbyt niski opad w ostatnim tygodniu",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0264,kurka,0.0,BRAK,0.35,,2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0201,maslak_zwyczajny,22.0,WYSYP,0.90,"Rozległe bory i młodniki sosnowe",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0206,maslak_zwyczajny,2.8,BRAK,0.62,"Mały udział sosny",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0208,maslak_zwyczajny,3.0,BRAK,0.64,"Dominacja świerka i buka",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0212,maslak_zwyczajny,6.4,SREDNIO,0.75,"Umiarkowany udział sosny (38%)",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0220,maslak_zwyczajny,5.9,SREDNIO,0.73,"Udział sosny 54%, niska wilgotność",2026-10-28,DEMO_MOCK_v0,True
+2026-10-31,0264,maslak_zwyczajny,0.2,BRAK,0.38,,2026-10-28,DEMO_MOCK_v0,True

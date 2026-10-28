@@ -1,0 +1,13 @@
+report_id,date,area_id,location_raw,dominant_species,yield_pcs_per_h,harvest_duration_h,worminess_pct,is_demo
+DEMO_REP_001,2026-10-18,0201,"Świętoszów, Bory Dolnośląskie",podgrzybek_brunatny,42.5,3.0,5.0,True
+DEMO_REP_002,2026-10-19,0201,"Kliczków, bór sosnowy z mchem",podgrzybek_brunatny,36.0,2.5,10.0,True
+DEMO_REP_003,2026-10-19,0201,"Osiecznica",maslak_zwyczajny,24.0,1.5,,True
+DEMO_REP_004,2026-10-20,0208,"Góry Stołowe, okolice Karłowa",borowik_szlachetny,28.0,4.0,8.0,True
+DEMO_REP_005,2026-10-21,0208,"Międzygórze, las świerkowo-bukowy",borowik_szlachetny,31.5,3.5,4.0,True
+DEMO_REP_006,2026-10-21,0206,"Szklarska Poręba, zbocza pod reglami",borowik_szlachetny,18.0,2.0,12.0,True
+DEMO_REP_007,2026-10-22,0212,"Mirsk, las mieszany",kurka,14.5,2.0,0.0,True
+DEMO_REP_008,2026-10-22,0212,"Lwówek Śląski",,11.0,,15.0,True
+DEMO_REP_009,2026-10-23,0220,"Oborniki Śląskie, Wzgórza Trzebnickie",kania,9.0,1.5,0.0,True
+DEMO_REP_010,2026-10-24,0220,"Żmigród, las sosnowo-dębowy",podgrzybek_brunatny,16.5,3.0,10.0,True
+DEMO_REP_011,2026-10-24,0264,"Las Osobowicki, Wrocław",,0.0,1.0,,True
+DEMO_REP_012,2026-10-25,0201,"Bolesławiec, lasy na północ od A4",podgrzybek_brunatny,48.0,2.5,3.0,True

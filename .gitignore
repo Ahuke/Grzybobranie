@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Dane surowe i przetworzone (duże paczki SHP/BDL, lokalny cache)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Zawsze śledź próbkę demonstracyjną do budowy UI!
+!data/demo/
+!data/demo/**
+
+# System / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp

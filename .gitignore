@@ -11,15 +11,19 @@ env/
 .mypy_cache/
 .ruff_cache/
 
-# Dane surowe i przetworzone (duże paczki SHP/BDL, lokalny cache)
+# Dane surowe i przetworzone (duże paczki SHP/BDL, lokalny cache, poświadczenia)
+.env
+.env.*
 data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
 
-# Zawsze śledź próbkę demonstracyjną do budowy UI!
+# Zawsze śledź próbkę demonstracyjną do budowy UI oraz próbkę audytową!
 !data/demo/
 !data/demo/**
+!data/sample/
+!data/sample/**
 
 # System / IDE
 .DS_Store

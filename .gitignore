@@ -4,20 +4,40 @@ __pycache__/
 *$py.class
 *.so
 .Python
+build/
+dist/
+*.egg-info/
 .venv/
 venv/
 env/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.ipynb_checkpoints/
 
-# Dane surowe i przetworzone (duże paczki SHP/BDL, lokalny cache, poświadczenia)
+# Sekrety i konfiguracja lokalna
 .env
 .env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Dane surowe i przetworzone (duże paczki SHP/BDL/GPKG, lokalny cache, sesje)
 data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+*.shp
+*.shx
+*.dbf
+*.prj
+*.gpkg
+
+# Artefakty dużych modeli ML
+models/*
+!models/.gitkeep
+!models/README.md
+*.pkl
+*.joblib
 
 # Zawsze śledź próbkę demonstracyjną do budowy UI oraz próbkę audytową!
 !data/demo/
@@ -27,6 +47,7 @@ data/processed/*
 
 # System / IDE
 .DS_Store
+Thumbs.db
 .idea/
 .vscode/
 *.swp

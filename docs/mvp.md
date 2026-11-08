@@ -104,7 +104,7 @@ Aby dotrzymać terminu i uniknąć blokad technicznych, poniższe elementy **cel
 ## 7. Lista kontrolna do przeglądu przez drugą osobę (`[DO WERYFIKACJI]`)
 
 Przed rozpoczęciem pełnego scrapingu i kodowania prosimy o potwierdzenie poniższych punktów:
-- [ ] **Region:** Czy zostajemy przy **województwie dolnośląskim (`TERYT 02`)**, czy wolisz **mazowieckie (`TERYT 14`)**?
-- [ ] **Progi klas wysypu (`abundance_class`):** Czy przedziały `< 5` (`BRAK`), `5–20` (`SREDNIO`), `> 20` (`WYSYP`) `[szt./h]` są odpowiednie dla wizualizacji na mapie?
-- [ ] **Lista gatunków w filtrze UI:** Czy zestaw `["all", "borowik_szlachetny", "podgrzybek_brunatny", "kurka", "maslak_zwyczajny", "kania"]` pokrywa potrzeby ekranu głównego?
-- [ ] **Format plików wymiany:** Czy na etapie MVP zostajemy przy `CSV` + `GeoJSON` (czytelne w Git i łatwe do inspekcji), czy od razu przechodzimy na `Parquet` / `GeoParquet`?
+- [x] **Region:** Czy zostajemy przy **województwie dolnośląskim (`TERYT 02`)**, czy wolisz **mazowieckie (`TERYT 14`)**?
+- [x] **Progi klas wysypu (`abundance_class`):** Czy przedziały `< 5` (`BRAK`), `5–20` (`SREDNIO`), `> 20` (`WYSYP`) `[szt./h]` są odpowiednie dla wizualizacji na mapie?
+- [x] **Lista gatunków w filtrze UI:** Czy zestaw `["all", "borowik_szlachetny", "podgrzybek_brunatny", "kurka", "maslak_zwyczajny", "kania"]` pokrywa potrzeby ekranu głównego?
+- [x] **Format plików wymiany:** Czy na etapie MVP zostajemy przy `CSV` + `GeoJSON` (czytelne w Git i łatwe do inspekcji), czy od razu przechodzimy na `Parquet` / `GeoParquet`?

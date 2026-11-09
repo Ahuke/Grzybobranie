@@ -1,22 +1,44 @@
 """
-Testy dymne (smoke tests) szkieletu aplikacji i kontraktu danych ([GRZ-02]).
+Testy dymne (smoke tests) szkieletu aplikacji, kontraktu danych ([GRZ-02])
+oraz granic regionu i wektorowej próbki leśnej BDL ([GRZ-05]).
 
 Uruchomienie:
-    pytest
+    pytest -v
     lub:
-    python -m unittest discover -s tests
+    python -m unittest discover -s tests -v
 """
 
 from __future__ import annotations
 
+import copy
+from pathlib import Path
+import sys
 import unittest
 
-from src.config import ABUNDANCE_CLASSES, PILOT_REGION, REFERENCE_CITIES, SPECIES_LABELS
-from src.data_loader import load_dataset_bundle, load_sprint1_audit_samples
-from src.geo_utils import enrich_geojson_with_predictions, haversine_km
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from src.config import (
+    ABUNDANCE_CLASSES,
+    PILOT_REGION,
+    PROCESSED_DIR,
+    REFERENCE_CITIES,
+    SPECIES_LABELS,
+)
+from src.data_loader import (
+    load_areas_geojson,
+    load_dataset_bundle,
+    load_sprint1_audit_samples,
+)
+from src.geo_utils import (
+    enrich_bdl_stands_geojson,
+    enrich_geojson_with_predictions,
+    haversine_km,
+)
 
 
-class TestAppSkeletonSmoke(unittest.TestCase):
+class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
     def test_region_configuration(self) -> None:
         self.assertEqual(PILOT_REGION.voivodeship_id, "02")
         self.assertIn("dolnośląskie", PILOT_REGION.voivodeship_name.lower())
@@ -30,7 +52,8 @@ class TestAppSkeletonSmoke(unittest.TestCase):
         self.assertEqual(bundle.env_mode, "demo")
         self.assertFalse(bundle.is_fallback_to_demo)
 
-        # Sprawdzenie zachowania wiodącego zera w kodach TERYT (4 znaki)
+        # Sprawdzenie obecności wszystkich 30 rzeczywistych powiatów woj. dolnośląskiego (TERYT 02)
+        self.assertEqual(len(bundle.areas_by_id), 30)
         self.assertIn("0201", bundle.areas_by_id)
         self.assertIn("0264", bundle.areas_by_id)
         for area_id, props in bundle.areas_by_id.items():
@@ -40,7 +63,6 @@ class TestAppSkeletonSmoke(unittest.TestCase):
 
         # Sprawdzenie rozróżnienia NULL (None) vs 0.0 w raportach demo
         reports_by_id = {r["report_id"]: r for r in bundle.reports}
-        # DEMO_REP_011 ma jawne yield_pcs_per_h = 0.0 oraz dominant_species = None (NULL)
         rep_011 = reports_by_id["DEMO_REP_011"]
         self.assertEqual(rep_011["yield_pcs_per_h"], 0.0)
         self.assertIsNone(rep_011["dominant_species"])
@@ -53,10 +75,89 @@ class TestAppSkeletonSmoke(unittest.TestCase):
         self.assertEqual(w_0264["precip_mm_1d"], 0.0)
         self.assertIsNone(w_0264["soil_moisture_0_7cm_m3m3"])
 
-    def test_prod_fallback_to_demo_when_processed_empty(self) -> None:
+    def test_prod_fallback_to_demo_when_processed_incomplete(self) -> None:
         bundle = load_dataset_bundle("prod")
         self.assertEqual(bundle.env_mode, "demo")
         self.assertTrue(bundle.is_fallback_to_demo)
+
+    def test_real_region_boundaries_and_crs_grz05(self) -> None:
+        """Weryfikuje rzeczywiste granice 30 powiatów w EPSG:4326 ([GRZ-05])."""
+        prod_areas_path = PROCESSED_DIR / "areas.geojson"
+        self.assertTrue(prod_areas_path.exists())
+        geojson_data, areas_by_id = load_areas_geojson(prod_areas_path)
+
+        self.assertEqual(len(areas_by_id), 30)
+        meta = geojson_data.get("metadata", {})
+        self.assertIn("EPSG:4326", meta.get("crs_storage", ""))
+        self.assertIn("EPSG:2180", meta.get("crs_metric_calculations", ""))
+        self.assertEqual(meta.get("retrieved_at"), "2026-11-08")
+
+        # Suma powierzchni 30 powiatów Dolnego Śląska (~19 941.7 km2)
+        total_km2 = sum(float(p["total_area_km2"]) for p in areas_by_id.values())
+        self.assertGreater(total_km2, 19800.0)
+        self.assertLess(total_km2, 20100.0)
+
+        # Weryfikacja, że geometrie są rzeczywistymi wielokątami, a nie prostokątami (min. kilkanaście punktów)
+        feat_0201 = [
+            f for f in geojson_data["features"] if f["properties"]["area_id"] == "0201"
+        ][0]
+        ring_0201 = feat_0201["geometry"]["coordinates"][0]
+        self.assertGreater(len(ring_0201), 15)
+        self.assertFalse(feat_0201["properties"]["is_demo"])
+
+    def test_bdl_vector_sample_and_analytical_aggregation_grz05(self) -> None:
+        """Weryfikuje wektorową próbkę 105 wydzieleń BDL i tabelę agregacji GeoPandas ([GRZ-05])."""
+        samples = load_sprint1_audit_samples()
+        self.assertEqual(len(samples["reports_audit"]), 52)
+        self.assertEqual(len(samples["weather_sample"]), 210)
+        self.assertEqual(len(samples["bdl_stands_sample"]), 105)
+        self.assertEqual(len(samples["bdl_powiaty_agg"]), 7)
+
+        bdl_geojson = samples["bdl_stands_geojson"]
+        self.assertIsNotNone(bdl_geojson)
+        self.assertEqual(len(bdl_geojson["features"]), 105)
+        self.assertEqual(bdl_geojson["metadata"]["forest_stands_count"], 74)
+        self.assertEqual(bdl_geojson["metadata"]["bdl_validity_year"], 2026)
+
+        enriched_bdl = enrich_bdl_stands_geojson(bdl_geojson)
+        self.assertIsNotNone(enriched_bdl)
+        first_props = enriched_bdl["features"][0]["properties"]
+        self.assertIn("Wydzielenie BDL:", first_props["tooltip_header"])
+        self.assertIn("arodes_int_num", first_props)
+
+    def test_missing_bdl_does_not_block_region_display_grz05(self) -> None:
+        """
+        Weryfikuje warunek #5 [GRZ-05]:
+        Brak atrybutów BDL (wszystkie pola BDL = None) oraz brak warstwy wydzieleń BDL
+        nie blokują wyświetlenia granic regionu i wyliczenia zestawienia powiatów.
+        """
+        bundle = load_dataset_bundle("demo")
+        stripped_geojson = copy.deepcopy(bundle.areas_geojson)
+        for feat in stripped_geojson["features"]:
+            props = feat["properties"]
+            props["forest_cover_pct"] = None
+            props["pine_share_pct"] = None
+            props["oak_beech_share_pct"] = None
+            props["spruce_share_pct"] = None
+            props["mean_stand_age_years"] = None
+            props["dominant_moisture_type"] = None
+            props["has_bdl_stand_data"] = False
+            props["bdl_sample_stands_count"] = 0
+
+        enriched_pred = enrich_geojson_with_predictions(
+            stripped_geojson, {}, color_mode="predictions"
+        )
+        enriched_region = enrich_geojson_with_predictions(
+            stripped_geojson, {}, color_mode="region_bdl"
+        )
+        self.assertEqual(len(enriched_pred["features"]), 30)
+        self.assertEqual(len(enriched_region["features"]), 30)
+
+        p0 = enriched_region["features"][0]["properties"]
+        self.assertEqual(p0["pine_share_pct_label"], "NULL (brak BDL)")
+        self.assertEqual(p0["dominant_moisture_label"], "NULL (brak BDL)")
+        self.assertEqual(len(p0["fill_color"]), 4)
+        self.assertIsNone(enrich_bdl_stands_geojson(None))
 
     def test_haversine_and_geojson_enrichment(self) -> None:
         wroclaw_lat, wroclaw_lon = REFERENCE_CITIES["Wrocław (centrum regionu)"]
@@ -85,11 +186,6 @@ class TestAppSkeletonSmoke(unittest.TestCase):
             ABUNDANCE_CLASSES["WYSYP"]["rgba"],
         )
         self.assertEqual(feat_0201["properties"]["predicted_yield_label"], "41.2 szt./h")
-
-    def test_sprint1_audit_samples_present(self) -> None:
-        samples = load_sprint1_audit_samples()
-        self.assertEqual(len(samples["reports_audit"]), 52)
-        self.assertEqual(len(samples["weather_sample"]), 210)
 
 
 if __name__ == "__main__":

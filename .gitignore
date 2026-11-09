@@ -26,6 +26,7 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+!data/processed/areas.geojson
 *.shp
 *.shx
 *.dbf

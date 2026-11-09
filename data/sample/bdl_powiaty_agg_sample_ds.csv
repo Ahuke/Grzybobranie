@@ -1,0 +1,8 @@
+area_id,area_name,sample_cluster_name,inspectorates,total_polygons_count,forest_stands_count,non_stand_polygons_count,total_sampled_area_ha,forest_stand_area_ha,non_stand_area_ha,sample_pine_share_pct,sample_oak_beech_share_pct,sample_spruce_share_pct,sample_mean_stand_age_years,sample_dominant_tsl,sample_dominant_moisture_type,a_year,crs_analysis
+0201,powiat bolesławiecki,Bory Dolnośląskie (Krępnica),Nadleśnictwo Bolesławiec,15,11,4,51.77,44.68,7.09,100.0,0.0,0.0,66.6,BŚW,swieze,2026,EPSG:2180
+0202,powiat dzierżoniowski,Góry Sowie,Nadleśnictwo Świdnica,15,11,4,31.26,31.01,0.25,0.0,21.0,78.8,82.1,LMGŚW,swieze,2026,EPSG:2180
+0206,powiat karkonoski,Karkonosze / Szklarska Poręba,Nadleśnictwo Szklarska Poręba,15,7,8,22.5,21.77,0.73,0.0,9.3,90.7,117.4,LMGŚW,swieze,2026,EPSG:2180
+0208,powiat kłodzki,Góry Stołowe (Batorów),Nadleśnictwo Zdroje,15,15,0,43.17,43.17,0.0,0.0,11.4,85.1,77.2,LMGŚW,swieze,2026,EPSG:2180
+0213,powiat milicki,Dolina Baryczy (Łazy Wielkie),Nadleśnictwo Milicz,15,11,4,14.74,13.97,0.77,69.2,26.6,0.0,84.4,LMŚW,swieze,2026,EPSG:2180
+0214,powiat oleśnicki,Lasy Twardogórskie (Białe Błoto),Nadleśnictwo Oleśnica Śląska,15,12,3,46.89,39.63,7.26,91.7,3.1,2.4,54.8,LMŚW,swieze,2026,EPSG:2180
+0221,powiat wałbrzyski,Masyw Trójgarbu (Witków),Nadleśnictwo Kamienna Góra; Nadleśnictwo Wałbrzych,15,7,8,34.41,30.71,3.7,0.0,53.4,46.6,42.6,LMGŚW,swieze,2026,EPSG:2180

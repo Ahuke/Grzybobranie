@@ -1,5 +1,5 @@
 """
-Punkt wejścia aplikacji Streamlit: "Gdzie na grzyby?" ([GRZ-02]).
+Punkt wejścia aplikacji Streamlit: "Gdzie na grzyby?" ([GRZ-02], [GRZ-05]).
 
 Uruchomienie:
     streamlit run app.py
@@ -27,7 +27,11 @@ from src.data_loader import (
     load_dataset_bundle,
     load_sprint1_audit_samples,
 )
-from src.geo_utils import enrich_geojson_with_predictions, haversine_km
+from src.geo_utils import (
+    enrich_bdl_stands_geojson,
+    enrich_geojson_with_predictions,
+    haversine_km,
+)
 
 
 CUSTOM_CSS = """
@@ -119,6 +123,7 @@ def build_ranking_records(
     """
     Łączy predykcje dla wybranej daty i gatunku z cechami siedliskowymi powiatów (areas)
     oraz najnowszym dostępnym rekordem pogodowym (weather) i wylicza odległość od punktu startowego.
+    Brak atrybutów BDL (None) nie blokuje wyznaczenia rekordu ani wyświetlenia powiatu.
     """
     preds_filtered = [
         p
@@ -147,6 +152,7 @@ def build_ranking_records(
         record = {
             "area_id": area_id,
             "area_name": area_props.get("area_name", area_id),
+            "total_area_km2": area_props.get("total_area_km2"),
             "distance_km": dist_km,
             "in_radius": in_radius,
             "predicted_yield_pcs_per_h": pred.get("predicted_yield_pcs_per_h"),
@@ -159,7 +165,16 @@ def build_ranking_records(
             "pine_share_pct": area_props.get("pine_share_pct"),
             "oak_beech_share_pct": area_props.get("oak_beech_share_pct"),
             "spruce_share_pct": area_props.get("spruce_share_pct"),
+            "mean_stand_age_years": area_props.get("mean_stand_age_years"),
             "dominant_moisture_type": area_props.get("dominant_moisture_type"),
+            "has_bdl_stand_data": bool(
+                area_props.get("has_bdl_stand_data")
+                or (
+                    area_props.get("pine_share_pct") is not None
+                    and area_props.get("mean_stand_age_years") is not None
+                )
+            ),
+            "bdl_sample_stands_count": int(area_props.get("bdl_sample_stands_count") or 0),
             "precip_lag_7d_mm": w_rec.get("precip_lag_7d_mm"),
             "precip_lag_14d_mm": w_rec.get("precip_lag_14d_mm"),
             "temp_min_night_c": w_rec.get("temp_min_night_c"),
@@ -173,6 +188,7 @@ def build_ranking_records(
         key=lambda r: (
             r["in_radius"],
             r["predicted_yield_pcs_per_h"] if r["predicted_yield_pcs_per_h"] is not None else -1.0,
+            r["forest_cover_pct"] if r["forest_cover_pct"] is not None else -1.0,
             -r["distance_km"],
         ),
         reverse=True,
@@ -180,17 +196,48 @@ def build_ranking_records(
     return records, records_by_area
 
 
-def render_legend() -> None:
-    """Wyświetla legendę klas obfitości wysypu oraz jednostkę wyniku."""
+def render_legend(color_mode: str = "predictions", show_bdl_stands: bool = False) -> None:
+    """Wyświetla legendę warstwy powiatów oraz opcjonalnej warstwy wydzieleń BDL."""
     items_html = []
-    for key in ["WYSYP", "SREDNIO", "BRAK", "BRAK_DANYCH"]:
-        info = ABUNDANCE_CLASSES[key]
-        items_html.append(
-            f"<div class='legend-item'>"
-            f"<span class='legend-swatch' style='background:{info['hex']};'></span>"
-            f"<span>{info['label']}</span>"
-            f"</div>"
-        )
+    if color_mode == "region_bdl":
+        forest_items = [
+            ("#225C34", "Lesistość ≥ 45% (wysoka)"),
+            ("#448452", "Lesistość 30 – 45% (umiarkowana)"),
+            ("#7AA874", "Lesistość 18 – 30% (średnia)"),
+            ("#B2C6A5", "Lesistość < 18% lub brak paczki BDL (NULL)"),
+        ]
+        for hex_col, label in forest_items:
+            items_html.append(
+                f"<div class='legend-item'>"
+                f"<span class='legend-swatch' style='background:{hex_col};'></span>"
+                f"<span>{label}</span>"
+                f"</div>"
+            )
+    else:
+        for key in ["WYSYP", "SREDNIO", "BRAK", "BRAK_DANYCH"]:
+            info = ABUNDANCE_CLASSES[key]
+            items_html.append(
+                f"<div class='legend-item'>"
+                f"<span class='legend-swatch' style='background:{info['hex']};'></span>"
+                f"<span>{info['label']}</span>"
+                f"</div>"
+            )
+
+    if show_bdl_stands:
+        bdl_items = [
+            ("#2E8B57", "BDL: Sosna (SO)"),
+            ("#1B4F72", "BDL: Świerk (ŚW)"),
+            ("#B76E22", "BDL: Buk / Dąb (BK/DB)"),
+            ("#8C8C87", "BDL: Użytek nieleśny"),
+        ]
+        for hex_col, label in bdl_items:
+            items_html.append(
+                f"<div class='legend-item'>"
+                f"<span class='legend-swatch' style='background:{hex_col};'></span>"
+                f"<span>{label}</span>"
+                f"</div>"
+            )
+
     st.markdown(
         f"<div class='legend-bar'>{''.join(items_html)}</div>",
         unsafe_allow_html=True,
@@ -208,7 +255,7 @@ def main() -> None:
         f"<div class='app-header'>"
         f"<p class='app-title'>Gdzie na grzyby — przestrzenna analiza i predykcja wysypu</p>"
         f"<p class='app-subtitle'>"
-        f"Obszar pilotażowy: <b>{PILOT_REGION.voivodeship_name} (TERYT {PILOT_REGION.voivodeship_id})</b> "
+        f"Obszar pilotażowy: <b>{PILOT_REGION.voivodeship_name} (TERYT {PILOT_REGION.voivodeship_id}, 30 powiatów)</b> "
         f"&nbsp;|&nbsp; Jednostka agregacji: <b>{PILOT_REGION.spatial_unit_name}</b> "
         f"&nbsp;|&nbsp; Jednostka wyniku: <b>szt./h</b>"
         f"</p></div>",
@@ -233,6 +280,7 @@ def main() -> None:
         )
 
         bundle = load_dataset_bundle(selected_env)
+        audit_samples = load_sprint1_audit_samples()
 
         available_dates = sorted({p["target_date"] for p in bundle.predictions}, reverse=True)
         selected_date = st.selectbox(
@@ -267,7 +315,7 @@ def main() -> None:
             max_value=160,
             value=120,
             step=10,
-            help="Odległość w linii prostej (Haversine) do centroidu leśnego powiatu.",
+            help="Odległość w linii prostej (Haversine) do centroidu powiatu.",
         )
 
         st.divider()
@@ -275,6 +323,7 @@ def main() -> None:
             f"Konfiguracja regionu:\n"
             f"TERYT: {PILOT_REGION.voivodeship_id} ({PILOT_REGION.voivodeship_name})\n"
             f"Klucz: {PILOT_REGION.spatial_key_name} | Układ: {PILOT_REGION.crs_display}\n"
+            f"Obliczenia metryczne: {PILOT_REGION.crs_metric}\n"
             f"Strefa: {PILOT_REGION.timezone}"
         )
 
@@ -315,10 +364,10 @@ def main() -> None:
     else:
         kpi2.metric("Maksymalna prognoza", "brak danych")
 
-    wysyp_count = sum(1 for r in in_radius_records if r["abundance_class"] == "WYSYP")
+    bdl_covered_count = sum(1 for r in records if r["has_bdl_stand_data"])
     kpi3.metric(
-        "Powiaty z klasą WYSYP",
-        f"{wysyp_count}",
+        "Powiaty z profilem BDL",
+        f"{bdl_covered_count} z {len(records)}",
     )
 
     valid_precip = [
@@ -341,31 +390,88 @@ def main() -> None:
     )
 
     with tab_map:
-        st.markdown(
-            f"#### Prognoza wydajności zbiorów na dzień `{selected_date}` — "
-            f"{SPECIES_LABELS.get(selected_species, selected_species)}"
-        )
-        render_legend()
+        ctrl_col1, ctrl_col2 = st.columns([3, 2])
+        with ctrl_col1:
+            color_mode = st.radio(
+                "Tryb kolorowania powiatów na mapie",
+                options=["predictions", "region_bdl"],
+                format_func=lambda m: (
+                    "Prognoza zbiorów [szt./h]"
+                    if m == "predictions"
+                    else "Granice regionu i lesistość / BDL ([GRZ-05])"
+                ),
+                horizontal=True,
+            )
+        with ctrl_col2:
+            bdl_available = bool(audit_samples.get("bdl_stands_geojson"))
+            show_bdl_stands = st.checkbox(
+                "Nałóż próbkę wektorową wydzieleń BDL (N = 105 poligonów)",
+                value=True,
+                help=(
+                    "Wyświetla rzeczywiste poligony wydzieleń leśnych BDL (G_SUBAREA / Wydzielenia PGL LP) "
+                    "w 7 klastrach leśnych na Dolnym Śląsku. Brak BDL nie blokuje wyświetlenia granic regionu."
+                ),
+            )
+
+        if color_mode == "region_bdl":
+            st.markdown(
+                f"#### Rzeczywiste granice 30 powiatów woj. dolnośląskiego (`TERYT 02`) oraz próbka BDL (`[GRZ-05]`)"
+            )
+        else:
+            st.markdown(
+                f"#### Prognoza wydajności zbiorów na dzień `{selected_date}` — "
+                f"{SPECIES_LABELS.get(selected_species, selected_species)}"
+            )
+
+        render_legend(color_mode=color_mode, show_bdl_stands=(show_bdl_stands and bdl_available))
 
         enriched_geojson = enrich_geojson_with_predictions(
-            bundle.areas_geojson, records_by_area
+            bundle.areas_geojson,
+            records_by_area,
+            color_mode=color_mode,
         )
 
         polygon_layer = pdk.Layer(
             "GeoJsonLayer",
             data=enriched_geojson,
-            opacity=0.78,
+            opacity=0.72,
             stroked=True,
             filled=True,
             extruded=False,
             wireframe=True,
             get_fill_color="properties.fill_color",
             get_line_color="properties.line_color",
-            get_line_width=110,
+            get_line_width=140,
             line_width_min_pixels=1.5,
             pickable=True,
             auto_highlight=True,
         )
+
+        deck_layers = [polygon_layer]
+
+        if show_bdl_stands:
+            enriched_bdl = enrich_bdl_stands_geojson(audit_samples.get("bdl_stands_geojson"))
+            if enriched_bdl:
+                bdl_layer = pdk.Layer(
+                    "GeoJsonLayer",
+                    data=enriched_bdl,
+                    opacity=0.90,
+                    stroked=True,
+                    filled=True,
+                    extruded=False,
+                    get_fill_color="properties.fill_color",
+                    get_line_color="properties.line_color",
+                    get_line_width=35,
+                    line_width_min_pixels=1.2,
+                    pickable=True,
+                    auto_highlight=True,
+                )
+                deck_layers.append(bdl_layer)
+            else:
+                st.info(
+                    "Próbka wektorowa wydzieleń BDL (`data/sample/bdl_stands_sample_ds.geojson`) jest niedostępna — "
+                    "mapa wyświetla same rzeczywiste granice 30 powiatów regionu pilotażowego."
+                )
 
         origin_layer = pdk.Layer(
             "ScatterplotLayer",
@@ -383,6 +489,7 @@ def main() -> None:
             get_radius=4200,
             pickable=False,
         )
+        deck_layers.append(origin_layer)
 
         view_state = pdk.ViewState(
             latitude=PILOT_REGION.center_lat,
@@ -393,16 +500,9 @@ def main() -> None:
 
         tooltip = {
             "html": (
-                "<b>{area_name}</b> (TERYT: <code>{area_id}</code>)<br/>"
-                "Prognoza: <b>{predicted_yield_label}</b> ({abundance_label})<br/>"
-                "Wskaźnik dopasowania: <b>{confidence_label}</b><br/>"
-                "Odległość w linii prostej: <b>{distance_label}</b><hr style='margin:4px 0;'/>"
-                "Lesistość: <b>{forest_cover_pct}%</b> | "
-                "Sosna: <b>{pine_share_pct_label}</b> | "
-                "Dąb/Buk: <b>{oak_beech_share_pct_label}</b> | "
-                "Świerk: <b>{spruce_share_pct_label}</b><br/>"
-                "Siedlisko BDL: <b>{dominant_moisture_label}</b><br/>"
-                "<i>{habitat_match_note}</i>"
+                "<b>{tooltip_header}</b><br/>"
+                "{tooltip_sub}<hr style='margin:4px 0;'/>"
+                "{tooltip_bdl}"
             ),
             "style": {
                 "backgroundColor": "#1F2421",
@@ -415,7 +515,7 @@ def main() -> None:
 
         st.pydeck_chart(
             pdk.Deck(
-                layers=[polygon_layer, origin_layer],
+                layers=deck_layers,
                 initial_view_state=view_state,
                 tooltip=tooltip,
                 map_style="light",
@@ -425,11 +525,10 @@ def main() -> None:
 
         sample_meta = bundle.predictions[0] if bundle.predictions else {}
         st.caption(
-            f"Data docelowa: {selected_date} | "
-            f"Data wygenerowania: {sample_meta.get('generated_at', '—')} | "
-            f"Wersja modelu: {sample_meta.get('model_version', '—')} | "
-            f"Jednostka wyniku: szt./h (liczba owocników na osobo-godzinę) | "
-            f"Punkt odniesienia (granatowy znacznik): {selected_city}."
+            f"Granice: Państwowy Rejestr Granic (GUGiK PRG, 30 powiatów TERYT 02, CRS: EPSG:4326, obliczenia pow. w EPSG:2180) | "
+            f"Dane leśne: Bank Danych o Lasach (BDL Lasy Państwowe, stan 2026) | "
+            f"Data prognozy: {selected_date} (model: {sample_meta.get('model_version', '—')}) | "
+            f"Punkt odniesienia: {selected_city}."
         )
 
         st.markdown(f"#### Zestawienie powiatów w promieniu {radius_km} km ({selected_city})")
@@ -442,18 +541,18 @@ def main() -> None:
             display_cols = {
                 "area_id": "TERYT",
                 "area_name": "Powiat",
+                "total_area_km2": "Pow. [km²]",
                 "distance_km": "Odległość [km]",
                 "predicted_yield_pcs_per_h": "Prognoza [szt./h]",
                 "abundance_class": "Klasa",
-                "confidence_score": "Dopasowanie [0-1]",
                 "forest_cover_pct": "Lesistość [%]",
                 "pine_share_pct": "Sosna [%]",
                 "oak_beech_share_pct": "Dąb/Buk [%]",
                 "spruce_share_pct": "Świerk [%]",
+                "mean_stand_age_years": "Wiek lasu [lat]",
+                "dominant_moisture_type": "Uwilgotnienie BDL",
+                "bdl_sample_stands_count": "Wydzielenia w próbce BDL",
                 "precip_lag_14d_mm": "Opad 14d [mm]",
-                "temp_min_night_c": "Temp. min [°C]",
-                "soil_moisture_0_7cm_m3m3": "Wilg. gleby 0-7cm [m³/m³]",
-                "habitat_match_note": "Uwagi siedliskowo-pogodowe",
             }
             df_show = df_rank[list(display_cols.keys())].rename(columns=display_cols)
             st.dataframe(df_show, use_container_width=True, hide_index=True)
@@ -463,8 +562,6 @@ def main() -> None:
         st.caption(
             "Sekcja diagnostyczna do weryfikacji formatu plików wymienianych pomiędzy modułem danych a interfejsem."
         )
-
-        audit_samples = load_sprint1_audit_samples()
 
         col_rep, col_wea = st.columns(2)
         with col_rep:
@@ -476,7 +573,7 @@ def main() -> None:
             st.dataframe(pd.DataFrame(bundle.weather), use_container_width=True, hide_index=True)
 
         st.divider()
-        st.markdown("**3. Próbka audytowa raportów z grzyby.pl (`data/sample/reports_audit_52_ds.csv`, N = 52)**")
+        st.markdown("**3. Próbka audytowa raportów z grzyby.pl (`data/sample/reports_audit_52_ds.csv`, N = 52, `[GRZ-03]`)**")
         if audit_samples["reports_audit"]:
             df_audit_rep = pd.DataFrame(audit_samples["reports_audit"])
             st.caption(
@@ -487,7 +584,7 @@ def main() -> None:
         else:
             st.info("Plik `data/sample/reports_audit_52_ds.csv` nie został znaleziony.")
 
-        st.markdown("**4. Próbka historii pogody Open-Meteo ERA5-Land (`data/sample/weather_daily_sample_ds.csv`, N = 210)**")
+        st.markdown("**4. Próbka historii pogody Open-Meteo ERA5-Land (`data/sample/weather_daily_sample_ds.csv`, N = 210, `[GRZ-04]`)**")
         if audit_samples["weather_sample"]:
             df_audit_wea = pd.DataFrame(audit_samples["weather_sample"])
             st.caption(
@@ -499,6 +596,31 @@ def main() -> None:
         else:
             st.info("Plik `data/sample/weather_daily_sample_ds.csv` nie został znaleziony.")
 
+        st.divider()
+        st.markdown(
+            "**5. Granice regionu pilotażowego (`data/sample/region_powiaty_02_ds.geojson`, N = 30) "
+            "oraz wektorowa próbka wydzieleń BDL (`data/sample/bdl_stands_sample_ds.geojson`, N = 105, `[GRZ-05]`)**"
+        )
+        if audit_samples["bdl_powiaty_agg"]:
+            df_bdl_agg = pd.DataFrame(audit_samples["bdl_powiaty_agg"])
+            st.caption(
+                "Wynik analitycznej agregacji przestrzennej GeoPandas (`gpd.sjoin` w układzie metrycznym `EPSG:2180`) "
+                "dla 7 klastrów leśnych (105 poligonów wydzieleń BDL `G_SUBAREA`, w tym 74 drzewostanów `D-STAN`). "
+                "Źródło: Bank Danych o Lasach (`mapserver.bdl.lasy.gov.pl/ArcGIS/rest/services/WMS_BDL/MapServer/5`), stan `a_year = 2026`."
+            )
+            st.dataframe(df_bdl_agg, use_container_width=True, hide_index=True)
+        else:
+            st.info("Plik `data/sample/bdl_powiaty_agg_sample_ds.csv` nie został znaleziony.")
+
+        if audit_samples["bdl_stands_sample"]:
+            df_bdl_stands = pd.DataFrame(audit_samples["bdl_stands_sample"])
+            st.caption(
+                f"Podgląd pojedynczych wydzieleń leśnych BDL (łącznie {len(df_bdl_stands)} obiektów wektorowych "
+                f"z adresem leśnym `adress_forest`, kluczem relacyjnym `arodes_int_num`, typem siedliskowym `site_type_cd` "
+                f"oraz gatunkiem panującym `species_cd_d`)."
+            )
+            st.dataframe(df_bdl_stands.head(25), use_container_width=True, hide_index=True)
+
     with tab_info:
         st.markdown("#### Założenia metodologiczne i ograniczenia")
         st.markdown(
@@ -506,13 +628,17 @@ def main() -> None:
             1. **Definicja zmiennej wyjściowej (`predicted_yield_pcs_per_h` `[szt./h]`):**
                - Szacowana wydajność grzybobrania w sztukach na godzinę na jedną osobę, odpowiadająca raportom z portalu `grzyby.pl`.
                - Agregacja przestrzenna odbywa się na poziomie powiatu (`area_id`, 4-znakowy kod TERYT). Wynik nie wskazuje pojedynczego oddziału leśnego.
-            2. **Semantyka braków danych (`NULL` vs `0.0`):**
+            2. **Granice regionu i dane wektorowe BDL (`[GRZ-05]`):**
+               - Granice 30 powiatów woj. dolnośląskiego (`TERYT 02`, łączna pow. `19 941,7 km²`) zapisane są w układzie `EPSG:4326` (`WGS84`), natomiast obliczenia powierzchni i złączenia przestrzenne (`gpd.sjoin`) wykonywane są w układzie metrycznym `EPSG:2180` (`PUWG 1992`).
+               - Wektorowe wydzielenia leśne z Banku Danych o Lasach (`G_SUBAREA` / `Wydzielenia PGL LP`, klucz relacyjny `arodes_int_num`) zawierają zarówno drzewostany (`area_type_cd = 'D-STAN'`), jak i użytki nieleśne/pomocnicze (`L ENERG`, `POTOK`, `R`, `PARK`), które należy odfiltrować przed obliczaniem udziału gatunków i wieku drzewostanu.
+               - Brak szczegółowych atrybutów BDL (`NULL`) w części powiatów nie blokuje prezentacji granic regionu ani oceny dalszego zakresu.
+            3. **Semantyka braków danych (`NULL` vs `0.0`):**
                - `0.0` oznacza potwierdzony pomiar zerowy (np. brak opadu `0.0 mm` lub jawny raport zerowego zbioru `(0/h)`).
                - `NULL` (`NaN` / `None`) oznacza brak informacji (np. niepodany czas zbierania lub brak atrybutu BDL).
                - Brak raportu w danym powiecie i dniu nie jest traktowany jako zerowy zbiór.
-            3. **Charakter danych glebowych:**
+            4. **Charakter danych glebowych:**
                - Temperatura i objętościowa wilgotność gleby (`soil_moisture_0_7cm_m3m3`) pochodzą z numerycznego modelu powierzchni lądu **ECMWF ERA5-Land** (oczko siatki ok. 9 × 9 km) udostępnianego przez Open-Meteo API, a nie z czujników terenowych.
-            4. **Izolacja danych demonstracyjnych (`data/demo/`):**
+            5. **Izolacja danych demonstracyjnych (`data/demo/`):**
                - Pliki w `data/demo/` posiadają flagę `is_demo = True` oraz oznaczenie `DEMO_MOCK_v0` i są wykluczone z potoku treningowego ML.
             """
         )

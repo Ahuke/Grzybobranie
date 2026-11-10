@@ -6,7 +6,8 @@ Zapewnia:
   od środowiska produkcyjnego (`data/processed/`, `is_demo = False`),
 - zachowanie 4-znakowego kodu TERYT (`area_id`, np. `"0201"`),
 - poprawne rozróżnienie pomiaru zerowego (`0.0`) od braku informacji (`NULL` / `None`),
-- dostęp do próbek audytowych ze Sprintu 1 (`data/sample/`).
+- dostęp do próbek audytowych ze Sprintu 1 (`data/sample/`, w tym granic regionu i BDL [GRZ-05]),
+- odporność na brak danych BDL (brak plików lub atrybutów BDL nie blokuje wczytania granic regionu).
 """
 
 from __future__ import annotations
@@ -41,7 +42,7 @@ def _parse_optional_float(value: str | float | int | None) -> float | None:
     if isinstance(value, (float, int)):
         return float(value)
     text = str(value).strip()
-    if text == "" or text.lower() == "null" or text.lower() == "none":
+    if text == "" or text.lower() in {"null", "none", "nan"}:
         return None
     return float(text)
 
@@ -87,16 +88,29 @@ def resolve_environment_paths(requested_mode: str = "demo") -> tuple[str, bool, 
 
 
 def load_areas_geojson(path: Path) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
-    """Wczytuje plik GeoJSON z granicami powiatów i cechami BDL."""
+    """
+    Wczytuje plik GeoJSON z granicami powiatów i cechami BDL.
+    Gwarantuje poprawne działanie nawet wtedy, gdy atrybuty BDL są równe NULL (None).
+    """
     if not path.exists():
         raise FileNotFoundError(f"Brak wymaganego pliku obszarów GeoJSON: {path}")
 
     data = json.loads(path.read_text(encoding="utf-8"))
     areas_by_id: dict[str, dict[str, Any]] = {}
     for feature in data.get("features", []):
-        props = feature.get("properties", {})
-        area_id = _normalize_area_id(props.get("area_id"))
+        props = feature.setdefault("properties", {})
+        area_id = _normalize_area_id(props.get("area_id") or props.get("JPT_KOD_JE"))
         props["area_id"] = area_id
+        # Upewnij się, że opcjonalne pola BDL zawsze istnieją w słowniku (jako wartość lub None)
+        for optional_bdl_field in (
+            "forest_cover_pct",
+            "pine_share_pct",
+            "oak_beech_share_pct",
+            "spruce_share_pct",
+            "mean_stand_age_years",
+            "dominant_moisture_type",
+        ):
+            props.setdefault(optional_bdl_field, None)
         areas_by_id[area_id] = props
 
     return data, areas_by_id
@@ -206,13 +220,14 @@ def load_dataset_bundle(requested_mode: str = "demo") -> DatasetBundle:
 
     if is_fallback:
         status_msg = (
-            "Pliki produkcyjne w `data/processed/` nie zostały jeszcze wygenerowane. "
-            "Automatycznie przełączono na bezpieczną próbkę demonstracyjną `data/demo/` (`is_demo = True`)."
+            "Pliki produkcyjne (`reports.csv`, `weather.csv`, `predictions.csv`) w `data/processed/` "
+            "nie zostały jeszcze w pełni wygenerowane (dostępny plik granic `data/processed/areas.geojson`). "
+            "Automatycznie przełączono na próbkę `data/demo/` (`is_demo = True`, 30 rzeczywistych powiatów Dolnego Śląska)."
         )
     elif actual_mode == "demo":
         status_msg = (
-            "Aktywny tryb demonstracyjny UI (`data/demo/`, `is_demo = True`). "
-            "Dane służą do budowy i integracji interfejsu i są wykluczone z treningu ML."
+            "Aktywny tryb demonstracyjny UI (`data/demo/`, `is_demo = True`) z rzeczywistymi granicami "
+            "30 powiatów woj. dolnośląskiego (`EPSG:4326`). Wykluczony z treningu ML."
         )
     else:
         status_msg = "Aktywny tryb produkcyjny (`data/processed/`, `is_demo = False`)."
@@ -229,17 +244,26 @@ def load_dataset_bundle(requested_mode: str = "demo") -> DatasetBundle:
     )
 
 
-def load_sprint1_audit_samples() -> dict[str, list[dict[str, str]]]:
+def load_sprint1_audit_samples() -> dict[str, Any]:
     """
-    Wczytuje rzeczywiste próbki audytowe przygotowane w Sprincie 1 ([GRZ-03] i [GRZ-04])
+    Wczytuje rzeczywiste próbki audytowe przygotowane w Sprincie 1 ([GRZ-03], [GRZ-04], [GRZ-05])
     z katalogu `data/sample/`, jeżeli są obecne w repozytorium.
+    Brak plików BDL nie powoduje błędu i nie blokuje działania aplikacji.
     """
-    result: dict[str, list[dict[str, str]]] = {
+    result: dict[str, Any] = {
         "reports_audit": [],
         "weather_sample": [],
+        "region_areas_geojson": None,
+        "bdl_stands_geojson": None,
+        "bdl_stands_sample": [],
+        "bdl_powiaty_agg": [],
     }
     reports_sample_path = SAMPLE_DIR / "reports_audit_52_ds.csv"
     weather_sample_path = SAMPLE_DIR / "weather_daily_sample_ds.csv"
+    region_geojson_path = SAMPLE_DIR / "region_powiaty_02_ds.geojson"
+    bdl_geojson_path = SAMPLE_DIR / "bdl_stands_sample_ds.geojson"
+    bdl_csv_path = SAMPLE_DIR / "bdl_stands_sample_ds.csv"
+    bdl_agg_path = SAMPLE_DIR / "bdl_powiaty_agg_sample_ds.csv"
 
     if reports_sample_path.exists():
         with reports_sample_path.open("r", encoding="utf-8", newline="") as f:
@@ -248,5 +272,23 @@ def load_sprint1_audit_samples() -> dict[str, list[dict[str, str]]]:
     if weather_sample_path.exists():
         with weather_sample_path.open("r", encoding="utf-8", newline="") as f:
             result["weather_sample"] = list(csv.DictReader(f))
+
+    if region_geojson_path.exists():
+        result["region_areas_geojson"] = json.loads(
+            region_geojson_path.read_text(encoding="utf-8")
+        )
+
+    if bdl_geojson_path.exists():
+        result["bdl_stands_geojson"] = json.loads(
+            bdl_geojson_path.read_text(encoding="utf-8")
+        )
+
+    if bdl_csv_path.exists():
+        with bdl_csv_path.open("r", encoding="utf-8", newline="") as f:
+            result["bdl_stands_sample"] = list(csv.DictReader(f))
+
+    if bdl_agg_path.exists():
+        with bdl_agg_path.open("r", encoding="utf-8", newline="") as f:
+            result["bdl_powiaty_agg"] = list(csv.DictReader(f))
 
     return result

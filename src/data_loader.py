@@ -99,8 +99,11 @@ def load_areas_geojson(path: Path) -> tuple[dict[str, Any], dict[str, dict[str, 
     areas_by_id: dict[str, dict[str, Any]] = {}
     for feature in data.get("features", []):
         props = feature.setdefault("properties", {})
-        area_id = _normalize_area_id(props.get("area_id") or props.get("JPT_KOD_JE"))
+        area_id = _normalize_area_id(
+            props.get("area_id") or props.get("region_id") or props.get("JPT_KOD_JE")
+        )
         props["area_id"] = area_id
+        props["region_id"] = area_id
         # Upewnij się, że opcjonalne pola BDL zawsze istnieją w słowniku (jako wartość lub None)
         for optional_bdl_field in (
             "forest_cover_pct",

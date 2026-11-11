@@ -41,7 +41,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0201"
       },
       "geometry": {
         "type": "Polygon",
@@ -300,7 +301,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0202"
       },
       "geometry": {
         "type": "Polygon",
@@ -475,7 +477,8 @@
         "data_source_bdl": "GUS BDL (lesistość ogólna; brak szczegółowej paczki drzewostanowej BDL -> NULL)",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0203"
       },
       "geometry": {
         "type": "Polygon",
@@ -670,7 +673,8 @@
         "data_source_bdl": "GUS BDL (lesistość ogólna; brak szczegółowej paczki drzewostanowej BDL -> NULL)",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0204"
       },
       "geometry": {
         "type": "Polygon",
@@ -873,7 +877,8 @@
         "data_source_bdl": "GUS BDL (lesistość ogólna; brak szczegółowej paczki drzewostanowej BDL -> NULL)",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0205"
       },
       "geometry": {
         "type": "Polygon",
@@ -1092,7 +1097,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0206"
       },
       "geometry": {
         "type": "Polygon",
@@ -1387,7 +1393,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0207"
       },
       "geometry": {
         "type": "Polygon",
@@ -1578,7 +1585,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0208"
       },
       "geometry": {
         "type": "Polygon",
@@ -1881,7 +1889,8 @@
         "data_source_bdl": "GUS BDL (lesistość ogólna; brak szczegółowej paczki drzewostanowej BDL -> NULL)",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0209"
       },
       "geometry": {
         "type": "Polygon",
@@ -2154,7 +2163,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0210"
       },
       "geometry": {
         "type": "Polygon",
@@ -2341,7 +2351,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0211"
       },
       "geometry": {
         "type": "Polygon",
@@ -2544,7 +2555,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0212"
       },
       "geometry": {
         "type": "Polygon",
@@ -2751,7 +2763,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0213"
       },
       "geometry": {
         "type": "Polygon",
@@ -2930,7 +2943,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0214"
       },
       "geometry": {
         "type": "Polygon",
@@ -3189,7 +3203,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0215"
       },
       "geometry": {
         "type": "Polygon",
@@ -3400,7 +3415,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0216"
       },
       "geometry": {
         "type": "Polygon",
@@ -3635,7 +3651,8 @@
         "data_source_bdl": "GUS BDL (lesistość ogólna; brak szczegółowej paczki drzewostanowej BDL -> NULL)",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0217"
       },
       "geometry": {
         "type": "Polygon",
@@ -3850,7 +3867,8 @@
         "data_source_bdl": "GUS BDL (lesistość ogólna; brak szczegółowej paczki drzewostanowej BDL -> NULL)",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0218"
       },
       "geometry": {
         "type": "Polygon",
@@ -4077,7 +4095,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0219"
       },
       "geometry": {
         "type": "Polygon",
@@ -4280,7 +4299,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0220"
       },
       "geometry": {
         "type": "Polygon",
@@ -4511,7 +4531,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0221"
       },
       "geometry": {
         "type": "Polygon",
@@ -4718,7 +4739,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0222"
       },
       "geometry": {
         "type": "Polygon",
@@ -4885,7 +4907,8 @@
         "data_source_bdl": "GUS BDL (lesistość ogólna; brak szczegółowej paczki drzewostanowej BDL -> NULL)",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0223"
       },
       "geometry": {
         "type": "Polygon",
@@ -5224,7 +5247,8 @@
         "data_source_bdl": "GUS BDL (lesistość ogólna; brak szczegółowej paczki drzewostanowej BDL -> NULL)",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0224"
       },
       "geometry": {
         "type": "Polygon",
@@ -5443,7 +5467,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0225"
       },
       "geometry": {
         "type": "Polygon",
@@ -5994,7 +6019,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0226"
       },
       "geometry": {
         "type": "Polygon",
@@ -6181,7 +6207,8 @@
         "data_source_bdl": "GUS BDL (lesistość ogólna; brak szczegółowej paczki drzewostanowej BDL -> NULL)",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0261"
       },
       "geometry": {
         "type": "Polygon",
@@ -6308,7 +6335,8 @@
         "data_source_bdl": "GUS BDL (lesistość ogólna; brak szczegółowej paczki drzewostanowej BDL -> NULL)",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0262"
       },
       "geometry": {
         "type": "Polygon",
@@ -6375,7 +6403,8 @@
         "data_source_bdl": "Bank Danych o Lasach (BDL Lasy Państwowe) + GUS BDL",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0264"
       },
       "geometry": {
         "type": "Polygon",
@@ -6514,7 +6543,8 @@
         "data_source_bdl": "GUS BDL (lesistość ogólna; brak szczegółowej paczki drzewostanowej BDL -> NULL)",
         "data_date": "2026-11-08",
         "crs": "EPSG:4326",
-        "is_demo": false
+        "is_demo": false,
+        "region_id": "0265"
       },
       "geometry": {
         "type": "Polygon",

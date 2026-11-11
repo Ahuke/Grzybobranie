@@ -30,6 +30,11 @@ data/processed/*
 !data/processed/reports.parquet
 !data/processed/reports.csv
 !data/processed/reports_quality_report.json
+!data/processed/forest_features.parquet
+!data/processed/forest_features.csv
+!data/processed/reports_spatial.parquet
+!data/processed/reports_spatial.csv
+!data/processed/spatial_quality_report.json
 *.shp
 *.shx
 *.dbf

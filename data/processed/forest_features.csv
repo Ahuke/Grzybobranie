@@ -1,0 +1,31 @@
+region_id,area_id,region_name,voivodeship_id,total_area_km2,forest_cover_pct,forest_area_km2,pine_share_pct,oak_beech_share_pct,spruce_share_pct,mean_stand_age_years,dominant_moisture_type,has_bdl_stand_data,bdl_sample_stands_count,aggregation_method,crs_metric
+0201,0201,powiat bolesławiecki,02,1311.5,61.4,805.26,84.2,8.5,4.1,64.0,swieze,True,15,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0202,0202,powiat dzierżoniowski,02,484.3,27.5,133.18,12.4,28.6,54.5,79.5,swieze,True,15,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0203,0203,powiat głogowski,02,442.3,19.8,87.58,,,,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180
+0204,0204,powiat górowski,02,739.8,23.4,173.11,,,,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180
+0205,0205,powiat jaworski,02,585.1,21.9,128.14,,,,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180
+0206,0206,powiat karkonoski,02,629.1,45.8,288.13,14.0,24.5,56.2,78.5,wilgotne,True,15,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0207,0207,powiat kamiennogórski,02,387.9,39.8,154.38,11.5,22.0,61.8,74.0,swieze,True,0,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0208,0208,powiat kłodzki,02,1640.9,48.9,802.4,9.8,28.4,58.0,81.2,wilgotne,True,15,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0209,0209,powiat legnicki,02,758.2,17.4,131.93,,,,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180
+0210,0210,powiat lubański,02,430.6,44.2,190.33,34.0,29.5,31.0,68.0,swieze,True,0,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0211,0211,powiat lubiński,02,702.2,31.5,221.19,76.5,14.2,3.8,61.0,swieze,True,0,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0212,0212,powiat lwówecki,02,706.1,35.2,248.55,38.0,31.0,26.5,69.4,swieze,True,0,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0213,0213,powiat milicki,02,720.8,43.5,313.55,68.4,22.1,2.5,72.0,swieze,True,15,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0214,0214,powiat oleśnicki,02,1040.1,27.9,290.19,74.0,16.5,4.2,62.5,swieze,True,15,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0215,0215,powiat oławski,02,528.4,18.5,97.75,52.0,38.4,2.8,67.0,swieze,True,0,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0216,0216,powiat polkowicki,02,780.8,34.1,266.25,79.0,12.8,3.1,59.5,swieze,True,0,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0217,0217,powiat strzeliński,02,624.2,10.9,68.04,,,,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180
+0218,0218,powiat średzki,02,704.7,11.8,83.15,,,,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180
+0219,0219,powiat świdnicki,02,739.3,21.2,156.73,24.5,36.0,33.5,73.0,swieze,True,0,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0220,0220,powiat trzebnicki,02,1018.5,28.4,289.25,54.0,36.2,3.5,71.0,swieze,True,0,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0221,0221,powiat wałbrzyski,02,431.9,41.6,179.67,11.2,41.5,42.8,75.4,swieze,True,15,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0222,0222,powiat wołowski,02,677.6,32.8,222.25,69.5,21.8,3.0,65.0,swieze,True,0,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0223,0223,powiat wrocławski,02,1112.2,14.2,157.93,,,,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180
+0224,0224,powiat ząbkowicki,02,796.1,22.6,179.92,,,,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180
+0225,0225,powiat zgorzelecki,02,839.9,60.8,510.66,81.5,9.8,4.5,63.0,swieze,True,0,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0226,0226,powiat złotoryjski,02,576.6,50.3,290.03,46.0,31.5,17.2,70.0,swieze,True,0,bdl_stand_weighted_mean_epsg2180,EPSG:2180
+0261,0261,powiat m. Jelenia Góra,02,108.8,26.2,28.51,,,,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180
+0262,0262,powiat m. Legnica,02,50.8,4.2,2.13,,,,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180
+0264,0264,powiat m. Wrocław,02,287.9,7.6,21.88,29.0,58.0,2.0,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180
+0265,0265,powiat m. Wałbrzych,02,85.1,25.8,21.96,,,,,,False,0,gus_bdl_official_forestry_prg,EPSG:2180

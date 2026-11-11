@@ -1,0 +1,37 @@
+{
+  "task": "[GRZ-08] Połączenie obserwacji z geometrią bez pozornej dokładności",
+  "spatial_key": "region_id (TERYT 4 znaki, np. 0201)",
+  "spatial_key_alias": "area_id",
+  "crs_rules": {
+    "metric_calculations": "EPSG:2180 (PUWG 1992 - odległości w metrach, pole powierzchni)",
+    "storage_and_pydeck": "EPSG:4326 (WGS84 - stopnie dziesiętne lon/lat)"
+  },
+  "multiplication_invariants": {
+    "input_reports_count": 518,
+    "output_spatial_reports_count": 518,
+    "multiplication_factor": 1.0,
+    "has_1_to_1_integrity": true
+  },
+  "precision_breakdown": {
+    "point_precise_count": 484,
+    "county_aggregate_count": 34,
+    "county_aggregate_pct": 6.56,
+    "border_locality_resolved_count": 3,
+    "unassigned_count": 0
+  },
+  "forest_features_units": {
+    "total_area_km2": "km² (powierzchnia powiatu z geometrii PRG)",
+    "forest_cover_pct": "% (lesistość powiatu z GUS BDL)",
+    "forest_area_km2": "km² (powierzchnia lasów w powiecie)",
+    "pine_share_pct": "% (udział drzewostanów z panującą sosną SO w BDL)",
+    "oak_beech_share_pct": "% (udział drzewostanów z dębem DB lub bukiem BK w BDL)",
+    "spruce_share_pct": "% (udział drzewostanów ze świerkiem ŚW w BDL)",
+    "mean_stand_age_years": "lata (średni ważony wiek drzewostanów D-STAN)",
+    "dominant_moisture_type": "enum: suche, swieze, wilgotne, bagienne"
+  },
+  "regional_coverage": {
+    "regions_count": 30,
+    "regions_with_bdl_profile": 18,
+    "regions_without_bdl_profile": 12
+  }
+}

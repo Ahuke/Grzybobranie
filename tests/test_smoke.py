@@ -29,6 +29,7 @@ from src.config import (
 from src.data_loader import (
     load_areas_geojson,
     load_dataset_bundle,
+    load_reports_csv,
     load_sprint1_audit_samples,
 )
 from src.geo_utils import (
@@ -218,6 +219,53 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertNotIn("[DO WERYFIKACJI]", mvp_text)
         self.assertIn("Wersja 2.0", contract_text)
         self.assertIn("Wersja 2.0", mvp_text)
+
+    def test_reports_dataset_parquet_and_csv_grz07(self) -> None:
+        """
+        Weryfikuje zbiór obserwacji [GRZ-07]:
+        - obecność i spójność `data/processed/reports.parquet`, `data/processed/reports.csv`
+          oraz `data/processed/reports_quality_report.json`,
+        - stabilne identyfikatory `DG...`, ślad pochodzenia (`source_url`, `place_id`),
+        - brak ujemnych lub zerowych czasów zbioru (`harvest_duration_h > 0`),
+        - oznaczenie i odfiltrowanie wpisów wykluczonych (`518` ogółem -> `513` VALID w CSV).
+        """
+        import json
+        import pandas as pd
+
+        parquet_path = PROCESSED_DIR / "reports.parquet"
+        csv_path = PROCESSED_DIR / "reports.csv"
+        quality_path = PROCESSED_DIR / "reports_quality_report.json"
+
+        self.assertTrue(parquet_path.exists())
+        self.assertTrue(csv_path.exists())
+        self.assertTrue(quality_path.exists())
+
+        df_parquet = pd.read_parquet(parquet_path)
+        self.assertEqual(len(df_parquet), 518)
+        self.assertEqual(df_parquet["report_id"].nunique(), 518)
+        self.assertTrue(df_parquet["report_id"].str.startswith("DG").all())
+        self.assertTrue(df_parquet["source_url"].str.startswith("https://www.grzyby.pl/").all())
+        self.assertFalse(df_parquet["is_demo"].any())
+
+        # Czas zbioru (gdy podany) musi być dodatni (> 0.0)
+        durations = df_parquet["harvest_duration_h"].dropna()
+        self.assertGreater(len(durations), 100)
+        self.assertTrue((durations > 0.0).all())
+
+        # Weryfikacja wykluczonych i poprawnych rekordów
+        valid_df = df_parquet[df_parquet["is_valid_for_training"]]
+        self.assertEqual(len(valid_df), 513)
+
+        csv_rows = load_reports_csv(csv_path)
+        self.assertEqual(len(csv_rows), 513)
+        self.assertTrue(all(not r["is_demo"] for r in csv_rows))
+        self.assertTrue(all(r["area_id"].startswith("02") and len(r["area_id"]) == 4 for r in csv_rows))
+        self.assertTrue(all(r["yield_pcs_per_h"] is not None and r["yield_pcs_per_h"] >= 0.0 for r in csv_rows))
+
+        q_report = json.loads(quality_path.read_text(encoding="utf-8"))
+        self.assertEqual(q_report["funnel_stages"]["stage_1_raw_extracted_from_9_weeks"], 518)
+        self.assertEqual(q_report["funnel_stages"]["stage_5_valid_for_training_in_reports_csv"], 513)
+        self.assertEqual(q_report["regional_coverage"]["covered_powiats_count"], 28)
 
 
 if __name__ == "__main__":

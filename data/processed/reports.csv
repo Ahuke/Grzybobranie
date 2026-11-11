@@ -1,0 +1,514 @@
+report_id,date,area_id,location_raw,dominant_species,yield_pcs_per_h,harvest_duration_h,worminess_pct,is_demo
+DG177228,2025-11-02,0218,Mrozów pow. średzki,kurka,10.0,,,False
+DG177210,2025-11-02,0221,Golińsk pow. wałbrzyski,podgrzybek_brunatny,10.0,,,False
+DG177203,2025-11-02,0205,Stare Rochowice pow. jaworski,podgrzybek_brunatny,10.0,,,False
+DG177137,2025-11-02,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,100.0,1.5,,False
+DG177132,2025-11-02,0214,Miodary pow. oleśnicki,,5.0,,,False
+DG177131,2025-11-02,0206,Jeżów Sudecki pow. karkonoski,mieszane,60.0,1,,False
+DG177115,2025-11-02,0213,pow. milicki,mieszane,20.0,,,False
+DG177253,2025-11-01,0201,Trzebień pow. bolesławiecki,podgrzybek_brunatny,80.0,3,,False
+DG177107,2025-11-01,0215,Miłocice pow. oławski,podgrzybek_brunatny,15.0,,,False
+DG177099,2025-11-01,0219,Jaroszów pow. świdnicki,,0.0,,,False
+DG177097,2025-11-01,0222,Wołów,mieszane,15.0,,,False
+DG177095,2025-11-01,0213,Piękocin pow. milicki,podgrzybek_brunatny,35.0,,,False
+DG177093,2025-11-01,0213,Łazy Wielkie pow. milicki,podgrzybek_brunatny,26.0,,,False
+DG177092,2025-11-01,0215,Janików pow. oławski,mieszane,20.0,,,False
+DG177082,2025-11-01,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,70.0,,,False
+DG177057,2025-11-01,0213,Łąki pow. milicki,podgrzybek_brunatny,30.0,,,False
+DG177029,2025-11-01,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,40.0,2,,False
+DG177028,2025-11-01,0206,Piechowice pow. karkonoski,mieszane,20.0,,,False
+DG177024,2025-11-01,0214,Grabowno Wielkie pow. oleśnicki,podgrzybek_brunatny,30.0,,,False
+DG177018,2025-11-01,0204,Jemielno pow. górowski,podgrzybek_brunatny,25.0,,,False
+DG177005,2025-10-31,0218,Szczepanów pow. średzki,mieszane,25.0,,,False
+DG176999,2025-10-31,0206,Kopaniec pow. karkonoski,borowik_szlachetny,30.0,2,,False
+DG176980,2025-10-31,0215,Minkowice Oławskie pow. oławski,mieszane,15.0,,,False
+DG177015,2025-10-30,0214,Miodary pow. oleśnicki,podgrzybek_brunatny,20.0,,,False
+DG176928,2025-10-29,0220,Zawonia pow. trzebnicki,podgrzybek_brunatny,15.0,,,False
+DG176910,2025-10-29,0220,Skoroszów pow. trzebnicki,podgrzybek_brunatny,50.0,,,False
+DG176909,2025-10-29,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,14.0,,,False
+DG176902,2025-10-29,0202,pow. dzierżoniowski,borowik_szlachetny,2.0,,,False
+DG176888,2025-10-29,0214,Oleśnica,podgrzybek_brunatny,0.0,,,False
+DG176884,2025-10-28,0206,Jeżów Sudecki pow. karkonoski,mieszane,50.0,0.5,,False
+DG176864,2025-10-27,0220,Oborniki Śląskie pow. trzebnicki,mieszane,10.0,,,False
+DG176851,2025-10-26,0221,Cieszów pow. wałbrzyski,mieszane,20.0,,,False
+DG176823,2025-10-26,0213,Łazy pow. milicki,podgrzybek_brunatny,5.0,2,,False
+DG176810,2025-10-26,0220,Niziny pow. trzebnicki,podgrzybek_brunatny,15.0,,,False
+DG176802,2025-10-26,0201,Ławszowa pow. bolesławiecki,mieszane,15.0,,,False
+DG176801,2025-10-26,0223,Chrząstawa Wielka pow. wrocławski,mieszane,25.0,,,False
+DG176791,2025-10-26,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,40.0,,,False
+DG176742,2025-10-26,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,100.0,3,,False
+DG176734,2025-10-26,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,30.0,,,False
+DG176727,2025-10-26,0204,Jemielno pow. górowski,mieszane,50.0,,,False
+DG176751,2025-10-25,0215,Miłocice pow. oławski,mieszane,30.0,,,False
+DG176699,2025-10-25,0214,Miodary pow. oleśnicki,mieszane,6.0,,,False
+DG176690,2025-10-25,0264,Ratyń pow. Wrocław,mieszane,20.0,,,False
+DG176680,2025-10-25,0220,Zawonia pow. trzebnicki,mieszane,4.0,1,,False
+DG176676,2025-10-25,0206,Mysłakowice pow. karkonoski,podgrzybek_brunatny,30.0,,,False
+DG176666,2025-10-25,0214,Bartków pow. oleśnicki,podgrzybek_brunatny,40.0,4,,False
+DG176663,2025-10-25,0201,Trzebień pow. bolesławiecki,mieszane,25.0,,,False
+DG176658,2025-10-25,0214,Miodary pow. oleśnicki,podgrzybek_brunatny,30.0,,,False
+DG176654,2025-10-25,0202,pow. dzierżoniowski,mieszane,5.0,3,,False
+DG176648,2025-10-25,0222,Wołów,podgrzybek_brunatny,30.0,,,False
+DG176595,2025-10-25,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,100.0,,0.0,False
+DG176592,2025-10-25,0205,Stare Rochowice pow. jaworski,kania,50.0,,,False
+DG176580,2025-10-25,0215,Minkowice Oławskie pow. oławski,,20.0,,,False
+DG176566,2025-10-24,0215,Minkowice Oławskie pow. oławski,mieszane,30.0,,,False
+DG176565,2025-10-24,0214,Miodary pow. oleśnicki,mieszane,50.0,4,,False
+DG176561,2025-10-24,0218,Lisiny pow. średzki,podgrzybek_brunatny,28.0,,,False
+DG176558,2025-10-24,0201,Trzebień pow. bolesławiecki,podgrzybek_brunatny,30.0,,,False
+DG176552,2025-10-24,0214,Ostrowina pow. oleśnicki,mieszane,15.0,3,,False
+DG176513,2025-10-24,0214,Miodary pow. oleśnicki,podgrzybek_brunatny,40.0,,,False
+DG176492,2025-10-23,0201,Kozłów pow. bolesławiecki,mieszane,20.0,,,False
+DG176481,2025-10-23,0213,Lasowice pow. milicki,podgrzybek_brunatny,10.0,,,False
+DG176469,2025-10-23,0222,Wołów,mieszane,15.0,,,False
+DG176449,2025-10-23,0220,Grochowa pow. trzebnicki,podgrzybek_brunatny,25.0,,,False
+DG176521,2025-10-22,0201,Trzebień pow. bolesławiecki,,5.0,,,False
+DG176411,2025-10-22,0214,Miodary pow. oleśnicki,podgrzybek_brunatny,10.0,1.5,,False
+DG176382,2025-10-22,0216,Przemków pow. polkowicki,podgrzybek_brunatny,20.0,3,,False
+DG176381,2025-10-22,0219,Jaroszów pow. świdnicki,,1.0,,,False
+DG176360,2025-10-21,0222,Jodłowice pow. wołowski,mieszane,20.0,,,False
+DG176330,2025-10-20,0213,pow. milicki,borowik_szlachetny,3.0,,,False
+DG176524,2025-10-19,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,15.0,2,,False
+DG176322,2025-10-19,0201,Ławszowa pow. bolesławiecki,mieszane,15.0,4,,False
+DG176290,2025-10-19,0204,Ryczeń pow. górowski,podgrzybek_brunatny,14.0,,,False
+DG176280,2025-10-19,0213,Piękocin pow. milicki,mieszane,20.0,,,False
+DG176270,2025-10-19,0221,Jedlina Zdrój pow. wałbrzyski,,0.0,,,False
+DG176263,2025-10-19,0214,Miodary pow. oleśnicki,podgrzybek_brunatny,20.0,,,False
+DG176239,2025-10-19,0215,Minkowice Oławskie pow. oławski,mieszane,15.0,,,False
+DG176238,2025-10-19,0213,Gruszeczka pow. milicki,,5.0,,,False
+DG176222,2025-10-19,0207,Pastewnik pow. kamiennogórski,podgrzybek_brunatny,15.0,,,False
+DG176215,2025-10-19,0213,Gruszeczka pow. milicki,maslak_zwyczajny,12.0,,,False
+DG176209,2025-10-19,0202,Góry Sowie pow. dzierżoniowski,podgrzybek_brunatny,5.0,,,False
+DG176198,2025-10-19,0219,Świebodzice pow. świdnicki,borowik_szlachetny,30.0,,,False
+DG176193,2025-10-19,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,100.0,,,False
+DG176162,2025-10-19,0220,Jary pow. trzebnicki,mieszane,5.0,,,False
+DG176236,2025-10-18,0201,Trzebień pow. bolesławiecki,borowik_szlachetny,10.0,,,False
+DG176192,2025-10-18,0214,Międzybórz pow. oleśnicki,mieszane,5.0,,,False
+DG176145,2025-10-18,0218,Szczepanów pow. średzki,podgrzybek_brunatny,35.0,,,False
+DG176133,2025-10-18,0201,pow. bolesławiecki,mieszane,20.0,,,False
+DG176115,2025-10-18,0215,Piekary pow. oławski,podgrzybek_brunatny,10.0,,,False
+DG176108,2025-10-18,0220,Złotów pow. trzebnicki,mieszane,3.0,2,,False
+DG176105,2025-10-18,0214,Bukowina Sycowska pow. oleśnicki,mieszane,30.0,1,,False
+DG176083,2025-10-18,0202,pow. dzierżoniowski,podgrzybek_brunatny,5.0,,,False
+DG176081,2025-10-18,0207,Pastewnik pow. kamiennogórski,borowik_szlachetny,0.5,2,,False
+DG176080,2025-10-18,0201,Trzebień pow. bolesławiecki,mieszane,60.0,,,False
+DG176076,2025-10-18,0208,Szczytna pow. kłodzki,podgrzybek_brunatny,20.0,3,,False
+DG176075,2025-10-18,0201,Studzianka pow. bolesławiecki,mieszane,10.0,,0.0,False
+DG176074,2025-10-18,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,35.0,,,False
+DG176069,2025-10-18,0214,Miodary pow. oleśnicki,,15.0,,,False
+DG176065,2025-10-18,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,100.0,,,False
+DG176062,2025-10-18,0222,Jodłowice pow. wołowski,podgrzybek_brunatny,25.0,4,,False
+DG176048,2025-10-18,0212,Młyńsko pow. lwówecki,podgrzybek_brunatny,20.0,,,False
+DG176045,2025-10-18,0201,Ławszowa pow. bolesławiecki,podgrzybek_brunatny,50.0,,,False
+DG176044,2025-10-17,0216,Chocianów pow. polkowicki,mieszane,55.0,,0.0,False
+DG176032,2025-10-17,0215,Jelcz Laskowice pow. oławski,podgrzybek_brunatny,30.0,2,,False
+DG175977,2025-10-17,0222,Jodłowice pow. wołowski,podgrzybek_brunatny,30.0,1.5,,False
+DG175961,2025-10-17,0211,Zimna Woda pow. lubiński,,0.0,1,,False
+DG175957,2025-10-17,0201,Zagajnik pow. bolesławiecki,mieszane,20.0,,,False
+DG175950,2025-10-17,0205,Stare Rochowice pow. jaworski,podgrzybek_brunatny,30.0,,,False
+DG175945,2025-10-17,0214,Międzybórz pow. oleśnicki,podgrzybek_brunatny,7.0,,,False
+DG175933,2025-10-17,0214,Miodary pow. oleśnicki,,26.0,,,False
+DG176000,2025-10-16,0214,Miodary pow. oleśnicki,,10.0,5,,False
+DG175989,2025-10-16,0222,Garwół pow. wołowski,mieszane,60.0,3,,False
+DG175905,2025-10-16,0213,Gruszeczka pow. milicki,mieszane,50.0,,,False
+DG175895,2025-10-16,0220,pow. trzebnicki,borowik_szlachetny,4.0,,,False
+DG175878,2025-10-16,0202,pow. dzierżoniowski,mieszane,5.0,,,False
+DG175870,2025-10-16,0214,Bukowina Sycowska pow. oleśnicki,mieszane,25.0,4,,False
+DG175931,2025-10-15,0214,Bukowina Sycowska pow. oleśnicki,podgrzybek_brunatny,30.0,,,False
+DG175854,2025-10-15,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,5.0,,,False
+DG175849,2025-10-15,0213,pow. milicki,mieszane,2.0,,,False
+DG175814,2025-10-15,0202,Góry Sowie pow. dzierżoniowski,mieszane,15.0,,,False
+DG175812,2025-10-15,0201,Kozłów pow. bolesławiecki,podgrzybek_brunatny,3.0,5,,False
+DG175808,2025-10-15,0201,Luboszów pow. bolesławiecki,podgrzybek_brunatny,25.0,,,False
+DG175852,2025-10-14,0201,Trzebień pow. bolesławiecki,,4.0,,,False
+DG175847,2025-10-14,0216,Chocianów pow. polkowicki,mieszane,25.0,8,,False
+DG175770,2025-10-14,0207,Kamienna Góra pow. kamiennogórski,mieszane,0.0,2,,False
+DG175750,2025-10-14,0220,Złotów pow. trzebnicki,podgrzybek_brunatny,30.0,,,False
+DG175743,2025-10-14,0223,Strzegomiany pow. wrocławski,mieszane,5.0,,,False
+DG175673,2025-10-13,0210,Świeradów Zdrój pow. lubański,mieszane,60.0,,,False
+DG175763,2025-10-12,0206,Jakuszyce pow. karkonoski,mieszane,30.0,,,False
+DG175613,2025-10-12,0201,Kozłów pow. bolesławiecki,mieszane,17.0,4,,False
+DG175601,2025-10-12,0218,Lisiny pow. średzki,podgrzybek_brunatny,8.0,,,False
+DG175590,2025-10-12,0210,Świeradów Zdrój pow. lubański,mieszane,40.0,,,False
+DG175545,2025-10-12,0214,Sosnówka pow. oleśnicki,podgrzybek_brunatny,1.0,,,False
+DG175534,2025-10-12,0214,Syców pow. oleśnicki,mieszane,25.0,,,False
+DG175523,2025-10-12,0213,Lasowice pow. milicki,,5.0,4,,False
+DG175494,2025-10-12,0204,Jemielno pow. górowski,podgrzybek_brunatny,40.0,3,,False
+DG175486,2025-10-12,0215,Nowy Dwór pow. oławski,mieszane,50.0,,,False
+DG175469,2025-10-12,0204,Ryczeń pow. górowski,mieszane,10.0,,,False
+DG175454,2025-10-12,0225,Zawidów pow. zgorzelecki,mieszane,20.0,,,False
+DG175742,2025-10-11,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,20.0,3,,False
+DG175679,2025-10-11,0208,Radków pow. kłodzki,podgrzybek_brunatny,40.0,,,False
+DG175659,2025-10-11,0220,Rościsławice pow. trzebnicki,kania,3.0,2,,False
+DG175645,2025-10-11,0201,Trzebień pow. bolesławiecki,podgrzybek_brunatny,30.0,,,False
+DG175474,2025-10-11,0222,Wołów,podgrzybek_brunatny,7.0,2,,False
+DG175466,2025-10-11,0204,Ryczeń pow. górowski,podgrzybek_brunatny,20.0,5,30.0,False
+DG175420,2025-10-11,0220,Jary pow. trzebnicki,mieszane,25.0,,,False
+DG175410,2025-10-11,0208,Polanica Zdrój pow. kłodzki,mieszane,15.0,,,False
+DG175408,2025-10-11,0201,Ławszowa pow. bolesławiecki,mieszane,20.0,,,False
+DG175369,2025-10-11,0204,Ryczeń pow. górowski,borowik_szlachetny,30.0,,,False
+DG175334,2025-10-11,0214,Bukowina Sycowska pow. oleśnicki,mieszane,35.0,,,False
+DG175333,2025-10-11,0201,Stara Oleszna pow. bolesławiecki,podgrzybek_brunatny,20.0,,50.0,False
+DG175316,2025-10-11,0214,Grabowno Wielkie pow. oleśnicki,,25.0,,,False
+DG175314,2025-10-11,0205,Stare Rochowice pow. jaworski,borowik_szlachetny,40.0,,,False
+DG175308,2025-10-11,0214,Sosnówka pow. oleśnicki,mieszane,28.0,,,False
+DG175302,2025-10-11,0204,Ryczeń pow. górowski,podgrzybek_brunatny,15.0,,,False
+DG175291,2025-10-11,0214,Grabowno Wielkie pow. oleśnicki,maslak_zwyczajny,30.0,2,,False
+DG175289,2025-10-11,0222,Brzeg Dolny pow. wołowski,mieszane,6.0,,,False
+DG175283,2025-10-11,0208,Sokolec pow. kłodzki,borowik_szlachetny,25.0,,,False
+DG175281,2025-10-11,0219,Bojanice pow. świdnicki,,0.0,,,False
+DG175280,2025-10-11,0219,Złoty Las pow. świdnicki,,0.0,,,False
+DG175635,2025-10-10,0220,Oborniki Śląskie pow. trzebnicki,mieszane,10.0,4,,False
+DG175455,2025-10-10,0201,Lipiany pow. bolesławiecki,mieszane,30.0,,70.0,False
+DG175453,2025-10-10,0216,Chocianów pow. polkowicki,podgrzybek_brunatny,20.0,3,,False
+DG175271,2025-10-10,0218,Lisiny pow. średzki,podgrzybek_brunatny,15.0,1,,False
+DG175222,2025-10-10,0206,Szklarska Poręba pow. karkonoski,podgrzybek_brunatny,20.0,,,False
+DG175209,2025-10-10,0201,Ławszowa pow. bolesławiecki,podgrzybek_brunatny,30.0,,,False
+DG175201,2025-10-10,0208,Nowa Ruda pow. kłodzki,podgrzybek_brunatny,10.0,,,False
+DG175197,2025-10-10,0214,Międzybórz pow. oleśnicki,mieszane,10.0,,,False
+DG175196,2025-10-10,0202,pow. dzierżoniowski,,2.0,,,False
+DG175168,2025-10-09,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,5.0,,,False
+DG175133,2025-10-09,0205,Stare Rochowice pow. jaworski,mieszane,20.0,,,False
+DG175131,2025-10-09,0201,Świętoszów pow. bolesławiecki,borowik_szlachetny,40.0,,,False
+DG175104,2025-10-09,0201,Luboszów pow. bolesławiecki,mieszane,35.0,,30.0,False
+DG175094,2025-10-09,0215,Minkowice Oławskie pow. oławski,mieszane,10.0,,,False
+DG175092,2025-10-09,0214,Oleśnica,podgrzybek_brunatny,20.0,,,False
+DG175156,2025-10-08,0220,Prusice pow. trzebnicki,mieszane,30.0,,,False
+DG174980,2025-10-08,0209,Prochowice pow. legnicki,,0.0,,,False
+DG175089,2025-10-07,0207,Jarkowice pow. kamiennogórski,mieszane,25.0,,,False
+DG174990,2025-10-07,0208,Szczytna pow. kłodzki,podgrzybek_brunatny,45.0,,,False
+DG174944,2025-10-07,0222,Brzeg Dolny pow. wołowski,mieszane,4.0,,,False
+DG174934,2025-10-07,0220,pow. trzebnicki,maslak_zwyczajny,30.0,,,False
+DG174888,2025-10-05,0220,pow. trzebnicki,mieszane,10.0,2,,False
+DG174833,2025-10-05,0221,Witków pow. wałbrzyski,borowik_szlachetny,2.0,,,False
+DG174825,2025-10-05,0219,Bojanice pow. świdnicki,borowik_szlachetny,5.0,,,False
+DG174806,2025-10-05,0201,Krępnica pow. bolesławiecki,podgrzybek_brunatny,8.0,,,False
+DG174777,2025-10-05,0222,Wołów,,0.0,,,False
+DG174764,2025-10-05,0213,pow. milicki,maslak_zwyczajny,5.0,2,,False
+DG174762,2025-10-05,0202,Góry Sowie pow. dzierżoniowski,mieszane,20.0,4,,False
+DG174714,2025-10-05,0208,Batorów pow. kłodzki,podgrzybek_brunatny,20.0,3,,False
+DG174692,2025-10-05,0206,Siedlęcin pow. karkonoski,borowik_szlachetny,20.0,4,,False
+DG174686,2025-10-05,0215,Minkowice Oławskie pow. oławski,podgrzybek_brunatny,10.0,2,,False
+DG174668,2025-10-05,0207,Marciszów pow. kamiennogórski,podgrzybek_brunatny,20.0,,,False
+DG174845,2025-10-04,0220,Oborniki Śląskie pow. trzebnicki,podgrzybek_brunatny,15.0,,,False
+DG174675,2025-10-04,0220,Oborniki Śląskie pow. trzebnicki,kania,5.0,,,False
+DG174646,2025-10-04,0223,Strzegomiany pow. wrocławski,kania,2.0,,,False
+DG174640,2025-10-04,0213,Łazy Wielkie pow. milicki,kurka,27.0,2.5,,False
+DG174632,2025-10-04,0214,Bukowina Sycowska pow. oleśnicki,mieszane,15.0,,,False
+DG174614,2025-10-04,0213,pow. milicki,borowik_szlachetny,8.0,1.5,,False
+DG174602,2025-10-04,0214,Grabowno Wielkie pow. oleśnicki,podgrzybek_brunatny,20.0,,,False
+DG174589,2025-10-04,0213,Gruszeczka pow. milicki,,20.0,,,False
+DG174567,2025-10-04,0202,pow. dzierżoniowski,borowik_szlachetny,1.0,,,False
+DG174563,2025-10-04,0201,Trzebień pow. bolesławiecki,borowik_szlachetny,10.0,,0.0,False
+DG174529,2025-10-04,0222,Brzeg Dolny pow. wołowski,podgrzybek_brunatny,15.0,,,False
+DG174514,2025-10-04,0218,Mrozów pow. średzki,maslak_zwyczajny,17.0,,,False
+DG174663,2025-10-03,0216,Chocianów pow. polkowicki,mieszane,10.0,8,,False
+DG174495,2025-10-03,0264,Wrocław,mieszane,3.0,,,False
+DG174479,2025-10-03,0220,Skoroszów pow. trzebnicki,podgrzybek_brunatny,3.0,2,,False
+DG174459,2025-10-03,0222,Orzeszków pow. wołowski,podgrzybek_brunatny,15.0,4,,False
+DG174456,2025-10-03,0221,Nowe Bogaczowice pow. wałbrzyski,borowik_szlachetny,5.0,2,,False
+DG174455,2025-10-03,0265,Wałbrzych,,10.0,,,False
+DG174449,2025-10-03,0220,Niedary pow. trzebnicki,podgrzybek_brunatny,15.0,1,,False
+DG174448,2025-10-03,0214,Białe Błoto pow. oleśnicki,mieszane,15.0,3,,False
+DG174442,2025-10-03,0208,Jodłów pow. kłodzki,podgrzybek_brunatny,2.0,1,,False
+DG174437,2025-10-03,0213,pow. milicki,podgrzybek_brunatny,5.0,4,,False
+DG174435,2025-10-03,0208,Lutynia pow. kłodzki,,0.0,1,,False
+DG174433,2025-10-03,0208,Szczytna pow. kłodzki,,3.0,3,,False
+DG174823,2025-10-02,0214,Miodary pow. oleśnicki,podgrzybek_brunatny,10.0,2.5,,False
+DG174352,2025-10-02,0202,pow. dzierżoniowski,borowik_szlachetny,3.0,,,False
+DG174345,2025-10-02,0201,Trzebień pow. bolesławiecki,borowik_szlachetny,30.0,,,False
+DG174333,2025-10-02,0202,Rościszów pow. dzierżoniowski,mieszane,25.0,,,False
+DG174327,2025-10-02,0205,Stare Rochowice pow. jaworski,borowik_szlachetny,50.0,,,False
+DG174325,2025-10-02,0201,Bolesławiec,,10.0,,,False
+DG174380,2025-10-01,0220,Piotrkowice pow. trzebnicki,mieszane,9.0,,,False
+DG174288,2025-10-01,0206,Jeżów Sudecki pow. karkonoski,borowik_szlachetny,15.0,0.5,,False
+DG174257,2025-10-01,0201,Buczek pow. bolesławiecki,borowik_szlachetny,30.0,,,False
+DG174246,2025-10-01,0214,Międzybórz pow. oleśnicki,,10.0,6.5,,False
+DG174211,2025-09-30,0205,Pomocne pow. jaworski,borowik_szlachetny,12.0,,,False
+DG174194,2025-09-30,0201,Kliczków pow. bolesławiecki,,5.0,,,False
+DG174188,2025-09-30,0202,pow. dzierżoniowski,borowik_szlachetny,6.0,1.5,,False
+DG174091,2025-09-29,0205,Paszowice pow. jaworski,mieszane,6.0,,,False
+DG174079,2025-09-29,0207,Pastewnik pow. kamiennogórski,kania,4.0,,,False
+DG174649,2025-09-28,0214,Bukowina Sycowska pow. oleśnicki,,3.0,,,False
+DG174145,2025-09-28,0209,Rokitki pow. legnicki,borowik_szlachetny,10.0,,,False
+DG174121,2025-09-28,0225,Węgliniec pow. zgorzelecki,mieszane,10.0,,,False
+DG174094,2025-09-28,0214,Białe Błoto pow. oleśnicki,mieszane,5.0,,,False
+DG174085,2025-09-28,0218,Wilczków pow. średzki,borowik_szlachetny,5.0,,,False
+DG174083,2025-09-28,0201,Krępnica pow. bolesławiecki,,7.0,,,False
+DG174060,2025-09-28,0201,Świętoszów pow. bolesławiecki,,5.0,,,False
+DG174034,2025-09-28,0221,Walim pow. wałbrzyski,mieszane,5.0,,,False
+DG174019,2025-09-28,0223,Byków pow. wrocławski,,1.0,,,False
+DG174004,2025-09-28,0214,Bartków pow. oleśnicki,podgrzybek_brunatny,15.0,,,False
+DG173998,2025-09-28,0221,Łączna pow. wałbrzyski,mieszane,8.0,,,False
+DG173946,2025-09-28,0203,Kulów pow. głogowski,podgrzybek_brunatny,50.0,,,False
+DG173938,2025-09-28,0214,Miodary pow. oleśnicki,podgrzybek_brunatny,6.0,2,0.0,False
+DG173905,2025-09-28,0206,Siedlęcin pow. karkonoski,podgrzybek_brunatny,40.0,4,,False
+DG173859,2025-09-28,0201,Luboszów pow. bolesławiecki,,1.0,,,False
+DG173839,2025-09-28,0203,Grochowice pow. głogowski,borowik_szlachetny,10.0,3,,False
+DG173832,2025-09-28,0214,Grabowno Wielkie pow. oleśnicki,podgrzybek_brunatny,5.0,,,False
+DG173823,2025-09-28,0213,Gruszeczka pow. milicki,,20.0,,,False
+DG174129,2025-09-27,0214,Miodary pow. oleśnicki,podgrzybek_brunatny,12.0,4,,False
+DG174084,2025-09-27,0201,Przejęsław pow. bolesławiecki,mieszane,10.0,,,False
+DG174052,2025-09-27,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,10.0,,,False
+DG173995,2025-09-27,0221,Nowe Bogaczowice pow. wałbrzyski,borowik_szlachetny,4.0,,,False
+DG173985,2025-09-27,0201,Kozłów pow. bolesławiecki,borowik_szlachetny,20.0,,,False
+DG173864,2025-09-27,0201,Parowa pow. bolesławiecki,podgrzybek_brunatny,15.0,,,False
+DG173831,2025-09-27,0201,Bolesławiec,borowik_szlachetny,20.0,,,False
+DG173816,2025-09-27,0208,pow. kłodzki,mieszane,20.0,,,False
+DG173803,2025-09-27,0201,Świętoszów pow. bolesławiecki,,10.0,,,False
+DG173777,2025-09-27,0210,Przylasek pow. lubański,borowik_szlachetny,15.0,,,False
+DG173775,2025-09-27,0202,Uliczno pow. dzierżoniowski,,2.0,,,False
+DG173720,2025-09-27,0201,Trzebień pow. bolesławiecki,mieszane,20.0,,,False
+DG173711,2025-09-27,0213,Łazy Wielkie pow. milicki,mieszane,23.0,,,False
+DG173709,2025-09-27,0219,Świebodzice pow. świdnicki,podgrzybek_brunatny,7.0,5,,False
+DG173702,2025-09-27,0201,Stara Oleszna pow. bolesławiecki,borowik_szlachetny,20.0,,60.0,False
+DG173697,2025-09-27,0201,Kozłów pow. bolesławiecki,borowik_szlachetny,20.0,,70.0,False
+DG173683,2025-09-27,0205,Stare Rochowice pow. jaworski,mieszane,5.0,2,100.0,False
+DG173682,2025-09-27,0213,Gruszeczka pow. milicki,mieszane,20.0,3,,False
+DG173658,2025-09-27,0222,Wołów,mieszane,13.0,2.5,,False
+DG173652,2025-09-27,0202,pow. dzierżoniowski,mieszane,5.0,,,False
+DG173650,2025-09-27,0214,Bukowina Sycowska pow. oleśnicki,mieszane,25.0,,,False
+DG173646,2025-09-27,0201,Osiecznica pow. bolesławiecki,mieszane,10.0,,,False
+DG173643,2025-09-27,0214,Grabowno Wielkie pow. oleśnicki,,10.0,,,False
+DG173619,2025-09-27,0204,Jemielno pow. górowski,mieszane,15.0,,,False
+DG173804,2025-09-26,0201,Świętoszów pow. bolesławiecki,,10.0,,,False
+DG173799,2025-09-26,0208,Lutynia pow. kłodzki,mieszane,120.0,,,False
+DG173763,2025-09-26,0209,Okmiany pow. Legnicki,borowik_szlachetny,15.0,,,False
+DG173588,2025-09-26,0222,Wołów,mieszane,10.0,,,False
+DG173584,2025-09-26,0213,Gruszeczka pow. milicki,mieszane,5.0,,,False
+DG173579,2025-09-26,0214,Grabowno Wielkie pow. oleśnicki,mieszane,15.0,6,40.0,False
+DG173550,2025-09-26,0220,Skoroszów pow. trzebnicki,podgrzybek_brunatny,20.0,,,False
+DG173463,2025-09-26,0224,pow. ząbkowicki,borowik_szlachetny,10.0,,0.0,False
+DG173637,2025-09-25,0202,pow. dzierżoniowski,borowik_szlachetny,3.0,,,False
+DG173454,2025-09-25,0225,Wyszków pow. zgorzelecki,maslak_zwyczajny,18.0,,,False
+DG173432,2025-09-25,0214,Miodary pow. oleśnicki,,20.0,1.5,,False
+DG173408,2025-09-25,0201,Trzebień pow. bolesławiecki,borowik_szlachetny,15.0,4,,False
+DG173390,2025-09-25,0218,Miękinia pow. średzki,mieszane,15.0,,,False
+DG173358,2025-09-25,0201,Przejęsław pow. bolesławiecki,mieszane,15.0,3,,False
+DG173340,2025-09-25,0222,Brzeg Dolny pow. wołowski,,0.0,,,False
+DG173339,2025-09-25,0201,Buczek pow. bolesławiecki,,10.0,,,False
+DG173338,2025-09-25,0201,Luboszów pow. bolesławiecki,podgrzybek_brunatny,10.0,,,False
+DG173336,2025-09-25,0208,Lasówka pow. kłodzki,podgrzybek_brunatny,35.0,,,False
+DG173320,2025-09-25,0203,Grochowice pow. głogowski,borowik_szlachetny,10.0,2,,False
+DG173303,2025-09-25,0215,Wójcice pow. oławski,mieszane,8.0,,,False
+DG173291,2025-09-25,0213,Pierstnica Mała pow. milicki,mieszane,20.0,,0.0,False
+DG173409,2025-09-24,0208,Szczytna pow. kłodzki,podgrzybek_brunatny,40.0,,,False
+DG173307,2025-09-24,0201,Świętoszów pow. bolesławiecki,mieszane,15.0,7,,False
+DG173305,2025-09-24,0265,Wałbrzych,mieszane,5.0,,,False
+DG173295,2025-09-24,0201,Przejęsław pow. bolesławiecki,mieszane,30.0,,,False
+DG173293,2025-09-24,0209,Okmiany pow. Legnicki,mieszane,35.0,,,False
+DG173288,2025-09-24,0208,Kłodzko,mieszane,15.0,,,False
+DG173286,2025-09-24,0225,Węgliniec pow. zgorzelecki,mieszane,25.0,,,False
+DG173281,2025-09-24,0201,Trzebień pow. bolesławiecki,mieszane,20.0,,80.0,False
+DG173278,2025-09-24,0221,Boguszów-Gorce pow. wałbrzyski,mieszane,20.0,,,False
+DG173276,2025-09-24,0203,Grochowice pow. głogowski,kurka,10.0,,,False
+DG173272,2025-09-24,0213,Milicz,mieszane,20.0,,,False
+DG173259,2025-09-24,0218,Mrozów pow. średzki,borowik_szlachetny,20.0,3.5,,False
+DG173256,2025-09-24,0220,Oborniki Śląskie pow. trzebnicki,podgrzybek_brunatny,10.0,1.5,,False
+DG173254,2025-09-24,0206,Siedlęcin pow. karkonoski,mieszane,35.0,,,False
+DG173250,2025-09-24,0202,Rościszów pow. dzierżoniowski,mieszane,25.0,,,False
+DG173247,2025-09-24,0213,Gruszeczka pow. milicki,,50.0,,,False
+DG173241,2025-09-24,0201,Przejęsław pow. bolesławiecki,mieszane,55.0,,,False
+DG173231,2025-09-24,0201,Trzebień pow. bolesławiecki,borowik_szlachetny,35.0,,,False
+DG173206,2025-09-24,0218,Miękinia pow. średzki,mieszane,10.0,,,False
+DG173200,2025-09-24,0213,Gruszeczka pow. milicki,mieszane,40.0,,,False
+DG173190,2025-09-24,0201,Kliczków pow. bolesławiecki,mieszane,50.0,6,,False
+DG173189,2025-09-24,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,30.0,,,False
+DG173181,2025-09-24,0208,Stójków pow. kłodzki,mieszane,30.0,,,False
+DG173180,2025-09-24,0208,Orłowiec pow. kłodzki,borowik_szlachetny,3.0,,,False
+DG173140,2025-09-24,0214,Dobroszyce pow. oleśnicki,mieszane,20.0,,,False
+DG173125,2025-09-24,0211,Lubin,,30.0,,,False
+DG173284,2025-09-23,0214,Bukowina Sycowska pow. oleśnicki,podgrzybek_brunatny,12.0,,,False
+DG173122,2025-09-23,0213,Gruszeczka pow. milicki,mieszane,40.0,,,False
+DG173120,2025-09-23,0264,Wrocław,mieszane,10.0,,,False
+DG173113,2025-09-23,0201,Krzyżowa pow. bolesławiecki,mieszane,10.0,,,False
+DG173096,2025-09-23,0201,Kozłów pow. bolesławiecki,mieszane,20.0,,30.0,False
+DG173085,2025-09-23,0201,Trzebień pow. bolesławiecki,podgrzybek_brunatny,40.0,,,False
+DG173078,2025-09-23,0204,Ryczeń pow. górowski,,40.0,,,False
+DG173074,2025-09-23,0223,Sulistrowiczki pow. wrocławski,mieszane,1.0,,,False
+DG173055,2025-09-23,0205,Stare Rochowice pow. jaworski,maslak_zwyczajny,30.0,,,False
+DG173029,2025-09-23,0222,Smogorzówek pow. wołowski,mieszane,40.0,3,,False
+DG172999,2025-09-23,0207,Pastewnik pow. kamiennogórski,borowik_szlachetny,30.0,0.67,,False
+DG172997,2025-09-23,0220,Jary pow. trzebnicki,mieszane,10.0,,,False
+DG172993,2025-09-23,0216,Przemków pow. polkowicki,borowik_szlachetny,25.0,,,False
+DG172976,2025-09-23,0208,Lutynia pow. kłodzki,borowik_szlachetny,30.0,,,False
+DG172885,2025-09-22,0222,Jodłowice pow. wołowski,,20.0,0.5,,False
+DG172952,2025-09-21,0201,Osiecznica pow. bolesławiecki,borowik_szlachetny,30.0,,50.0,False
+DG172890,2025-09-21,0218,Środa Śląska,kania,0.0,2,,False
+DG172868,2025-09-21,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,5.0,,,False
+DG172864,2025-09-21,0220,Ludgierzowice pow. trzebnicki,mieszane,1.0,1,,False
+DG172814,2025-09-21,0201,Gromadka pow. bolesławiecki,mieszane,50.0,,40.0,False
+DG172792,2025-09-21,0218,Szczepanów pow. średzki,mieszane,10.0,,,False
+DG172788,2025-09-21,0226,Proboszczów pow. złotoryjski,,0.0,,,False
+DG172787,2025-09-21,0205,Kłonice pow. jaworski,,0.0,,,False
+DG172780,2025-09-21,0201,Kozłów pow. bolesławiecki,mieszane,25.0,4,,False
+DG172772,2025-09-21,0201,Bolesławiec,borowik_szlachetny,25.0,,95.0,False
+DG172768,2025-09-21,0205,Pomocne pow. jaworski,borowik_szlachetny,60.0,,,False
+DG172766,2025-09-21,0213,Sułów pow. milicki,mieszane,30.0,0.58,,False
+DG172762,2025-09-21,0216,Przemków pow. polkowicki,mieszane,50.0,,,False
+DG172761,2025-09-21,0218,Zabór Wielki pow. średzki,mieszane,2.0,,,False
+DG172729,2025-09-21,0201,Świętoszów pow. bolesławiecki,borowik_szlachetny,15.0,,95.0,False
+DG172721,2025-09-21,0201,Lipiany pow. bolesławiecki,mieszane,25.0,,,False
+DG172720,2025-09-21,0225,Jagodzin pow. zgorzelecki,borowik_szlachetny,15.0,0.5,,False
+DG172713,2025-09-21,0201,Świętoszów pow. bolesławiecki,borowik_szlachetny,20.0,,,False
+DG172711,2025-09-21,0223,Sobótka pow. wrocławski,mieszane,10.0,4,,False
+DG172694,2025-09-21,0214,Krzeczyn pow. oleśnicki,kania,5.0,,,False
+DG172677,2025-09-21,0206,Siedlęcin pow. karkonoski,mieszane,50.0,,,False
+DG172674,2025-09-21,0265,Wałbrzych,borowik_szlachetny,30.0,,70.0,False
+DG172649,2025-09-21,0201,Trzebień pow. bolesławiecki,borowik_szlachetny,50.0,2,,False
+DG172620,2025-09-21,0201,Buczek pow. bolesławiecki,mieszane,35.0,,,False
+DG172609,2025-09-21,0201,Trzebień pow. bolesławiecki,mieszane,20.0,,,False
+DG172602,2025-09-21,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,20.0,,,False
+DG172599,2025-09-21,0209,Rokitki pow. legnicki,,60.0,2.5,,False
+DG173569,2025-09-20,0214,Bukowina Sycowska pow. oleśnicki,,15.0,,,False
+DG173103,2025-09-20,0201,Przejęsław pow. bolesławiecki,mieszane,25.0,,,False
+DG172891,2025-09-20,0218,Mrozów pow. średzki,mieszane,1.0,,,False
+DG172826,2025-09-20,0216,Jakubowo Lubińskie pow. polkowicki,mieszane,40.0,,,False
+DG172789,2025-09-20,0208,Jugów pow. kłodzki,borowik_szlachetny,1.0,,,False
+DG172676,2025-09-20,0201,Osiecznica pow. bolesławiecki,borowik_szlachetny,30.0,,,False
+DG172653,2025-09-20,0220,Ludgierzowice pow. trzebnicki,,5.0,,,False
+DG172596,2025-09-20,0216,pow. polkowicki,mieszane,25.0,1,,False
+DG172593,2025-09-20,0201,Ławszowa pow. bolesławiecki,,30.0,,,False
+DG172592,2025-09-20,0218,Miękinia pow. średzki,mieszane,10.0,,,False
+DG172573,2025-09-20,0219,Modliszów pow. świdnicki,mieszane,3.0,2.5,,False
+DG172571,2025-09-20,0213,Piękocin pow. milicki,mieszane,20.0,,,False
+DG172561,2025-09-20,0201,Wilkocin pow. polkowicki,mieszane,40.0,2.5,,False
+DG172551,2025-09-20,0201,Buczek pow. bolesławiecki,maslak_zwyczajny,25.0,,,False
+DG172538,2025-09-20,0210,Świecie pow. lubański,borowik_szlachetny,5.0,,,False
+DG172530,2025-09-20,0206,Siedlęcin pow. karkonoski,mieszane,50.0,,,False
+DG172518,2025-09-20,0213,Gruszeczka pow. milicki,borowik_szlachetny,20.0,,,False
+DG172517,2025-09-20,0214,Miodary pow. oleśnicki,mieszane,7.0,,,False
+DG172491,2025-09-20,0226,Złotoryja,,35.0,,,False
+DG172485,2025-09-20,0201,Osiecznica pow. bolesławiecki,mieszane,30.0,,,False
+DG172481,2025-09-20,0216,Przemków pow. polkowicki,borowik_szlachetny,40.0,,,False
+DG172478,2025-09-20,0201,Kliczków pow. bolesławiecki,mieszane,25.0,,,False
+DG172469,2025-09-20,0223,Byków pow. wrocławski,,0.0,0.25,,False
+DG172466,2025-09-20,0220,Złotówek pow. trzebnicki,podgrzybek_brunatny,6.0,,,False
+DG172464,2025-09-20,0201,Bolesławiec,,30.0,,,False
+DG172451,2025-09-20,0218,Miękinia pow. średzki,mieszane,20.0,0.67,,False
+DG172430,2025-09-20,0214,Niwki Kraszowskie pow. oleśnicki,,10.0,2,,False
+DG172424,2025-09-20,0204,Ryczeń pow. górowski,mieszane,80.0,,,False
+DG172393,2025-09-20,0219,Złoty Las pow. świdnicki,mieszane,5.0,,,False
+DG172386,2025-09-20,0221,Glinno pow. wałbrzyski,kania,3.0,,,False
+DG172376,2025-09-20,0201,Trzebień pow. bolesławiecki,mieszane,20.0,,,False
+DG172368,2025-09-20,0213,Pracze pow. milicki,mieszane,15.0,,,False
+DG172589,2025-09-19,0213,Łazy Wielkie pow. milicki,mieszane,20.0,,,False
+DG172540,2025-09-19,0201,Trzebień pow. bolesławiecki,mieszane,50.0,,,False
+DG172477,2025-09-19,0201,Kozłów pow. bolesławiecki,mieszane,40.0,,,False
+DG172349,2025-09-19,0201,Gromadka pow. bolesławiecki,mieszane,20.0,,,False
+DG172348,2025-09-19,0219,Modliszów pow. świdnicki,kania,3.0,,,False
+DG172345,2025-09-19,0214,Szczodrów pow. oleśnicki,,1.0,,,False
+DG172324,2025-09-19,0214,Węgrowa pow. oleśnicki,mieszane,30.0,0.5,,False
+DG172320,2025-09-19,0201,Studzianka pow. bolesławiecki,borowik_szlachetny,30.0,,,False
+DG172312,2025-09-19,0201,Ławszowa pow. bolesławiecki,borowik_szlachetny,10.0,,,False
+DG172311,2025-09-19,0201,Krzyżowa pow. bolesławiecki,borowik_szlachetny,20.0,,,False
+DG172263,2025-09-19,0201,Świętoszów pow. bolesławiecki,mieszane,35.0,,,False
+DG172248,2025-09-19,0213,Gruszeczka pow. milicki,podgrzybek_brunatny,40.0,,,False
+DG172223,2025-09-19,0216,Przemków pow. polkowicki,borowik_szlachetny,30.0,,,False
+DG172207,2025-09-19,0264,Rędzin (Wrocław),,30.0,,,False
+DG172190,2025-09-19,0214,Miodary pow. oleśnicki,,0.0,,,False
+DG172189,2025-09-19,0223,Sobótka pow. wrocławski,podgrzybek_brunatny,2.0,4,,False
+DG172186,2025-09-19,0201,Stara Oleszna pow. bolesławiecki,mieszane,30.0,,,False
+DG172162,2025-09-19,0219,Lubachów pow. świdnicki,kania,3.0,,,False
+DG172300,2025-09-18,0210,Pobiedna pow. lubański,mieszane,19.0,,,False
+DG172276,2025-09-18,0211,Raszówka pow. lubiński,maslak_zwyczajny,4.0,1.5,,False
+DG172188,2025-09-18,0223,Kotowice pow. wrocławski,,40.0,,,False
+DG172165,2025-09-18,0201,Osiecznica pow. bolesławiecki,mieszane,20.0,,,False
+DG172164,2025-09-18,0216,Przemków pow. polkowicki,borowik_szlachetny,20.0,,,False
+DG172156,2025-09-18,0209,Prochowice pow. legnicki,kania,5.0,,,False
+DG172151,2025-09-18,0201,Buczek pow. bolesławiecki,borowik_szlachetny,20.0,,,False
+DG172143,2025-09-18,0201,Kozłów pow. bolesławiecki,mieszane,30.0,,,False
+DG172141,2025-09-18,0223,pow. wrocławski,podgrzybek_brunatny,2.0,,,False
+DG172135,2025-09-18,0214,Ostrowina pow. oleśnicki,mieszane,0.0,,,False
+DG172125,2025-09-18,0223,Kotowice pow. wrocławski,kania,30.0,,,False
+DG172112,2025-09-18,0201,Trzebień pow. bolesławiecki,,20.0,,,False
+DG172099,2025-09-18,0224,Ziębice pow. ząbkowicki,mieszane,10.0,,,False
+DG172097,2025-09-18,0206,Siedlęcin pow. karkonoski,mieszane,40.0,,,False
+DG172083,2025-09-18,0264,Rędzin (Wrocław),mieszane,15.0,,,False
+DG172050,2025-09-18,0206,Janowice Wielkie pow. karkonoski,mieszane,3.0,,,False
+DG172043,2025-09-18,0214,Sosnówka pow. oleśnicki,podgrzybek_brunatny,3.0,,,False
+DG172037,2025-09-18,0206,Janowice Wielkie pow. karkonoski,,2.0,2,,False
+DG172154,2025-09-17,0201,Kozłów pow. bolesławiecki,borowik_szlachetny,80.0,1.5,,False
+DG172044,2025-09-17,0201,Przejęsław pow. bolesławiecki,mieszane,15.0,,,False
+DG172011,2025-09-17,0219,Świebodzice pow. świdnicki,kania,18.0,0.33,,False
+DG171994,2025-09-17,0216,Przemków pow. polkowicki,borowik_szlachetny,30.0,,,False
+DG171985,2025-09-17,0261,Jelenia Góra,borowik_szlachetny,55.0,2,,False
+DG171982,2025-09-17,0201,Ławszowa pow. bolesławiecki,,15.0,,,False
+DG171973,2025-09-17,0210,Pobiedna pow. lubański,mieszane,20.0,,,False
+DG171965,2025-09-17,0223,Siechnice pow. wrocławski,kania,40.0,,,False
+DG171958,2025-09-17,0215,Jelcz-Laskowice pow. oławski,podgrzybek_brunatny,30.0,,,False
+DG171954,2025-09-17,0201,Ławszowa pow. bolesławiecki,mieszane,10.0,3,,False
+DG171943,2025-09-17,0208,pow. kłodzki,,0.0,,,False
+DG171941,2025-09-17,0216,Przemków pow. polkowicki,borowik_szlachetny,15.0,,,False
+DG171928,2025-09-17,0201,Studzianka pow. bolesławiecki,borowik_szlachetny,80.0,,,False
+DG171899,2025-09-17,0214,Międzybórz pow. oleśnicki,mieszane,3.0,,,False
+DG172145,2025-09-16,0201,Studzianka pow. bolesławiecki,borowik_szlachetny,30.0,,,False
+DG171908,2025-09-16,0216,Przemków pow. polkowicki,mieszane,30.0,,,False
+DG171882,2025-09-16,0210,Pobiedna pow. lubański,borowik_szlachetny,5.0,,,False
+DG171872,2025-09-16,0208,Pokrzywno pow. kłodzki,borowik_szlachetny,8.0,,,False
+DG171866,2025-09-16,0201,Trzebień pow. bolesławiecki,borowik_szlachetny,5.0,,,False
+DG171859,2025-09-16,0261,Jelenia Góra,borowik_szlachetny,40.0,3,,False
+DG171842,2025-09-16,0223,Kotowice pow. wrocławski,mieszane,10.0,,,False
+DG171813,2025-09-16,0211,Lubin,mieszane,5.0,,,False
+DG171811,2025-09-16,0206,Karpacz pow. karkonoski,,0.0,1,,False
+DG171807,2025-09-16,0205,Muchów pow. jaworski,,2.0,,,False
+DG171910,2025-09-15,0222,Wołów,borowik_szlachetny,2.0,,,False
+DG171788,2025-09-15,0213,pow. milicki,kurka,20.0,,,False
+DG171786,2025-09-15,0220,Wilczyn pow. trzebnicki,kania,5.0,,,False
+DG171785,2025-09-15,0223,Przemiłów pow. wrocławski,,0.0,,,False
+DG171742,2025-09-15,0201,Osiecznica pow. bolesławiecki,mieszane,5.0,,,False
+DG171730,2025-09-14,0220,Skoroszów pow. trzebnicki,kania,2.0,,,False
+DG171727,2025-09-14,0226,Złotoryja,mieszane,20.0,,,False
+DG171725,2025-09-14,0261,Jelenia Góra,,30.0,,,False
+DG171722,2025-09-14,0220,Ludgierzowice pow. trzebnicki,kurka,1.0,,,False
+DG171697,2025-09-14,0213,Milicz,mieszane,5.0,,,False
+DG171691,2025-09-14,0261,Jelenia Góra,borowik_szlachetny,20.0,,,False
+DG171667,2025-09-14,0207,Ogorzelec pow. kamiennogórski,mieszane,5.0,,,False
+DG171663,2025-09-14,0264,Wrocław,borowik_szlachetny,8.0,,,False
+DG171637,2025-09-14,0221,Konradów (Wałbrzych),maslak_zwyczajny,5.0,,,False
+DG171631,2025-09-14,0214,Bukowina Sycowska pow. oleśnicki,maslak_zwyczajny,3.0,,,False
+DG171617,2025-09-14,0220,pow. trzebnicki,mieszane,5.0,,,False
+DG171718,2025-09-13,0201,Świętoszów pow. bolesławiecki,kurka,4.0,1,,False
+DG171623,2025-09-13,0220,Oborniki Śląskie pow. trzebnicki,mieszane,1.0,,,False
+DG171605,2025-09-13,0201,Osła pow. bolesławiecki,mieszane,25.0,,,False
+DG171589,2025-09-13,0220,pow. trzebnicki,mieszane,5.0,2,,False
+DG171580,2025-09-13,0211,Lubin,mieszane,10.0,,,False
+DG171556,2025-09-13,0223,Będkowice pow. wrocławski,mieszane,0.0,,,False
+DG171546,2025-09-13,0220,Oborniki Śląskie pow. trzebnicki,,0.0,,,False
+DG171533,2025-09-13,0220,pow. trzebnicki,mieszane,1.0,,,False
+DG171509,2025-09-13,0215,Janików pow. oławski,,0.0,,,False
+DG171586,2025-09-12,0202,Lasocin pow. dzierżoniowski,mieszane,1.0,,,False
+DG171486,2025-09-12,0213,pow. milicki,kurka,2.0,,,False
+DG171450,2025-09-12,0219,Łażany pow. świdnicki,mieszane,14.0,,,False
+DG171446,2025-09-11,0221,Jedlina Zdrój pow. wałbrzyski,mieszane,3.0,2,,False
+DG171433,2025-09-11,0214,Dobroszyce pow. oleśnicki,,0.0,,,False
+DG171420,2025-09-11,0201,Bolesławiec,,0.0,,,False
+DG171400,2025-09-10,0220,Koniowo pow. trzebnicki,,0.0,,,False
+DG171399,2025-09-10,0264,Leśnica (Wrocław),,0.0,,,False
+DG171393,2025-09-10,0208,Dlugopole-Zdrój pow. kłodzki,,0.0,,,False
+DG171384,2025-09-10,0204,Śleszów pow. górowski,kurka,2.0,,,False
+DG171391,2025-09-09,0208,Międzygórze pow. kłodzki,,0.0,,,False
+DG171368,2025-09-09,0261,Jelenia Góra,kurka,3.0,,,False
+DG171587,2025-09-08,0202,Lasocin pow. dzierżoniowski,mieszane,1.0,,,False
+DG171392,2025-09-08,0208,Gorzanów pow. kłodzki,,0.0,,,False
+DG171309,2025-09-08,0219,Świebodzice pow. świdnicki,,0.0,,,False
+DG171308,2025-09-08,0213,pow. milicki,,0.0,,,False
+DG171405,2025-09-07,0211,Raszówka pow. lubiński,,0.0,,,False
+DG171336,2025-09-07,0214,Twardogóra pow. oleśnicki,,0.0,,,False
+DG171306,2025-09-07,0207,Kamienna Góra pow. kamiennogórski,mieszane,2.0,2,,False
+DG171296,2025-09-07,0223,Sulistrowiczki pow. wrocławski,,2.0,,,False
+DG171288,2025-09-07,0211,Zimna Woda pow. lubiński,kania,0.0,1,,False
+DG171259,2025-09-07,0213,Gruszeczka pow. milicki,mieszane,1.0,,,False
+DG171238,2025-09-07,0201,Kliczków pow. bolesławiecki,,0.0,4,,False
+DG171232,2025-09-07,0206,Siedlęcin pow. karkonoski,borowik_szlachetny,0.0,1,,False
+DG171231,2025-09-07,0220,pow. trzebnicki,,0.0,,,False
+DG171222,2025-09-06,0203,Grochowice pow. głogowski,,0.0,,,False
+DG171205,2025-09-06,0202,pow. dzierżoniowski,mieszane,2.0,,,False
+DG171203,2025-09-06,0220,Skoroszów pow. trzebnicki,kurka,1.0,2,,False
+DG171172,2025-09-05,0201,Gromadka pow. bolesławiecki,,3.0,,,False
+DG171166,2025-09-04,0214,Bartków pow. oleśnicki,,0.0,,,False
+DG171154,2025-09-04,0201,Parowa pow. bolesławiecki,,0.0,,,False
+DG171143,2025-09-03,0261,Jelenia Góra,,0.0,,,False
+DG171133,2025-09-03,0213,pow. milicki,,0.0,,,False
+DG171104,2025-09-02,0211,Lubin,,0.0,,,False
+DG171107,2025-09-01,0221,Zagórze Śląskie pow. wałbrzyski,,0.0,,,False

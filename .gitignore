@@ -27,6 +27,9 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 !data/processed/areas.geojson
+!data/processed/reports.parquet
+!data/processed/reports.csv
+!data/processed/reports_quality_report.json
 *.shp
 *.shx
 *.dbf

@@ -1,0 +1,359 @@
+{
+  "task": "[GRZ-07] Zbiór obserwacji o zbiorach grzybów (woj. dolnośląskie, TERYT 02)",
+  "funnel_stages": {
+    "stage_1_raw_extracted_from_9_weeks": 518,
+    "stage_2_after_exact_report_id_dedup": 518,
+    "stage_3_geopandas_sjoin_assigned_to_powiat": 518,
+    "stage_4_after_same_day_author_place_dedup": 516,
+    "stage_5_valid_for_training_in_reports_csv": 513
+  },
+  "quality_status_breakdown": {
+    "VALID": 510,
+    "VALID_BORDER_LOCALITY_RESOLVED": 3,
+    "EXCLUDED_SAME_DAY_AUTHOR_PLACE_DUPLICATE": 2,
+    "EXCLUDED_URBAN_NON_FOREST": 2,
+    "EXCLUDED_EXTREME_UNVERIFIED_OUTLIER": 1
+  },
+  "date_coverage": {
+    "harvest_date_min": "2025-09-01",
+    "harvest_date_max": "2025-11-02",
+    "unique_harvest_days": 62,
+    "publication_date_min": "2025-09-02",
+    "publication_date_max": "2025-11-03",
+    "archive_weeks_count": 9
+  },
+  "regional_coverage": {
+    "voivodeship_id": "02",
+    "total_powiats_in_region": 30,
+    "covered_powiats_count": 28,
+    "coverage_pct": 93.33,
+    "covered_powiats_list": [
+      "0201",
+      "0202",
+      "0203",
+      "0204",
+      "0205",
+      "0206",
+      "0207",
+      "0208",
+      "0209",
+      "0210",
+      "0211",
+      "0212",
+      "0213",
+      "0214",
+      "0215",
+      "0216",
+      "0218",
+      "0219",
+      "0220",
+      "0221",
+      "0222",
+      "0223",
+      "0224",
+      "0225",
+      "0226",
+      "0261",
+      "0264",
+      "0265"
+    ],
+    "unreported_powiats_list": [
+      "0217",
+      "0262"
+    ],
+    "unique_places_count": 189
+  },
+  "target_variable_summary": {
+    "min_yield_pcs_per_h": 0.0,
+    "median_yield_pcs_per_h": 15.0,
+    "mean_yield_pcs_per_h": 18.59,
+    "max_yield_pcs_per_h": 120.0,
+    "class_BRAK_lt_5": 112,
+    "class_SREDNIO_5_to_20": 239,
+    "class_WYSYP_gt_20": 162,
+    "explicit_zero_harvest_reports": 45,
+    "explicit_duration_h_count": 116,
+    "explicit_total_pieces_count": 186
+  },
+  "species_breakdown": {
+    "mieszane": 194,
+    "podgrzybek_brunatny": 114,
+    "NULL": 89,
+    "borowik_szlachetny": 78,
+    "kania": 17,
+    "maslak_zwyczajny": 11,
+    "kurka": 10
+  },
+  "flagged_and_excluded_records": [
+    {
+      "report_id": "DG175278",
+      "date": "2025-10-11",
+      "area_id": "0201",
+      "location_raw": "Kozłów pow. bolesławiecki",
+      "portal_yield_pcs_per_h": 250.0,
+      "quality_status": "EXCLUDED_EXTREME_UNVERIFIED_OUTLIER",
+      "quality_reason": "extreme_yield_outlier_250.0_per_h_without_explicit_duration"
+    },
+    {
+      "report_id": "DG174245",
+      "date": "2025-10-01",
+      "area_id": "0206",
+      "location_raw": "Jeżów Sudecki pow. karkonoski",
+      "portal_yield_pcs_per_h": 30.0,
+      "quality_status": "EXCLUDED_SAME_DAY_AUTHOR_PLACE_DUPLICATE",
+      "quality_reason": "duplicate_same_author_date_place_id_kept_DG174288"
+    },
+    {
+      "report_id": "DG174153",
+      "date": "2025-09-30",
+      "area_id": "0264",
+      "location_raw": "Wrocław",
+      "portal_yield_pcs_per_h": 14.0,
+      "quality_status": "EXCLUDED_URBAN_NON_FOREST",
+      "quality_reason": "non_forest_urban_park_lawn_harvest_coprinus_comatus"
+    },
+    {
+      "report_id": "DG173963",
+      "date": "2025-09-28",
+      "area_id": "0264",
+      "location_raw": "Wrocław",
+      "portal_yield_pcs_per_h": 30.0,
+      "quality_status": "EXCLUDED_URBAN_NON_FOREST",
+      "quality_reason": "non_forest_urban_park_lawn_harvest_coprinus_comatus"
+    },
+    {
+      "report_id": "DG172561",
+      "date": "2025-09-20",
+      "area_id": "0201",
+      "location_raw": "Wilkocin pow. polkowicki",
+      "portal_yield_pcs_per_h": 40.0,
+      "quality_status": "VALID_BORDER_LOCALITY_RESOLVED",
+      "quality_reason": "gps_polygon_0201_differs_from_text_label_0216"
+    },
+    {
+      "report_id": "DG172141",
+      "date": "2025-09-18",
+      "area_id": "0223",
+      "location_raw": "pow. wrocławski",
+      "portal_yield_pcs_per_h": 2.0,
+      "quality_status": "VALID_BORDER_LOCALITY_RESOLVED",
+      "quality_reason": "generic_label_pow_wroclawski_overrode_city_centroid_0264_to_0223"
+    },
+    {
+      "report_id": "DG172071",
+      "date": "2025-09-18",
+      "area_id": "0264",
+      "location_raw": "Rędzin (Wrocław)",
+      "portal_yield_pcs_per_h": 2.0,
+      "quality_status": "EXCLUDED_SAME_DAY_AUTHOR_PLACE_DUPLICATE",
+      "quality_reason": "duplicate_same_author_date_place_id_kept_DG172083"
+    },
+    {
+      "report_id": "DG171637",
+      "date": "2025-09-14",
+      "area_id": "0221",
+      "location_raw": "Konradów (Wałbrzych)",
+      "portal_yield_pcs_per_h": 5.0,
+      "quality_status": "VALID_BORDER_LOCALITY_RESOLVED",
+      "quality_reason": "gps_polygon_0221_differs_from_text_label_0265"
+    }
+  ],
+  "powiat_breakdown": [
+    {
+      "area_id": "0201",
+      "reports_count": 101,
+      "mean_yield_pcs_per_h": 23.24,
+      "max_yield_pcs_per_h": 80.0,
+      "zero_harvest_count": 3
+    },
+    {
+      "area_id": "0214",
+      "reports_count": 59,
+      "mean_yield_pcs_per_h": 14.97,
+      "max_yield_pcs_per_h": 50.0,
+      "zero_harvest_count": 6
+    },
+    {
+      "area_id": "0213",
+      "reports_count": 58,
+      "mean_yield_pcs_per_h": 26.52,
+      "max_yield_pcs_per_h": 100.0,
+      "zero_harvest_count": 2
+    },
+    {
+      "area_id": "0220",
+      "reports_count": 38,
+      "mean_yield_pcs_per_h": 10.24,
+      "max_yield_pcs_per_h": 50.0,
+      "zero_harvest_count": 3
+    },
+    {
+      "area_id": "0208",
+      "reports_count": 24,
+      "mean_yield_pcs_per_h": 20.08,
+      "max_yield_pcs_per_h": 120.0,
+      "zero_harvest_count": 5
+    },
+    {
+      "area_id": "0222",
+      "reports_count": 19,
+      "mean_yield_pcs_per_h": 17.21,
+      "max_yield_pcs_per_h": 60.0,
+      "zero_harvest_count": 2
+    },
+    {
+      "area_id": "0202",
+      "reports_count": 19,
+      "mean_yield_pcs_per_h": 7.0,
+      "max_yield_pcs_per_h": 25.0,
+      "zero_harvest_count": 0
+    },
+    {
+      "area_id": "0206",
+      "reports_count": 18,
+      "mean_yield_pcs_per_h": 27.5,
+      "max_yield_pcs_per_h": 60.0,
+      "zero_harvest_count": 2
+    },
+    {
+      "area_id": "0218",
+      "reports_count": 17,
+      "mean_yield_pcs_per_h": 13.59,
+      "max_yield_pcs_per_h": 35.0,
+      "zero_harvest_count": 1
+    },
+    {
+      "area_id": "0223",
+      "reports_count": 16,
+      "mean_yield_pcs_per_h": 10.62,
+      "max_yield_pcs_per_h": 40.0,
+      "zero_harvest_count": 3
+    },
+    {
+      "area_id": "0216",
+      "reports_count": 15,
+      "mean_yield_pcs_per_h": 29.0,
+      "max_yield_pcs_per_h": 55.0,
+      "zero_harvest_count": 0
+    },
+    {
+      "area_id": "0215",
+      "reports_count": 15,
+      "mean_yield_pcs_per_h": 19.53,
+      "max_yield_pcs_per_h": 50.0,
+      "zero_harvest_count": 1
+    },
+    {
+      "area_id": "0219",
+      "reports_count": 14,
+      "mean_yield_pcs_per_h": 6.36,
+      "max_yield_pcs_per_h": 30.0,
+      "zero_harvest_count": 4
+    },
+    {
+      "area_id": "0205",
+      "reports_count": 13,
+      "mean_yield_pcs_per_h": 24.23,
+      "max_yield_pcs_per_h": 60.0,
+      "zero_harvest_count": 1
+    },
+    {
+      "area_id": "0221",
+      "reports_count": 13,
+      "mean_yield_pcs_per_h": 6.54,
+      "max_yield_pcs_per_h": 20.0,
+      "zero_harvest_count": 2
+    },
+    {
+      "area_id": "0204",
+      "reports_count": 12,
+      "mean_yield_pcs_per_h": 28.42,
+      "max_yield_pcs_per_h": 80.0,
+      "zero_harvest_count": 0
+    },
+    {
+      "area_id": "0207",
+      "reports_count": 9,
+      "mean_yield_pcs_per_h": 11.28,
+      "max_yield_pcs_per_h": 30.0,
+      "zero_harvest_count": 1
+    },
+    {
+      "area_id": "0211",
+      "reports_count": 8,
+      "mean_yield_pcs_per_h": 6.12,
+      "max_yield_pcs_per_h": 30.0,
+      "zero_harvest_count": 4
+    },
+    {
+      "area_id": "0210",
+      "reports_count": 7,
+      "mean_yield_pcs_per_h": 23.43,
+      "max_yield_pcs_per_h": 60.0,
+      "zero_harvest_count": 0
+    },
+    {
+      "area_id": "0264",
+      "reports_count": 7,
+      "mean_yield_pcs_per_h": 12.29,
+      "max_yield_pcs_per_h": 30.0,
+      "zero_harvest_count": 1
+    },
+    {
+      "area_id": "0209",
+      "reports_count": 6,
+      "mean_yield_pcs_per_h": 20.83,
+      "max_yield_pcs_per_h": 60.0,
+      "zero_harvest_count": 1
+    },
+    {
+      "area_id": "0261",
+      "reports_count": 6,
+      "mean_yield_pcs_per_h": 24.67,
+      "max_yield_pcs_per_h": 55.0,
+      "zero_harvest_count": 1
+    },
+    {
+      "area_id": "0203",
+      "reports_count": 5,
+      "mean_yield_pcs_per_h": 16.0,
+      "max_yield_pcs_per_h": 50.0,
+      "zero_harvest_count": 1
+    },
+    {
+      "area_id": "0225",
+      "reports_count": 5,
+      "mean_yield_pcs_per_h": 17.6,
+      "max_yield_pcs_per_h": 25.0,
+      "zero_harvest_count": 0
+    },
+    {
+      "area_id": "0226",
+      "reports_count": 3,
+      "mean_yield_pcs_per_h": 18.33,
+      "max_yield_pcs_per_h": 35.0,
+      "zero_harvest_count": 1
+    },
+    {
+      "area_id": "0265",
+      "reports_count": 3,
+      "mean_yield_pcs_per_h": 15.0,
+      "max_yield_pcs_per_h": 30.0,
+      "zero_harvest_count": 0
+    },
+    {
+      "area_id": "0224",
+      "reports_count": 2,
+      "mean_yield_pcs_per_h": 10.0,
+      "max_yield_pcs_per_h": 10.0,
+      "zero_harvest_count": 0
+    },
+    {
+      "area_id": "0212",
+      "reports_count": 1,
+      "mean_yield_pcs_per_h": 20.0,
+      "max_yield_pcs_per_h": 20.0,
+      "zero_harvest_count": 0
+    }
+  ]
+}

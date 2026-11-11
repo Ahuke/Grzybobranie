@@ -35,6 +35,10 @@ data/processed/*
 !data/processed/reports_spatial.parquet
 !data/processed/reports_spatial.csv
 !data/processed/spatial_quality_report.json
+!data/processed/weather.parquet
+!data/processed/weather.csv
+!data/processed/weather_daily.parquet
+!data/processed/weather_quality_report.json
 *.shp
 *.shx
 *.dbf

@@ -78,11 +78,19 @@ Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w 
 │   ├── __init__.py
 │   ├── config.py                             # Konfiguracja regionu pilotażowego (Dolny Śląsk, TERYT 02) i słowników
 │   ├── data_loader.py                        # Wczytywanie i walidacja plików wg kontraktu danych (NULL vs 0.0)
-│   └── geo_utils.py                          # Obliczenia odległości (Haversine) i wzbogacanie warstw GeoJSON (powiaty + BDL)
+│   ├── geo_utils.py                          # Obliczenia odległości (Haversine) i wzbogacanie warstw GeoJSON (powiaty + BDL)
+│   ├── features.py                           # Budowa zbioru cech Point-in-Time i słownika kolumn ([GRZ-10])
+│   ├── evaluation.py                         # Protokół ewaluacji, podział czasowy i metryki ([GRZ-13])
+│   └── baseline.py                           # Modele bazowe (GlobalMean, PowiatMean, MajorityClass, Seasonal) ([GRZ-13])
 ├── scripts/                                  # Skrypty potoku danych, scrapingu, pogody i GIS/BDL
 │   ├── audit_grzyby_reports.py               # Skrypt audytowy raportów grzyby.pl ([GRZ-03])
 │   ├── fetch_weather_sample.py               # Skrypt pobierania próbki pogody z Open-Meteo z cache'em ([GRZ-04])
-│   └── prepare_region_and_bdl_sample.py      # Skrypt przygotowania granic 30 powiatów i próbki wektorowej BDL ([GRZ-05])
+│   ├── prepare_region_and_bdl_sample.py      # Skrypt przygotowania granic 30 powiatów i próbki wektorowej BDL ([GRZ-05])
+│   ├── build_reports_dataset.py              # Budowa oczyszczonego zbioru obserwacji reports.parquet ([GRZ-07])
+│   ├── build_spatial_features.py             # Łączenie przestrzenne raportów z lasami i powiatami ([GRZ-08])
+│   ├── build_weather_dataset.py              # Budowa historii pogodowej i okien 7/14/21d dla 30 powiatów ([GRZ-09])
+│   ├── build_features_dataset.py             # Łączenie raportów, lasów i pogody w features.parquet Point-in-Time ([GRZ-10])
+│   └── build_split_and_baseline.py           # Podział czasowy train/val/test i benchmarki bazowe ([GRZ-13])
 ├── notebooks/                                # Notatniki Jupyter i analizy eksploracyjne (EDA, Lag Effect)
 │   └── README.md
 ├── models/                                   # Artefakty wytrenowanych modeli ML i metadane (binaria ignorowane w Git)
@@ -95,18 +103,28 @@ Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w 
 │   ├── data_audit.md                         # Zbiorczy audyt danych, cel predykcji, odcięcie pogody i plan modelowania ([GRZ-06])
 │   ├── reports_audit.md                      # Audyt struktury i kompletności raportów z grzyby.pl ([GRZ-03])
 │   ├── weather_audit.md                      # Audyt zmiennych pogodowych i glebowych Open-Meteo ERA5-Land ([GRZ-04])
-│   └── bdl_region_audit.md                   # Audyt granic regionu (PRG) i wektorowej próbki BDL ([GRZ-05])
+│   ├── bdl_region_audit.md                   # Audyt granic regionu (PRG) i wektorowej próbki BDL ([GRZ-05])
+│   ├── reports_etl.md                        # Dokumentacja potoku ETL obserwacji z grzyby.pl ([GRZ-07])
+│   ├── spatial_join_bdl.md                   # Dokumentacja łączenia przestrzennego z powiatami i BDL ([GRZ-08])
+│   ├── weather_pipeline.md                   # Dokumentacja potoku pogodowego Open-Meteo dla 30 powiatów ([GRZ-09])
+│   ├── features_engineering.md               # Dokumentacja zbioru cech features.parquet i weryfikacji Point-in-Time ([GRZ-10])
+│   └── evaluation_protocol.md                # Dokumentacja podziału czasowego i modeli bazowych ([GRZ-13])
 └── data/                                     # Katalog danych
     ├── demo/                                 # Próbka demonstracyjna do budowy UI (is_demo = True, 30 powiatów)
     ├── sample/                               # Rzeczywiste próbki audytowe ze Sprintu 1 ([GRZ-03], [GRZ-04], [GRZ-05])
     ├── raw/                                  # Surowe dane (cache GIS/BDL, zrzuty HTML, cache API) — ignorowane w Git
-    └── processed/                            # Produkcyjne pliki dla modelu i aplikacji (areas.geojson śledzony w Git)
+    └── processed/                            # Produkcyjne pliki dla modelu i aplikacji (reports, forest, weather, features)
 ```
 
 ---
 
 ## 4. Dokumentacja projektu
 
+- [**Inżynieria Cech i Zbiór Analityczny Point-in-Time (`docs/features_engineering.md`)**](docs/features_engineering.md) *(`[GRZ-10]`)*
+- [**Protokół Ewaluacji, Podział Czasowy i Modele Bazowe (`docs/evaluation_protocol.md`)**](docs/evaluation_protocol.md) *(`[GRZ-13]`)*
+- [**Potok Pogodowy dla Regionu Pilotażowego (`docs/weather_pipeline.md`)**](docs/weather_pipeline.md) *(`[GRZ-09]`)*
+- [**Łączenie Przestrzenne z Granicami Powiatów i BDL (`docs/spatial_join_bdl.md`)**](docs/spatial_join_bdl.md) *(`[GRZ-08]`)*
+- [**Potok ETL Zbioru Obserwacji (`docs/reports_etl.md`)**](docs/reports_etl.md) *(`[GRZ-07]`)*
 - [**Zbiorczy Audyt Danych i Zatwierdzenie Celu Predykcji (`docs/data_audit.md`)**](docs/data_audit.md) *(`[GRZ-06]`)*
 - [**Zakres MVP i definicja wyniku aplikacji (`docs/mvp.md`)**](docs/mvp.md) *(`[GRZ-01]`, `[GRZ-06]`)*
 - [**Kontrakt Danych (`docs/data_contract.md`)**](docs/data_contract.md) *(`[GRZ-01]`, `[GRZ-06]`)*

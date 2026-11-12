@@ -1,6 +1,8 @@
 """
-Testy dymne (smoke tests) szkieletu aplikacji, kontraktu danych ([GRZ-02])
-oraz granic regionu i wektorowej próbki leśnej BDL ([GRZ-05]).
+Testy dymne (smoke tests) szkieletu aplikacji, kontraktu danych ([GRZ-02]),
+granic regionu i wektorowej próbki leśnej BDL ([GRZ-05]), audytu ([GRZ-06]),
+potoku raportów ([GRZ-07]), łączenia przestrzennego ([GRZ-08]), pogody ([GRZ-09]),
+zbioru cech Point-in-Time ([GRZ-10]) oraz protokołu ewaluacji ([GRZ-13]).
 
 Uruchomienie:
     pytest -v
@@ -406,6 +408,137 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertEqual(q_report["integrity_and_missing_data"]["total_missing_days_count"], 0)
         self.assertTrue(q_report["integrity_and_missing_data"]["has_unique_area_date_keys"])
         self.assertEqual(q_report["date_range"]["history_buffer_days_before_first_report"], 31)
+
+    def test_features_dataset_and_point_in_time_cutoff_grz10(self) -> None:
+        """
+        Weryfikuje zbiór cech analitycznych Point-in-Time [GRZ-10]:
+        1. Skrypt odtwarza `data/processed/features.parquet` z uzgodnionym słownikiem kolumn (`FEATURE_DICTIONARY`).
+        2. Każda etykieta ma identyfikator źródłowego raportu (`report_id` / `observation_id`);
+           łączenie nie tworzy przypadkowych kopii (`513` -> `513`, współczynnik = 1.0).
+        3. Okna pogodowe 3/7/14/21 dni nie obejmują dni po przyjętym odcięciu informacji (`feature_cutoff_date < target_date`).
+        4. Sprawdzono ręcznie obliczenie jednego okna 7-dniowego (`DG174806`), jeden brak danych (`DG177228` + brak dnia pogody)
+           i jeden join 3-tabelowy (`DG174714`).
+        5. Braki cech (`NULL`) nie są automatycznie zamieniane w zero opadu (`0.0 mm`) ani zero zbioru (`0.0 szt./h`).
+        6. Zapisano liczebność i zakres danych po połączeniu w `features_quality_report.json` i `docs/features_engineering.md`.
+        """
+        import json
+        import pandas as pd
+        from src.features import (
+            FEATURE_DICTIONARY,
+            compute_point_in_time_weather_features,
+            index_weather_by_region_and_date,
+        )
+
+        features_parquet = PROCESSED_DIR / "features.parquet"
+        features_csv = PROCESSED_DIR / "features.csv"
+        quality_path = PROCESSED_DIR / "features_quality_report.json"
+        doc_path = ROOT_DIR / "docs" / "features_engineering.md"
+        weather_daily_parquet = PROCESSED_DIR / "weather_daily.parquet"
+
+        self.assertTrue(features_parquet.exists(), "Brak data/processed/features.parquet")
+        self.assertTrue(features_csv.exists(), "Brak data/processed/features.csv")
+        self.assertTrue(quality_path.exists(), "Brak data/processed/features_quality_report.json")
+        self.assertTrue(doc_path.exists(), "Brak docs/features_engineering.md")
+
+        df_feat = pd.read_parquet(features_parquet)
+        df_csv = pd.read_csv(features_csv)
+
+        # 1. Uzgodniony słownik kolumn
+        expected_cols = list(FEATURE_DICTIONARY.keys())
+        self.assertEqual(list(df_feat.columns), expected_cols)
+        self.assertEqual(list(df_csv.columns), expected_cols)
+        self.assertEqual(len(expected_cols), 70)
+
+        # 2. Identyfikator źródłowego raportu i brak multiplikacji (1:1 = 513 rekordów)
+        self.assertEqual(len(df_feat), 513)
+        self.assertEqual(len(df_csv), 513)
+        self.assertEqual(df_feat["report_id"].nunique(), 513)
+        self.assertEqual(df_feat["observation_id"].nunique(), 513)
+        self.assertTrue((df_feat["report_id"] == df_feat["observation_id"]).all())
+        self.assertTrue(df_feat["report_id"].str.startswith("DG").all())
+        self.assertFalse(df_feat["is_demo"].any())
+
+        # 3. Odcięcie informacji Point-in-Time (brak wycieku z dnia prognozy t)
+        self.assertTrue((df_feat["observation_date"] == df_feat["harvest_date"]).all())
+        self.assertTrue((df_feat["target_date"] == df_feat["harvest_date"]).all())
+        self.assertTrue((df_feat["issued_at"] == df_feat["feature_cutoff_date"]).all())
+        self.assertTrue((df_feat["feature_cutoff_date"] < df_feat["target_date"]).all())
+        self.assertTrue((df_feat["window_end_date"] == df_feat["feature_cutoff_date"]).all())
+        self.assertTrue((df_feat["window_7d_start_date"] < df_feat["window_end_date"]).all())
+        self.assertTrue((df_feat["window_14d_start_date"] < df_feat["window_7d_start_date"]).all())
+        self.assertTrue((df_feat["window_21d_start_date"] < df_feat["window_14d_start_date"]).all())
+        self.assertTrue((df_feat["horizon_days"] == 1).all())
+
+        # 4a. Ręczna weryfikacja okna 7-dniowego dla DG174806 (pow. bolesławiecki 0201, target=2025-10-05, cutoff=2025-10-04)
+        row_174806 = df_feat[df_feat["report_id"] == "DG174806"].iloc[0]
+        self.assertEqual(row_174806["region_id"], "0201")
+        self.assertEqual(row_174806["target_date"], "2025-10-05")
+        self.assertEqual(row_174806["feature_cutoff_date"], "2025-10-04")
+        self.assertEqual(row_174806["window_7d_start_date"], "2025-09-28")
+        self.assertEqual(row_174806["window_end_date"], "2025-10-04")
+        # Suma 2025-09-28..2025-10-04 = 0.0 + 0.3 + 1.6 + 2.8 + 0.4 + 0.0 + 7.9 = 13.0 mm (bez 0.9 mm z 2025-10-05!)
+        self.assertAlmostEqual(float(row_174806["precip_lag_7d_mm"]), 13.0, places=2)
+        self.assertAlmostEqual(float(row_174806["temp_mean_7d_c"]), 8.3, places=1)
+        self.assertEqual(int(row_174806["rainy_days_lag_7d_count"]), 3)
+
+        # 4b & 5. Ręczna weryfikacja braków danych (NULL != 0.0)
+        row_177228 = df_feat[df_feat["report_id"] == "DG177228"].iloc[0]
+        self.assertEqual(row_177228["region_id"], "0218")
+        self.assertFalse(bool(row_177228["has_bdl_stand_data"]))
+        self.assertTrue(pd.isna(row_177228["pine_share_pct"]))
+        self.assertTrue(pd.isna(row_177228["oak_beech_share_pct"]))
+        self.assertTrue(pd.isna(row_177228["spruce_share_pct"]))
+        self.assertTrue(pd.isna(row_177228["mean_stand_age_years"]))
+        self.assertTrue(pd.isna(row_177228["dominant_moisture_type"]))
+        self.assertTrue(pd.isna(row_177228["harvest_duration_h"]))
+        self.assertTrue(pd.isna(row_177228["total_pieces"]))
+        self.assertAlmostEqual(float(row_177228["yield_pcs_per_h"]), 10.0, places=2)
+
+        # Wszystkie 80 rekordów z 11 powiatów bez profilu taksacyjnego BDL ma zachowany NULL (a nie 0.0)
+        no_bdl_rows = df_feat[df_feat["pine_share_pct"].isna()]
+        self.assertEqual(len(no_bdl_rows), 80)
+        self.assertTrue(no_bdl_rows["oak_beech_share_pct"].isna().all())
+        self.assertTrue(no_bdl_rows["spruce_share_pct"].isna().all())
+        self.assertTrue(no_bdl_rows["mean_stand_age_years"].isna().all())
+        self.assertTrue(no_bdl_rows["dominant_moisture_type"].isna().all())
+
+        # Raport zerowego zbioru DG174777 zachowuje yield_pcs_per_h == 0.0 oraz dominant_species == NULL
+        row_174777 = df_feat[df_feat["report_id"] == "DG174777"].iloc[0]
+        self.assertEqual(float(row_174777["yield_pcs_per_h"]), 0.0)
+        self.assertEqual(row_174777["abundance_class"], "BRAK")
+        self.assertTrue(pd.isna(row_174777["dominant_species"]))
+
+        # Symulacja braku pojedynczego dnia w szeregu pogodowym -> okno zwraca None, a nie 0.0 mm
+        df_weather_daily = pd.read_parquet(weather_daily_parquet)
+        weather_lookup = index_weather_by_region_and_date(df_weather_daily)
+        del weather_lookup[("0201", "2025-10-02")]
+        missing_window_res = compute_point_in_time_weather_features("0201", "2025-10-05", weather_lookup)
+        self.assertIsNone(missing_window_res["precip_lag_7d_mm"])
+        self.assertIsNone(missing_window_res["precip_lag_14d_mm"])
+        self.assertIsNone(missing_window_res["precip_lag_21d_mm"])
+        self.assertAlmostEqual(float(missing_window_res["precip_cutoff_1d_mm"]), 7.9, places=2)
+
+        # 4c. Ręczna weryfikacja łączenia 3-tabelowego (DG174714, pow. kłodzki 0208, 2025-10-05)
+        row_174714 = df_feat[df_feat["report_id"] == "DG174714"].iloc[0]
+        self.assertEqual(row_174714["region_id"], "0208")
+        self.assertEqual(row_174714["dominant_species"], "podgrzybek_brunatny")
+        self.assertAlmostEqual(float(row_174714["forest_cover_pct"]), 48.9, places=2)
+        self.assertAlmostEqual(float(row_174714["spruce_share_pct"]), 58.0, places=2)
+        self.assertEqual(row_174714["dominant_moisture_type"], "wilgotne")
+        self.assertAlmostEqual(float(row_174714["precip_lag_7d_mm"]), 9.8, places=2)
+        self.assertAlmostEqual(float(row_174714["precip_lag_14d_mm"]), 24.8, places=2)
+        self.assertAlmostEqual(float(row_174714["precip_lag_21d_mm"]), 33.5, places=2)
+        self.assertAlmostEqual(float(row_174714["temp_min_night_c"]), -2.1, places=2)
+        self.assertAlmostEqual(float(row_174714["soil_moisture_0_7cm_m3m3"]), 0.3248, places=4)
+
+        # 6. Sprawdzenie raportu jakości i liczebności po połączeniu
+        q_report = json.loads(quality_path.read_text(encoding="utf-8"))
+        self.assertEqual(q_report["dataset_summary"]["valid_training_observations_count"], 513)
+        self.assertEqual(q_report["dataset_summary"]["multiplication_factor"], 1.0)
+        self.assertTrue(q_report["dataset_summary"]["has_1_to_1_label_integrity"])
+        self.assertTrue(q_report["temporal_ranges_and_cutoff_rules"]["no_weather_after_cutoff_verified"])
+        self.assertEqual(q_report["splits_distribution"]["split_2way"]["train"], 386)
+        self.assertEqual(q_report["splits_distribution"]["split_2way"]["test"], 127)
 
     def test_evaluation_protocol_and_baseline_grz13(self) -> None:
         """

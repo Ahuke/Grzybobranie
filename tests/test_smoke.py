@@ -187,6 +187,38 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         )
         self.assertEqual(feat_0201["properties"]["predicted_yield_label"], "41.2 szt./h")
 
+    def test_data_audit_and_contract_approval_grz06(self) -> None:
+        """
+        Weryfikuje warunki ukończenia [GRZ-06]:
+        - istnienie i kompletność docs/data_audit.md,
+        - zatwierdzenie docs/data_contract.md i docs/mvp.md (usunięcie [DO WERYFIKACJI]).
+        """
+        docs_dir = ROOT_DIR / "docs"
+        audit_path = docs_dir / "data_audit.md"
+        contract_path = docs_dir / "data_contract.md"
+        mvp_path = docs_dir / "mvp.md"
+
+        self.assertTrue(audit_path.exists(), "Brak pliku docs/data_audit.md")
+        audit_text = audit_path.read_text(encoding="utf-8")
+
+        # Kluczowe elementy wymagane w [GRZ-06]
+        self.assertIn("predicted_yield_pcs_per_h", audit_text)
+        self.assertIn("area_id", audit_text)
+        self.assertIn("Temporal Split", audit_text)
+        self.assertIn("Macro-F1", audit_text)
+        self.assertIn("Brak wpisu", audit_text)
+        self.assertIn("Point-in-Time Correctness", audit_text)
+        self.assertIn("Jawny Wskaźnik Warunków", audit_text)
+        self.assertIn("Osoba A", audit_text)
+        self.assertIn("Osoba B", audit_text)
+
+        contract_text = contract_path.read_text(encoding="utf-8")
+        mvp_text = mvp_path.read_text(encoding="utf-8")
+        self.assertNotIn("[DO WERYFIKACJI]", contract_text)
+        self.assertNotIn("[DO WERYFIKACJI]", mvp_text)
+        self.assertIn("Wersja 2.0", contract_text)
+        self.assertIn("Wersja 2.0", mvp_text)
+
 
 if __name__ == "__main__":
     unittest.main()

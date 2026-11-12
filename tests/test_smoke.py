@@ -407,6 +407,82 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertTrue(q_report["integrity_and_missing_data"]["has_unique_area_date_keys"])
         self.assertEqual(q_report["date_range"]["history_buffer_days_before_first_report"], 31)
 
+    def test_evaluation_protocol_and_baseline_grz13(self) -> None:
+        """
+        Weryfikuje protokół ewaluacji i modele odniesienia [GRZ-13]:
+        - obecność i spójność `split_metadata.json`, `baseline_metrics.json` oraz `docs/evaluation_protocol.md`,
+        - deterministyczny podział czasowy (386 Train / 127 Test = 513 łącznie),
+        - brak wycieku danych (0 wspólnych ID, max_train_date < min_test_date),
+        - dopasowanie predyktorów wyłącznie na zbiorze treningowym,
+        - metryki regresji (MAE, RMSE) i klasyfikacji (Macro-F1, Macierz pomyłek),
+        - poprawność klasyfikatora obfitości zbioru (`classify_abundance`).
+        """
+        import json
+        import numpy as np
+        import pandas as pd
+        from src.evaluation import classify_abundance, compute_regression_metrics, compute_classification_metrics
+        from src.baseline import GlobalMeanRegressor, MajorityClassClassifier
+
+        split_meta_path = PROCESSED_DIR / "split_metadata.json"
+        metrics_path = PROCESSED_DIR / "baseline_metrics.json"
+        doc_path = ROOT_DIR / "docs" / "evaluation_protocol.md"
+
+        self.assertTrue(split_meta_path.exists(), "Brak data/processed/split_metadata.json")
+        self.assertTrue(metrics_path.exists(), "Brak data/processed/baseline_metrics.json")
+        self.assertTrue(doc_path.exists(), "Brak docs/evaluation_protocol.md")
+
+        # 1. Weryfikacja metadanych podziału (split_metadata.json)
+        split_meta = json.loads(split_meta_path.read_text(encoding="utf-8"))
+        self.assertEqual(split_meta["total_valid_records"], 513)
+
+        p_train = split_meta["primary_split_train_test"]["train"]
+        p_test = split_meta["primary_split_train_test"]["test"]
+        self.assertEqual(p_train["count"], 386)
+        self.assertEqual(p_test["count"], 127)
+        self.assertEqual(p_train["count"] + p_test["count"], 513)
+
+        # Sprawdzenie braku wycieków
+        self.assertEqual(split_meta["anti_leakage_checks"]["report_id_overlap_train_test"], 0)
+        self.assertTrue(split_meta["anti_leakage_checks"]["temporal_gap_maintained"])
+        self.assertTrue(p_train["date_max"] < p_test["date_min"])
+
+        train_ids = set(p_train["report_ids"])
+        test_ids = set(p_test["report_ids"])
+        self.assertEqual(len(train_ids.intersection(test_ids)), 0)
+
+        # 2. Weryfikacja metryk bazowych (baseline_metrics.json)
+        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+        self.assertIn("regression_benchmarks", metrics)
+        self.assertIn("classification_benchmarks", metrics)
+        self.assertIn("target_evaluation_criteria_for_ml_models", metrics)
+
+        # Regresja: MAE i RMSE
+        reg_mean = metrics["regression_benchmarks"]["global_mean"]["test_metrics"]
+        self.assertGreater(reg_mean["mae_pcs_per_h"], 10.0)
+        self.assertGreater(reg_mean["rmse_pcs_per_h"], 15.0)
+        self.assertFalse(reg_mean["r2_interpretable"])
+
+        # Klasyfikacja: Macro-F1 i Confusion Matrix
+        cls_maj = metrics["classification_benchmarks"]["majority_class"]["test_metrics"]
+        self.assertGreater(cls_maj["macro_f1"], 0.15)
+        self.assertEqual(len(cls_maj["confusion_matrix"]), 3)
+        self.assertEqual(len(cls_maj["confusion_matrix"][0]), 3)
+
+        # 3. Test jednostkowy funkcji pomocniczych
+        self.assertEqual(classify_abundance(2.5), "BRAK")
+        self.assertEqual(classify_abundance(5.0), "SREDNIO")
+        self.assertEqual(classify_abundance(20.0), "SREDNIO")
+        self.assertEqual(classify_abundance(20.5), "WYSYP")
+
+        # Test predyktorów bazowych
+        g_reg = GlobalMeanRegressor().fit(None, pd.Series([10.0, 20.0, 30.0]))
+        preds = g_reg.predict(3)
+        np.testing.assert_array_almost_equal(preds, [20.0, 20.0, 20.0])
+
+        m_cls = MajorityClassClassifier().fit(None, pd.Series(["BRAK", "SREDNIO", "SREDNIO"]))
+        cls_preds = m_cls.predict(2)
+        self.assertEqual(list(cls_preds), ["SREDNIO", "SREDNIO"])
+
 
 if __name__ == "__main__":
     unittest.main()

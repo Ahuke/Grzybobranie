@@ -79,3 +79,30 @@ Dla wybranej przez użytkownika **daty docelowej $t$** (w horyzoncie $t \in [t_0
 - [x] **Progi klas wysypu (`abundance_class`):** `< 5.0` (`BRAK`), `5.0–20.0` (`SREDNIO`), `> 20.0` (`WYSYP`) `[szt./h]`.
 - [x] **Lista gatunków w filtrze UI:** `["all", "borowik_szlachetny", "podgrzybek_brunatny", "kurka", "maslak_zwyczajny", "kania"]`.
 - [x] **Format plików wymiany:** `CSV` + `GeoJSON` (`UTF-8`, `EPSG:4326`).
+
+---
+
+## 6. Rzeczy odkładane na później (Out of Scope / Post-MVP)
+
+Aby dotrzymać terminu i uniknąć blokad technicznych, poniższe elementy **celowo wyłączamy z pierwszej wersji**:
+
+1. **Renderowanie pojedynczych wydzieleń leśnych BDL (dziesiątki tysięcy poligonów) bezpośrednio w przeglądarce:**
+   - *W MVP:* Wektory BDL przetwarzamy offline w GeoPandas i agregujemy do poziomu powiatu. Bezpośrednie rysowanie pododdziałów leśnych w Streamlit odkładamy do wersji 2.0 (jako drill-down dla jednego wybranego nadleśnictwa).
+2. **Pokrycie całej Polski dla szczegółowych warstw BDL:**
+   - *W MVP:* Skupiamy się na jednym województwie (30 powiatów na Dolnym Śląsku).
+3. **Dane radarowe IMGW (Polrad) w siatce 1 km × 1 km:**
+   - *W MVP:* Korzystamy z otwartego i stabilnego API Open-Meteo (Historical & Forecast API) próbkowanego dla centroidów powiatów.
+4. **Wyznaczanie trasy drogowej (OSRM / Google Maps API):**
+   - *W MVP:* Odległość „w promieniu X km od miasta” liczymy w linii prostej (odległość geometryczna / Haversine od wybranego miasta do centroidu leśnego powiatu).
+5. **System kont użytkowników i dodawanie nowych raportów przez aplikację:**
+   - *W MVP:* Aplikacja działa w trybie tylko do odczytu (Read-Only Dashboard).
+6. **Zaawansowane NLP na treści postów z forum grzyby.pl:**
+   - *W MVP:* Korzystamy z ustrukturyzowanych nagłówków raportów z `grzyby.pl` (data, województwo/miejsce, `szt./h`) oraz słownikowego dopasowania nazw gatunków i powiatów.
+
+---
+
+## 7. Zasady bezpieczeństwa dla próbki demonstracyjnej
+
+1. Próbka do budowy interfejsu znajduje się wyłącznie w katalogu `data/demo/`.
+2. Każdy rekord w plikach demonstracyjnych posiada kolumnę `is_demo = True` oraz prefiks `DEMO_` w polach identyfikacyjnych/wersji modelu.
+3. Skrypty treningowe ML muszą jawnie odrzucać katalog `data/demo/` oraz odfiltrowywać wiersze z `is_demo == True` (np. `df = df[~df["is_demo"]]`), aby sztuczne dane nigdy nie zanieczyściły zbioru uczącego ani walidacyjnego.

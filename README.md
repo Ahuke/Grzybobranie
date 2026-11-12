@@ -4,7 +4,7 @@
 
 ---
 
-## 1. Szybki start — instalacja i uruchomienie aplikacji (`[GRZ-02]`, `[GRZ-05]`)
+## 1. Szybki start — instalacja i uruchomienie aplikacji (`[GRZ-02]`, `[GRZ-05]`, `[GRZ-06]`)
 
 ### Wymagania wstępne
 - **Python 3.11+** (zalecane użycie wirtualnego środowiska `.venv`)
@@ -39,14 +39,14 @@ Po uruchomieniu aplikacja jest dostępna w przeglądarce pod adresem **`http://l
 
 ### Krok 4: Weryfikacja działania (testy dymne)
 ```bash
-python -m unittest discover -s tests -v
+pytest -v
 ```
 
 ---
 
 ## 2. Wymagane pliki danych i tryby pracy aplikacji
 
-Aplikacja działa w oparciu o kontrakt danych opisany w [`docs/data_contract.md`](docs/data_contract.md) i obsługuje dwa odseparowane środowiska:
+Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w [`docs/data_contract.md`](docs/data_contract.md) oraz [`docs/data_audit.md`](docs/data_audit.md) i obsługuje dwa odseparowane środowiska:
 
 1. **Tryb demonstracyjny UI (`data/demo/` — domyślny na starcie, wersjonowany w Git):**
    - `data/demo/areas_demo.geojson` — rzeczywiste granice wszystkich **30 powiatów woj. dolnośląskiego (`TERYT 02`, `EPSG:4326`)** z Państwowego Rejestru Granic (PRG) wraz z cechami siedlisk leśnych BDL (`[GRZ-05]`),
@@ -87,11 +87,12 @@ Aplikacja działa w oparciu o kontrakt danych opisany w [`docs/data_contract.md`
 │   └── README.md
 ├── models/                                   # Artefakty wytrenowanych modeli ML i metadane (binaria ignorowane w Git)
 │   └── README.md
-├── tests/                                    # Testy jednostkowe i dymne szkieletu aplikacji oraz danych GIS/BDL
+├── tests/                                    # Testy jednostkowe i dymne szkieletu aplikacji, GIS/BDL i kontraktu danych
 │   └── test_smoke.py
 ├── docs/                                     # Dokumentacja projektowa, architektoniczna i raporty z audytów
-│   ├── mvp.md                                # Zakres MVP, definicja wyniku, lista [DO WERYFIKACJI] ([GRZ-01])
-│   ├── data_contract.md                      # Kontrakt danych: areas, reports, weather, predictions ([GRZ-01])
+│   ├── mvp.md                                # Zakres MVP zatwierdzony po audycie ([GRZ-01], [GRZ-06])
+│   ├── data_contract.md                      # Kontrakt danych: areas, reports, weather, predictions ([GRZ-01], [GRZ-06])
+│   ├── data_audit.md                         # Zbiorczy audyt danych, cel predykcji, odcięcie pogody i plan modelowania ([GRZ-06])
 │   ├── reports_audit.md                      # Audyt struktury i kompletności raportów z grzyby.pl ([GRZ-03])
 │   ├── weather_audit.md                      # Audyt zmiennych pogodowych i glebowych Open-Meteo ERA5-Land ([GRZ-04])
 │   └── bdl_region_audit.md                   # Audyt granic regionu (PRG) i wektorowej próbki BDL ([GRZ-05])
@@ -106,11 +107,12 @@ Aplikacja działa w oparciu o kontrakt danych opisany w [`docs/data_contract.md`
 
 ## 4. Dokumentacja projektu
 
-- [**Zakres MVP i definicja wyniku aplikacji (`docs/mvp.md`)**](docs/mvp.md)
-- [**Kontrakt Danych (`docs/data_contract.md`)**](docs/data_contract.md)
-- [**Audyt raportów z portalu `grzyby.pl` (`docs/reports_audit.md`)**](docs/reports_audit.md)
-- [**Audyt danych pogodowych Open-Meteo (`docs/weather_audit.md`)**](docs/weather_audit.md)
-- [**Audyt granic regionu i wektorowej próbki leśnej BDL (`docs/bdl_region_audit.md`)**](docs/bdl_region_audit.md)
+- [**Zbiorczy Audyt Danych i Zatwierdzenie Celu Predykcji (`docs/data_audit.md`)**](docs/data_audit.md) *(`[GRZ-06]`)*
+- [**Zakres MVP i definicja wyniku aplikacji (`docs/mvp.md`)**](docs/mvp.md) *(`[GRZ-01]`, `[GRZ-06]`)*
+- [**Kontrakt Danych (`docs/data_contract.md`)**](docs/data_contract.md) *(`[GRZ-01]`, `[GRZ-06]`)*
+- [**Audyt raportów z portalu `grzyby.pl` (`docs/reports_audit.md`)**](docs/reports_audit.md) *(`[GRZ-03]`)*
+- [**Audyt danych pogodowych Open-Meteo (`docs/weather_audit.md`)**](docs/weather_audit.md) *(`[GRZ-04]`)*
+- [**Audyt granic regionu i wektorowej próbki leśnej BDL (`docs/bdl_region_audit.md`)**](docs/bdl_region_audit.md) *(`[GRZ-05]`)*
 
 ---
 

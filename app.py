@@ -622,24 +622,29 @@ def main() -> None:
             st.dataframe(df_bdl_stands.head(25), use_container_width=True, hide_index=True)
 
     with tab_info:
-        st.markdown("#### Założenia metodologiczne i ograniczenia")
+        st.markdown("#### Zatwierdzone założenia metodologiczne i kontrakt danych (`[GRZ-06]` v2.0)")
         st.markdown(
             """
-            1. **Definicja zmiennej wyjściowej (`predicted_yield_pcs_per_h` `[szt./h]`):**
-               - Szacowana wydajność grzybobrania w sztukach na godzinę na jedną osobę, odpowiadająca raportom z portalu `grzyby.pl`.
-               - Agregacja przestrzenna odbywa się na poziomie powiatu (`area_id`, 4-znakowy kod TERYT). Wynik nie wskazuje pojedynczego oddziału leśnego.
-            2. **Granice regionu i dane wektorowe BDL (`[GRZ-05]`):**
-               - Granice 30 powiatów woj. dolnośląskiego (`TERYT 02`, łączna pow. `19 941,7 km²`) zapisane są w układzie `EPSG:4326` (`WGS84`), natomiast obliczenia powierzchni i złączenia przestrzenne (`gpd.sjoin`) wykonywane są w układzie metrycznym `EPSG:2180` (`PUWG 1992`).
-               - Wektorowe wydzielenia leśne z Banku Danych o Lasach (`G_SUBAREA` / `Wydzielenia PGL LP`, klucz relacyjny `arodes_int_num`) zawierają zarówno drzewostany (`area_type_cd = 'D-STAN'`), jak i użytki nieleśne/pomocnicze (`L ENERG`, `POTOK`, `R`, `PARK`), które należy odfiltrować przed obliczaniem udziału gatunków i wieku drzewostanu.
-               - Brak szczegółowych atrybutów BDL (`NULL`) w części powiatów nie blokuje prezentacji granic regionu ani oceny dalszego zakresu.
-            3. **Semantyka braków danych (`NULL` vs `0.0`):**
-               - `0.0` oznacza potwierdzony pomiar zerowy (np. brak opadu `0.0 mm` lub jawny raport zerowego zbioru `(0/h)`).
-               - `NULL` (`NaN` / `None`) oznacza brak informacji (np. niepodany czas zbierania lub brak atrybutu BDL).
-               - Brak raportu w danym powiecie i dniu nie jest traktowany jako zerowy zbiór.
-            4. **Charakter danych glebowych:**
-               - Temperatura i objętościowa wilgotność gleby (`soil_moisture_0_7cm_m3m3`) pochodzą z numerycznego modelu powierzchni lądu **ECMWF ERA5-Land** (oczko siatki ok. 9 × 9 km) udostępnianego przez Open-Meteo API, a nie z czujników terenowych.
-            5. **Izolacja danych demonstracyjnych (`data/demo/`):**
-               - Pliki w `data/demo/` posiadają flagę `is_demo = True` oraz oznaczenie `DEMO_MOCK_v0` i są wykluczone z potoku treningowego ML.
+            1. **Zatwierdzona główna zmienna docelowa i jednostka przestrzenna (`[GRZ-06]`):**
+               - **Główna zmienna docelowa (regresja):** `predicted_yield_pcs_per_h` (`[szt./h]`) — znormalizowana wydajność zbioru na 1 grzybiarza (100% kompletności w nagłówku `(X/h)` w próbce `52/52` raportów; surowe pola sztuki+czas występują łącznie tylko w `30,8%` wpisów).
+               - **Pomocnicza etykieta wizualna (klasyfikacja 3-klasowa):** `abundance_class` (`BRAK < 5 szt./h`, `SREDNIO 5–20 szt./h`, `WYSYP > 20 szt./h`) wyznaczana deterministycznie z progów `predicted_yield_pcs_per_h`.
+               - **Jednostka przestrzenna:** Powiat (`area_id`, 4-znakowy kod TERYT `0201`–`0265`). Ze względu na dokładność lokalizacji `place_id` z `grzyby.pl` (wskazującą na ogół miejscowość lub stolicę powiatu) mapa prezentuje wyłącznie poligony powiatów, bez pozornej dokładności pojedynczego lasu.
+            2. **Sposób ewaluacji modeli (`Temporal Split`):**
+               - Podział czasowy (chronologiczny) bez losowego tasowania (`shuffle=False`), wykluczający przeciek informacji z przyszłości.
+               - Metryki dla regresji: **MAE** `[szt./h]` (główna), **RMSE** `[szt./h]` oraz korelacja rangowa **Spearmana ($\rho$)** względem `ranking_score`.
+               - Metryki dla 3 klas obfitości (`BRAK` / `SREDNIO` / `WYSYP`): **Macro-F1** (odporna na dominację klasy `SREDNIO` — `67,3%` w próbce) oraz **Balanced Accuracy**.
+            3. **Moment odcięcia danych pogodowych (`Point-in-Time Cutoff`) i horyzont prognozy:**
+               - Dla prognozy na dzień $t$ odcięcie danych obserwacyjnych następuje o `t-1 23:59:59 UTC`.
+               - Cechy historyczne oparte na reanalizie ERA5-Land liczone są wyłącznie z okna przeszłego $[t-k, t-1]$ (np. `precip_mm_3d`, `precip_mm_7d`, `precip_mm_14d`, średnie temperatury i wilgotności gleby).
+               - **Przyszła rzeczywista pogoda (`realized weather`) z dni $\ge t$ nigdy nie trafia do cech prognozy.** Dla horyzontu $h \in \{0, \dots, 5\}$ dni do przodu dozwolone są wyłącznie cechy do $t-1$ lub archiwalna prognoza synoptyczna wystawiona przed momentem odcięcia.
+            4. **Semantyka braków danych (`NULL` vs `0.0`):**
+               - **Brak wpisu na `grzyby.pl` w danym powiecie i dniu (`81,9%` powiat-dni w próbce) NIE jest traktowany jako raport zerowego zbioru (`0.0 szt./h`)** — pozostaje wartością `NULL` i nie jest imputowany zerami.
+               - Wartość `0.0 szt./h` występuje wyłącznie przy jawnym raporcie zerowego zbioru `(0/h)`.
+            5. **Przeplanowana architektura modelowania (`Model ML + Jawny Wskaźnik Warunków`):**
+               - Z uwagi na rzadkość etykiet per gatunek przeplanowano Sprint 2 na podejście dwutorowe: **Tor A — Jawny Wskaźnik Warunków Siedliskowo-Pogodowych (`Explicit Condition Index`)** pokrywający 100% powiatów każdego dnia + **Tor B — Model ML (`Ridge` / `HistGradientBoosting` / `RandomForest`)** dla ogólnego wysypu (`species_filter = "all"`), korygowany dla poszczególnych gatunków współczynnikiem siedliskowym z warstwy BDL (`pine_share_pct`, `oak_beech_share_pct`, `spruce_share_pct`).
+            6. **Granice regionu, BDL (`[GRZ-05]`) i izolacja `data/demo/`:**
+               - Granice 30 powiatów (`TERYT 02`, `19 941,7 km²`) są zapisane w `EPSG:4326`, a złączenia przestrzenne z wydzieleniami BDL (`area_type_cd = 'D-STAN'`) wykonywane są w `EPSG:2180`.
+               - Dane demonstracyjne w `data/demo/` posiadają flagę `is_demo = True` (`DEMO_MOCK_v0`) i są fizycznie odseparowane od potoku treningowego ML.
             """
         )
 

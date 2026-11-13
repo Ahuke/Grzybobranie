@@ -1,5 +1,5 @@
 """
-Punkt wejścia aplikacji Streamlit: "Gdzie na grzyby?" ([GRZ-02], [GRZ-05]).
+Punkt wejścia aplikacji Streamlit: "Gdzie na grzyby?" ([GRZ-02], [GRZ-05], [GRZ-12]).
 
 Uruchomienie:
     streamlit run app.py
@@ -7,6 +7,7 @@ Uruchomienie:
 
 from __future__ import annotations
 
+import datetime
 import os
 from typing import Any
 
@@ -17,6 +18,7 @@ import streamlit as st
 from src.config import (
     ABUNDANCE_CLASSES,
     ACADEMIC_ATTRIBUTION,
+    OBSERVATION_SPECIES_FILTER_LABELS,
     PILOT_REGION,
     REFERENCE_CITIES,
     SPECIES_HABITAT_HINTS,
@@ -24,12 +26,18 @@ from src.config import (
 )
 from src.data_loader import (
     DatasetBundle,
+    RealObservationsBundle,
+    filter_real_observations_and_aggregate_by_county,
     load_dataset_bundle,
+    load_real_observations_bundle,
     load_sprint1_audit_samples,
+    verify_record_against_source_tables,
 )
 from src.geo_utils import (
+    build_precise_report_points_layer_data,
     enrich_bdl_stands_geojson,
     enrich_geojson_with_predictions,
+    enrich_geojson_with_real_observations,
     haversine_km,
 )
 
@@ -65,11 +73,20 @@ CUSTOM_CSS = """
         color: #1F2421;
         font-size: 0.86rem;
         border-radius: 0 4px 4px 0;
-        margin-bottom: 1.1rem;
+        margin-bottom: 0.75rem;
     }
     .status-banner-warn {
         border-left-color: #C98E2A;
         background-color: #F7EFE0;
+    }
+    .context-strip {
+        padding: 0.6rem 1rem;
+        background-color: #FFFFFF;
+        border: 1px solid #DCD9D0;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        color: #1F2421;
+        margin-bottom: 1rem;
     }
     div[data-testid="stMetric"] {
         background-color: #FFFFFF;
@@ -123,7 +140,7 @@ def build_ranking_records(
     """
     Łączy predykcje dla wybranej daty i gatunku z cechami siedliskowymi powiatów (areas)
     oraz najnowszym dostępnym rekordem pogodowym (weather) i wylicza odległość od punktu startowego.
-    Brak atrybutów BDL (None) nie blokuje wyznaczenia rekordu ani wyświetlenia powiatu.
+    Zachowane dla kompatybilności wstecznej z trybem demonstracyjnym ([GRZ-02], [GRZ-05]).
     """
     preds_filtered = [
         p
@@ -196,8 +213,12 @@ def build_ranking_records(
     return records, records_by_area
 
 
-def render_legend(color_mode: str = "predictions", show_bdl_stands: bool = False) -> None:
-    """Wyświetla legendę warstwy powiatów oraz opcjonalnej warstwy wydzieleń BDL."""
+def render_legend(
+    color_mode: str = "observed_yield",
+    show_bdl_stands: bool = False,
+    show_report_points: bool = False,
+) -> None:
+    """Wyświetla legendę warstwy powiatów, punktów zgłoszeń oraz wydzieleń BDL."""
     items_html = []
     if color_mode == "region_bdl":
         forest_items = [
@@ -213,6 +234,20 @@ def render_legend(color_mode: str = "predictions", show_bdl_stands: bool = False
                 f"<span>{label}</span>"
                 f"</div>"
             )
+    elif color_mode == "report_coverage":
+        coverage_items = [
+            ("#1D4E89", "Wysokie pokrycie (≥ 20 raportów w powiecie)"),
+            ("#3A7CA5", "Średnie pokrycie (5 – 19 raportów w powiecie)"),
+            ("#81B2CD", "Niskie pokrycie (1 – 4 raporty w powiecie)"),
+            ("#B4B4B4", "Brak danych (0 raportów — NULL, nie 0.0 szt./h)"),
+        ]
+        for hex_col, label in coverage_items:
+            items_html.append(
+                f"<div class='legend-item'>"
+                f"<span class='legend-swatch' style='background:{hex_col};'></span>"
+                f"<span>{label}</span>"
+                f"</div>"
+            )
     else:
         for key in ["WYSYP", "SREDNIO", "BRAK", "BRAK_DANYCH"]:
             info = ABUNDANCE_CLASSES[key]
@@ -222,6 +257,14 @@ def render_legend(color_mode: str = "predictions", show_bdl_stands: bool = False
                 f"<span>{info['label']}</span>"
                 f"</div>"
             )
+
+    if show_report_points:
+        items_html.append(
+            "<div class='legend-item'>"
+            "<span class='legend-swatch' style='background:#1F2421;border-radius:50%;'></span>"
+            "<span>Punkt zgłoszenia z potwierdzoną miejscowością (point_precise)</span>"
+            "</div>"
+        )
 
     if show_bdl_stands:
         bdl_items = [
@@ -244,66 +287,117 @@ def render_legend(color_mode: str = "predictions", show_bdl_stands: bool = False
     )
 
 
-def main() -> None:
-    st.set_page_config(
-        page_title="Gdzie na grzyby — Dolny Śląsk",
-        layout="wide",
-    )
-    st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+def render_real_observations_view(
+    real_bundle: RealObservationsBundle,
+    audit_samples: dict[str, Any],
+) -> None:
+    """
+    Główny widok eksploracji rzeczywistych raportów i pokrycia danych przed modelem ([GRZ-12]).
+    """
+    min_d = datetime.date.fromisoformat(real_bundle.min_date)
+    max_d = datetime.date.fromisoformat(real_bundle.max_date)
 
-    st.markdown(
-        f"<div class='app-header'>"
-        f"<p class='app-title'>Gdzie na grzyby — przestrzenna analiza i predykcja wysypu</p>"
-        f"<p class='app-subtitle'>"
-        f"Obszar pilotażowy: <b>{PILOT_REGION.voivodeship_name} (TERYT {PILOT_REGION.voivodeship_id}, 30 powiatów)</b> "
-        f"&nbsp;|&nbsp; Jednostka agregacji: <b>{PILOT_REGION.spatial_unit_name}</b> "
-        f"&nbsp;|&nbsp; Jednostka wyniku: <b>szt./h</b>"
-        f"</p></div>",
-        unsafe_allow_html=True,
-    )
-
-    # --- PANEL BOCZNY (SIDEBAR) ---
+    # --- PANEL BOCZNY (FILTRY OBSERWACJI [GRZ-12]) ---
     with st.sidebar:
-        st.subheader("Parametry widoku")
+        st.divider()
+        st.subheader("1. Wybór okresu / daty obserwacji")
 
-        default_env = os.getenv("GRZYBY_DATA_ENV", "demo").lower()
-        env_options = {
-            "demo": "Próbka demonstracyjna (data/demo/)",
-            "prod": "Dane przetworzone (data/processed/)",
-        }
-        selected_env = st.selectbox(
-            "Zbiór danych",
-            options=list(env_options.keys()),
-            index=0 if default_env != "prod" else 1,
-            format_func=lambda k: env_options[k],
-            help="Próbka data/demo/ (is_demo=True) służy do integracji interfejsu i nie trafia do treningu ML.",
+        date_filter_mode = st.radio(
+            "Tryb filtrowania daty",
+            options=["range", "single_day"],
+            format_func=lambda m: (
+                "Zakres dat / podokres sezonu" if m == "range" else "Pojedynczy dzień zbioru"
+            ),
+            horizontal=False,
         )
 
-        bundle = load_dataset_bundle(selected_env)
-        audit_samples = load_sprint1_audit_samples()
+        if date_filter_mode == "range":
+            preset_options = {
+                "all_season": f"Cały okres danych ({real_bundle.min_date} .. {real_bundle.max_date})",
+                "sep_2025": "Wrzesień 2025 (2025-09-01 .. 2025-09-30)",
+                "oct_early": "Wczesny październik (2025-10-01 .. 2025-10-15)",
+                "oct_late": "Późny październik i listopad (2025-10-16 .. 2025-11-02)",
+                "custom": "Własny zakres z kalendarza",
+            }
+            selected_preset = st.selectbox(
+                "Predefiniowany podokres",
+                options=list(preset_options.keys()),
+                format_func=lambda k: preset_options[k],
+                index=0,
+            )
+            preset_bounds = {
+                "all_season": (min_d, max_d),
+                "sep_2025": (datetime.date(2025, 9, 1), datetime.date(2025, 9, 30)),
+                "oct_early": (datetime.date(2025, 10, 1), datetime.date(2025, 10, 15)),
+                "oct_late": (datetime.date(2025, 10, 16), max_d),
+            }
+            if selected_preset in preset_bounds:
+                default_start, default_end = preset_bounds[selected_preset]
+            else:
+                default_start, default_end = (min_d, max_d)
 
-        available_dates = sorted({p["target_date"] for p in bundle.predictions}, reverse=True)
-        selected_date = st.selectbox(
-            "Data prognozy",
-            options=available_dates if available_dates else ["2026-10-31"],
-            help="Data docelowa w formacie ISO (YYYY-MM-DD).",
-        )
-
-        available_species = [
-            sp for sp in SPECIES_LABELS if any(p["species_filter"] == sp for p in bundle.predictions)
-        ] or list(SPECIES_LABELS.keys())
-
-        selected_species = st.selectbox(
-            "Filtr gatunku",
-            options=available_species,
-            format_func=lambda sp: SPECIES_LABELS.get(sp, sp),
-        )
-        st.caption(f"Siedlisko BDL: {SPECIES_HABITAT_HINTS.get(selected_species, '—')}")
+            picked_dates = st.date_input(
+                "Zakres dat zbioru (`observation_date`)",
+                value=(default_start, default_end),
+                min_value=min_d,
+                max_value=max_d,
+            )
+            if isinstance(picked_dates, (tuple, list)) and len(picked_dates) == 2:
+                date_from = picked_dates[0].isoformat()
+                date_to = picked_dates[1].isoformat()
+            elif isinstance(picked_dates, (tuple, list)) and len(picked_dates) == 1:
+                date_from = picked_dates[0].isoformat()
+                date_to = picked_dates[0].isoformat()
+            else:
+                date_from = picked_dates.isoformat()  # type: ignore[union-attr]
+                date_to = date_from
+        else:
+            avail_dates = sorted(
+                real_bundle.features_df["observation_date"].astype(str).unique().tolist(),
+                reverse=True,
+            )
+            selected_single = st.selectbox(
+                "Wybierz dzień z raportami (`observation_date`)",
+                options=avail_dates,
+                index=0,
+                help="Lista dni w sezonie jesiennym 2025 posiadających co najmniej jeden raport.",
+            )
+            date_from = selected_single
+            date_to = selected_single
 
         st.divider()
-        st.subheader("Filtr odległości")
+        st.subheader("2. Filtr gatunku (obserwacje)")
+        selected_species = st.selectbox(
+            "Deklarowany gatunek dominujący (`dominant_species`)",
+            options=list(OBSERVATION_SPECIES_FILTER_LABELS.keys()),
+            format_func=lambda k: OBSERVATION_SPECIES_FILTER_LABELS.get(k, k),
+            index=0,
+            help=(
+                "Na etapie [GRZ-12] filtr gatunku filtruje rzeczywiste raporty terenowe z grzyby.pl "
+                "(nie uruchamia osobnego modelu ML dla gatunku)."
+            ),
+        )
+        st.caption(
+            f"Kontekst siedliskowy BDL: {SPECIES_HABITAT_HINTS.get(selected_species, '—')}"
+        )
+
+        st.divider()
+        st.subheader("3. Jednostka przestrzenna i odległość")
+        county_options = {"ALL": "Wszystkie powiaty (30 jednostek TERYT 02)"}
+        for aid, aprops in sorted(
+            real_bundle.areas_by_id.items(), key=lambda kv: kv[1].get("area_name", kv[0])
+        ):
+            county_options[aid] = f"{aprops.get('area_name', aid)} (TERYT {aid})"
+
+        selected_county = st.selectbox(
+            "Filtr jednostki przestrzennej (powiat)",
+            options=list(county_options.keys()),
+            format_func=lambda k: county_options[k],
+            index=0,
+        )
+
         selected_city = st.selectbox(
-            "Punkt odniesienia",
+            "Punkt odniesienia odległości",
             options=list(REFERENCE_CITIES.keys()),
             index=0,
         )
@@ -313,7 +407,7 @@ def main() -> None:
             "Promień od punktu [km]",
             min_value=20,
             max_value=160,
-            value=120,
+            value=160,
             step=10,
             help="Odległość w linii prostej (Haversine) do centroidu powiatu.",
         )
@@ -322,112 +416,144 @@ def main() -> None:
         st.caption(
             f"Konfiguracja regionu:\n"
             f"TERYT: {PILOT_REGION.voivodeship_id} ({PILOT_REGION.voivodeship_name})\n"
-            f"Klucz: {PILOT_REGION.spatial_key_name} | Układ: {PILOT_REGION.crs_display}\n"
-            f"Obliczenia metryczne: {PILOT_REGION.crs_metric}\n"
+            f"Jednostka: {PILOT_REGION.spatial_unit_name} ({PILOT_REGION.spatial_key_name})\n"
+            f"Układ mapy: {PILOT_REGION.crs_display} | Metryczny: {PILOT_REGION.crs_metric}\n"
             f"Strefa: {PILOT_REGION.timezone}"
         )
 
-    banner_cls = "status-banner status-banner-warn" if bundle.is_fallback_to_demo else "status-banner"
-    st.markdown(
-        f"<div class='{banner_cls}'><b>Status danych:</b> {bundle.status_message}</div>",
-        unsafe_allow_html=True,
-    )
-
-    records, records_by_area = build_ranking_records(
-        bundle=bundle,
-        target_date=selected_date,
+    # --- FILTROWANIE I AGREGACJA RZECZYWISTYCH DANYCH ---
+    filter_res = filter_real_observations_and_aggregate_by_county(
+        real_bundle=real_bundle,
+        date_from=date_from,
+        date_to=date_to,
         species_filter=selected_species,
         origin_lat=origin_lat,
         origin_lon=origin_lon,
         radius_km=float(radius_km),
+        region_filter=selected_county,
     )
-    in_radius_records = [r for r in records if r["in_radius"]]
+    filtered_df: pd.DataFrame = filter_res["filtered_reports_df"]
+    county_records: list[dict[str, Any]] = filter_res["county_records"]
+    county_by_id: dict[str, dict[str, Any]] = filter_res["county_by_id"]
 
-    # --- KARTY PODSUMOWANIA ---
+    in_filter_counties = [c for c in county_records if c["in_radius"]]
+    counties_with_data = [c for c in in_filter_counties if c["has_reports"]]
+    counties_no_data = [c for c in in_filter_counties if not c["has_reports"]]
+
+    # --- PASEK STATUSU I WIDOCZNE METADANE (OKRES, JEDNOSTKA PRZESTRZENNA, FILTRY) ---
+    st.markdown(
+        f"<div class='status-banner'><b>Źródło danych ([GRZ-12]):</b> {real_bundle.status_message}</div>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f"<div class='context-strip'>"
+        f"<b>Pełny okres zbioru danych:</b> <code>{real_bundle.min_date} – {real_bundle.max_date}</code> (63 dni sezonu jesiennego 2025) "
+        f"&nbsp;|&nbsp; <b>Aktywny filtr okresu:</b> <code>{date_from} – {date_to}</code> "
+        f"&nbsp;|&nbsp; <b>Jednostka przestrzenna:</b> <code>powiat (4-znakowy kod TERYT 0201–0265, N=30)</code> "
+        f"&nbsp;|&nbsp; <b>Filtr gatunku (obserwacje):</b> <code>{OBSERVATION_SPECIES_FILTER_LABELS.get(selected_species, selected_species)}</code>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+
+    # --- KARTY PODSUMOWANIA (DYNAMICZNE POD WPŁYWEM FILTRÓW) ---
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
     kpi1.metric(
-        "Powiaty w promieniu",
-        f"{len(in_radius_records)} z {len(records)}",
+        "Dostępne raporty (po filtracji)",
+        f"{len(filtered_df)} z {len(real_bundle.features_df)}",
+        delta=f"Okres: {date_from} .. {date_to}",
+        delta_color="off",
     )
-
-    valid_yields = [
-        r for r in in_radius_records if r["predicted_yield_pcs_per_h"] is not None
-    ]
-    if valid_yields:
-        best_rec = max(valid_yields, key=lambda r: float(r["predicted_yield_pcs_per_h"]))
-        kpi2.metric(
-            "Maksymalna prognoza",
-            f"{best_rec['predicted_yield_pcs_per_h']:.1f} szt./h",
-            delta=best_rec["area_name"],
+    kpi2.metric(
+        "Pokrycie powiatów danymi",
+        f"{len(counties_with_data)} z {len(in_filter_counties)} w filtrze",
+        delta=f"Brak danych (NULL): {len(counties_no_data)} pow.",
+        delta_color="off",
+    )
+    if not filtered_df.empty and counties_with_data:
+        mean_y = float(filtered_df["yield_pcs_per_h"].mean())
+        med_y = float(filtered_df["yield_pcs_per_h"].median())
+        zero_cnt = int((filtered_df["yield_pcs_per_h"] == 0.0).sum())
+        kpi3.metric(
+            "Średni zbiór z raportów",
+            f"{mean_y:.1f} szt./h",
+            delta=f"Mediana: {med_y:.1f} szt./h | Puste koszyki (0/h): {zero_cnt}",
+            delta_color="off",
+        )
+        top_county = max(counties_with_data, key=lambda c: int(c["reports_count"]))
+        kpi4.metric(
+            "Najwięcej raportów w filtrze",
+            f"{top_county['reports_count']} rap.",
+            delta=f"{top_county['area_name']} ({top_county['area_id']})",
             delta_color="off",
         )
     else:
-        kpi2.metric("Maksymalna prognoza", "brak danych")
+        kpi3.metric(
+            "Średni zbiór z raportów",
+            "BRAK DANYCH (NULL)",
+            delta="0 raportów spełnia kryteria filtru",
+            delta_color="off",
+        )
+        kpi4.metric(
+            "Najwięcej raportów w filtrze",
+            "0 raportów",
+            delta="Brak obserwacji w zadanym filtrze",
+            delta_color="off",
+        )
 
-    bdl_covered_count = sum(1 for r in records if r["has_bdl_stand_data"])
-    kpi3.metric(
-        "Powiaty z profilem BDL",
-        f"{bdl_covered_count} z {len(records)}",
-    )
-
-    valid_precip = [
-        float(r["precip_lag_14d_mm"])
-        for r in in_radius_records
-        if r["precip_lag_14d_mm"] is not None
-    ]
-    kpi4.metric(
-        "Średni opad skumulowany (14d)",
-        f"{(sum(valid_precip) / len(valid_precip)):.1f} mm" if valid_precip else "brak danych",
-    )
-
-    # --- ZAKŁADKI GŁÓWNE ---
-    tab_map, tab_samples, tab_info = st.tabs(
+    # --- ZAKŁADKI GŁÓWNE ([GRZ-12]) ---
+    tab_map, tab_records, tab_methodology = st.tabs(
         [
-            "Mapa i zestawienie powiatów",
-            "Przegląd danych wejściowych i próbek",
-            "Metodologia i kontrakt danych",
+            "Mapa pokrycia danych i obserwowanych zbiorów",
+            "Próbka rekordów i weryfikacja zgodności z tabelami źródłowymi",
+            "Metodologia, kontrakt danych i wyniki EDA",
         ]
     )
 
     with tab_map:
-        ctrl_col1, ctrl_col2 = st.columns([3, 2])
+        ctrl_col1, ctrl_col2, ctrl_col3 = st.columns([4, 2, 2])
         with ctrl_col1:
             color_mode = st.radio(
                 "Tryb kolorowania powiatów na mapie",
-                options=["predictions", "region_bdl"],
-                format_func=lambda m: (
-                    "Prognoza zbiorów [szt./h]"
-                    if m == "predictions"
-                    else "Granice regionu i lesistość / BDL ([GRZ-05])"
-                ),
+                options=["observed_yield", "report_coverage", "region_bdl"],
+                format_func=lambda m: {
+                    "observed_yield": "Obserwowana wydajność zbiorów [szt./h] vs Brak danych",
+                    "report_coverage": "Pokrycie danymi — liczba raportów w powiecie",
+                    "region_bdl": "Granice regionu i lesistość BDL ([GRZ-05])",
+                }[m],
                 horizontal=True,
             )
         with ctrl_col2:
-            bdl_available = bool(audit_samples.get("bdl_stands_geojson"))
-            show_bdl_stands = st.checkbox(
-                "Nałóż próbkę wektorową wydzieleń BDL (N = 105 poligonów)",
+            show_report_points = st.checkbox(
+                "Pokaż punkty zgłoszeń (`point_precise`)",
                 value=True,
                 help=(
-                    "Wyświetla rzeczywiste poligony wydzieleń leśnych BDL (G_SUBAREA / Wydzielenia PGL LP) "
-                    "w 7 klastrach leśnych na Dolnym Śląsku. Brak BDL nie blokuje wyświetlenia granic regionu."
+                    "Wyświetla punkty wyłącznie dla raportów ze zweryfikowaną miejscowością/lasem "
+                    "(`point_represents_specific_forest == True`), bez pozornej dokładności dla raportów ogólnopowiatowych."
                 ),
             )
-
-        if color_mode == "region_bdl":
-            st.markdown(
-                f"#### Rzeczywiste granice 30 powiatów woj. dolnośląskiego (`TERYT 02`) oraz próbka BDL (`[GRZ-05]`)"
-            )
-        else:
-            st.markdown(
-                f"#### Prognoza wydajności zbiorów na dzień `{selected_date}` — "
-                f"{SPECIES_LABELS.get(selected_species, selected_species)}"
+        with ctrl_col3:
+            bdl_available = bool(audit_samples.get("bdl_stands_geojson"))
+            show_bdl_stands = st.checkbox(
+                "Nałóż wydzielenia BDL (N=105)",
+                value=False,
+                help="Warstwa wektorowa 105 wydzieleń leśnych BDL w 7 klastrach na Dolnym Śląsku.",
             )
 
-        render_legend(color_mode=color_mode, show_bdl_stands=(show_bdl_stands and bdl_available))
+        st.markdown(
+            f"#### Mapa jednostek przestrzennych (`powiat`, TERYT `0201–0265`) — "
+            f"okres `{date_from}` do `{date_to}` | "
+            f"filtr gatunku: {OBSERVATION_SPECIES_FILTER_LABELS.get(selected_species, selected_species)}"
+        )
 
-        enriched_geojson = enrich_geojson_with_predictions(
-            bundle.areas_geojson,
-            records_by_area,
+        render_legend(
+            color_mode=color_mode,
+            show_bdl_stands=(show_bdl_stands and bdl_available),
+            show_report_points=show_report_points,
+        )
+
+        enriched_geojson = enrich_geojson_with_real_observations(
+            real_bundle.areas_geojson,
+            county_by_id,
             color_mode=color_mode,
         )
 
@@ -446,16 +572,15 @@ def main() -> None:
             pickable=True,
             auto_highlight=True,
         )
-
         deck_layers = [polygon_layer]
 
-        if show_bdl_stands:
+        if show_bdl_stands and bdl_available:
             enriched_bdl = enrich_bdl_stands_geojson(audit_samples.get("bdl_stands_geojson"))
             if enriched_bdl:
                 bdl_layer = pdk.Layer(
                     "GeoJsonLayer",
                     data=enriched_bdl,
-                    opacity=0.90,
+                    opacity=0.88,
                     stroked=True,
                     filled=True,
                     extruded=False,
@@ -467,17 +592,29 @@ def main() -> None:
                     auto_highlight=True,
                 )
                 deck_layers.append(bdl_layer)
-            else:
-                st.info(
-                    "Próbka wektorowa wydzieleń BDL (`data/sample/bdl_stands_sample_ds.geojson`) jest niedostępna — "
-                    "mapa wyświetla same rzeczywiste granice 30 powiatów regionu pilotażowego."
-                )
+
+        precise_points = build_precise_report_points_layer_data(filtered_df)
+        if show_report_points and precise_points:
+            points_layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=precise_points,
+                get_position="[lon, lat]",
+                get_fill_color="fill_color",
+                get_line_color=[20, 25, 20, 240],
+                line_width_min_pixels=1.5,
+                get_radius=2400,
+                pickable=True,
+                auto_highlight=True,
+            )
+            deck_layers.append(points_layer)
 
         origin_layer = pdk.Layer(
             "ScatterplotLayer",
             data=[
                 {
-                    "name": f"Punkt odniesienia: {selected_city}",
+                    "tooltip_header": f"Punkt odniesienia odległości: {selected_city}",
+                    "tooltip_sub": f"Promień filtra: <b>{radius_km} km</b>",
+                    "tooltip_bdl": f"Współrzędne WGS84: <code>{origin_lat:.4f}, {origin_lon:.4f}</code>",
                     "lat": origin_lat,
                     "lon": origin_lon,
                 }
@@ -486,8 +623,8 @@ def main() -> None:
             get_fill_color=[35, 78, 112, 235],
             get_line_color=[255, 255, 255, 255],
             line_width_min_pixels=2,
-            get_radius=4200,
-            pickable=False,
+            get_radius=4000,
+            pickable=True,
         )
         deck_layers.append(origin_layer)
 
@@ -523,130 +660,400 @@ def main() -> None:
             use_container_width=True,
         )
 
-        sample_meta = bundle.predictions[0] if bundle.predictions else {}
+        county_agg_cnt = (
+            int((filtered_df["point_represents_specific_forest"] == False).sum())  # noqa: E712
+            if not filtered_df.empty
+            else 0
+        )
         st.caption(
-            f"Granice: Państwowy Rejestr Granic (GUGiK PRG, 30 powiatów TERYT 02, CRS: EPSG:4326, obliczenia pow. w EPSG:2180) | "
-            f"Dane leśne: Bank Danych o Lasach (BDL Lasy Państwowe, stan 2026) | "
-            f"Data prognozy: {selected_date} (model: {sample_meta.get('model_version', '—')}) | "
-            f"Punkt odniesienia: {selected_city}."
+            f"Jednostka przestrzenna: powiat (GUGiK PRG, 30 powiatów woj. dolnośląskiego TERYT 02, CRS: EPSG:4326) | "
+            f"Okres zbioru danych: {real_bundle.min_date} – {real_bundle.max_date} (aktywny filtr: {date_from} – {date_to}) | "
+            f"Raporty punktowe na mapie (`point_precise`): {len(precise_points)} | "
+            f"Raporty ogólnopowiatowe przypisane wyłącznie do poligonu powiatu (`county_aggregate`): {county_agg_cnt}."
         )
 
-        st.markdown(f"#### Zestawienie powiatów w promieniu {radius_km} km ({selected_city})")
-        if not in_radius_records:
+        st.markdown(
+            f"#### Pokrycie danych i statystyki obserwacji w powiatach "
+            f"({len(in_filter_counties)} pow. w filtrze: {len(counties_with_data)} z raportami, "
+            f"{len(counties_no_data)} ze statusem `BRAK_DANYCH`)"
+        )
+        st.caption(
+            "Zgodnie z kontraktem danych (`[GRZ-06]`, `[GRZ-10]`, `[GRZ-12]`) powiaty bez wpisów w wybranym okresie i filtrze "
+            "mają jawny status `BRAK_DANYCH (0 raportów — NULL)` oraz puste pola średniej wydajności (`None`), "
+            "co odróżnia brak obserwacji od jawnego zerowego zbioru (`0.0 szt./h`)."
+        )
+
+        if not in_filter_counties:
             st.warning(
-                "Brak powiatów w zadanym promieniu. Zwiększ promień na pasku bocznym."
+                "Żaden powiat nie spełnia warunków filtru przestrzennego. Zwiększ promień na pasku bocznym."
             )
         else:
-            df_rank = pd.DataFrame(in_radius_records)
-            display_cols = {
+            df_counties = pd.DataFrame(in_filter_counties)
+            county_cols = {
                 "area_id": "TERYT",
                 "area_name": "Powiat",
-                "total_area_km2": "Pow. [km²]",
                 "distance_km": "Odległość [km]",
-                "predicted_yield_pcs_per_h": "Prognoza [szt./h]",
-                "abundance_class": "Klasa",
-                "forest_cover_pct": "Lesistość [%]",
+                "reports_count": "Liczba raportów",
+                "status_code": "Status pokrycia / obfitości",
+                "mean_yield_pcs_per_h": "Śr. zbiór [szt./h] (NULL=brak danych)",
+                "median_yield_pcs_per_h": "Mediana [szt./h]",
+                "max_yield_pcs_per_h": "Maks. [szt./h]",
+                "zero_harvest_reports_count": "Puste koszyki (0/h)",
+                "point_precise_count": "Punkty miejsc. (precise)",
+                "county_aggregate_count": "Ogólnopowiatowe (agg)",
+                "last_report_date": "Ostatni raport",
+                "forest_cover_pct": "Lesistość BDL [%]",
                 "pine_share_pct": "Sosna [%]",
                 "oak_beech_share_pct": "Dąb/Buk [%]",
                 "spruce_share_pct": "Świerk [%]",
-                "mean_stand_age_years": "Wiek lasu [lat]",
-                "dominant_moisture_type": "Uwilgotnienie BDL",
-                "bdl_sample_stands_count": "Wydzielenia w próbce BDL",
                 "precip_lag_14d_mm": "Opad 14d [mm]",
             }
-            df_show = df_rank[list(display_cols.keys())].rename(columns=display_cols)
-            st.dataframe(df_show, use_container_width=True, hide_index=True)
+            df_counties_show = df_counties[list(county_cols.keys())].rename(columns=county_cols)
+            st.dataframe(df_counties_show, use_container_width=True, hide_index=True)
 
-    with tab_samples:
-        st.markdown("#### Podgląd plików kontraktu danych oraz próbek audytowych ze Sprintu 1")
+    with tab_records:
+        st.markdown(
+            f"#### 1. Próbka przefiltrowanych rekordów obserwacyjnych (`N = {len(filtered_df)}` z `{len(real_bundle.features_df)}`)"
+        )
         st.caption(
-            "Sekcja diagnostyczna do weryfikacji formatu plików wymienianych pomiędzy modułem danych a interfejsem."
+            "Tabela prezentuje rzeczywiste zgłoszenia z `grzyby.pl` spełniające aktywne filtry okresu, gatunku, "
+            "jednostki przestrzennej i promienia wraz z dołączonymi cechami Point-in-Time (`t - 1`)."
         )
 
-        col_rep, col_wea = st.columns(2)
-        with col_rep:
-            st.markdown("**1. Raporty zbieraczy (`reports`)**")
-            st.dataframe(pd.DataFrame(bundle.reports), use_container_width=True, hide_index=True)
-
-        with col_wea:
-            st.markdown("**2. Szeregi pogodowe (`weather`)**")
-            st.dataframe(pd.DataFrame(bundle.weather), use_container_width=True, hide_index=True)
-
-        st.divider()
-        st.markdown("**3. Próbka audytowa raportów z grzyby.pl (`data/sample/reports_audit_52_ds.csv`, N = 52, `[GRZ-03]`)**")
-        if audit_samples["reports_audit"]:
-            df_audit_rep = pd.DataFrame(audit_samples["reports_audit"])
-            st.caption(
-                f"Liczba rekordów: {len(df_audit_rep)} | Pokrycie: 18 powiatów woj. dolnośląskiego | "
-                f"Okres zbiorów: 2025-09-29 .. 2025-10-05."
+        if filtered_df.empty:
+            st.info(
+                "Brak raportów spełniających wybrane kryteria filtru (status: BRAK DANYCH). "
+                "Poszerz zakres dat lub wybierz 'Wszystkie raporty' w filtrze gatunku."
             )
-            st.dataframe(df_audit_rep.head(20), use_container_width=True, hide_index=True)
         else:
-            st.info("Plik `data/sample/reports_audit_52_ds.csv` nie został znaleziony.")
-
-        st.markdown("**4. Próbka historii pogody Open-Meteo ERA5-Land (`data/sample/weather_daily_sample_ds.csv`, N = 210, `[GRZ-04]`)**")
-        if audit_samples["weather_sample"]:
-            df_audit_wea = pd.DataFrame(audit_samples["weather_sample"])
-            st.caption(
-                f"Liczba rekordów dobowych: {len(df_audit_wea)} (6 lokalizacji × 35 dni, 2025-09-01 .. 2025-10-05). "
-                f"Zmienne glebowe (warstwy 0–7 cm oraz 7–28 cm) pochodzą z modelu reanalizy ERA5-Land (siatka ~9 km), "
-                f"a nie z pomiarów terenowych in-situ."
+            preview_cols = {
+                "report_id": "ID raportu",
+                "observation_date": "Data zbioru (t)",
+                "feature_cutoff_date": "Odcięcie cech (t-1)",
+                "region_id": "TERYT",
+                "region_name": "Powiat",
+                "location_raw": "Miejscowość / las (grzyby.pl)",
+                "yield_pcs_per_h": "Wydajność [szt./h]",
+                "abundance_class": "Klasa obfitości",
+                "dominant_species": "Gatunek dominujący",
+                "spatial_precision": "Precyzja geo",
+                "precip_lag_7d_mm": "Opad 7d [mm]",
+                "precip_lag_14d_mm": "Opad 14d [mm]",
+                "precip_lag_21d_mm": "Opad 21d [mm]",
+                "temp_mean_7d_c": "Śr. temp. 7d [°C]",
+                "soil_moisture_0_7cm_m3m3": "Wilg. gleby 0–7 cm",
+                "forest_cover_pct": "Lesistość [%]",
+                "source_url": "URL źródłowy",
+            }
+            available_preview_cols = [c for c in preview_cols if c in filtered_df.columns]
+            df_preview = (
+                filtered_df[available_preview_cols]
+                .sort_values(["observation_date", "report_id"], ascending=[False, True])
+                .rename(columns=preview_cols)
             )
-            st.dataframe(df_audit_wea.head(20), use_container_width=True, hide_index=True)
-        else:
-            st.info("Plik `data/sample/weather_daily_sample_ds.csv` nie został znaleziony.")
+            st.dataframe(df_preview, use_container_width=True, hide_index=True)
 
         st.divider()
         st.markdown(
-            "**5. Granice regionu pilotażowego (`data/sample/region_powiaty_02_ds.geojson`, N = 30) "
-            "oraz wektorowa próbka wydzieleń BDL (`data/sample/bdl_stands_sample_ds.geojson`, N = 105, `[GRZ-05]`)**"
+            "#### 2. Weryfikacja zgodności rekordu z tabelami źródłowymi (`reports.parquet` vs `reports_spatial.parquet` vs `forest_features.parquet` vs `features.parquet`)"
         )
-        if audit_samples["bdl_powiaty_agg"]:
-            df_bdl_agg = pd.DataFrame(audit_samples["bdl_powiaty_agg"])
-            st.caption(
-                "Wynik analitycznej agregacji przestrzennej GeoPandas (`gpd.sjoin` w układzie metrycznym `EPSG:2180`) "
-                "dla 7 klastrów leśnych (105 poligonów wydzieleń BDL `G_SUBAREA`, w tym 74 drzewostanów `D-STAN`). "
-                "Źródło: Bank Danych o Lasach (`mapserver.bdl.lasy.gov.pl/ArcGIS/rest/services/WMS_BDL/MapServer/5`), stan `a_year = 2026`."
-            )
-            st.dataframe(df_bdl_agg, use_container_width=True, hide_index=True)
-        else:
-            st.info("Plik `data/sample/bdl_powiaty_agg_sample_ds.csv` nie został znaleziony.")
+        st.caption(
+            "Wybierz dowolny raport z aktywnej próbki (lub z pełnego zbioru `N = 513`), aby sprawdzić zgodność 1:1 "
+            "pomiędzy surową tabelą zgłoszeń (`reports.parquet`), złączeniem przestrzennym (`reports_spatial.parquet`), "
+            "profilem leśnym BDL (`forest_features.parquet`) oraz tabelą analityczną (`features.parquet`)."
+        )
 
-        if audit_samples["bdl_stands_sample"]:
-            df_bdl_stands = pd.DataFrame(audit_samples["bdl_stands_sample"])
-            st.caption(
-                f"Podgląd pojedynczych wydzieleń leśnych BDL (łącznie {len(df_bdl_stands)} obiektów wektorowych "
-                f"z adresem leśnym `adress_forest`, kluczem relacyjnym `arodes_int_num`, typem siedliskowym `site_type_cd` "
-                f"oraz gatunkiem panującym `species_cd_d`)."
+        candidate_df = filtered_df if not filtered_df.empty else real_bundle.features_df
+        candidate_df = candidate_df.sort_values(
+            ["observation_date", "report_id"], ascending=[False, True]
+        )
+        candidate_options: dict[str, str] = {}
+        for _, r_row in candidate_df.head(200).iterrows():
+            rid = str(r_row["report_id"])
+            sp_txt = (
+                "NULL (brak deklaracji)"
+                if r_row["dominant_species"] is None or pd.isna(r_row["dominant_species"])
+                else str(r_row["dominant_species"])
             )
-            st.dataframe(df_bdl_stands.head(25), use_container_width=True, hide_index=True)
+            candidate_options[rid] = (
+                f"{rid} | {r_row['observation_date']} | {r_row['region_name']} ({r_row['region_id']}) | "
+                f"{float(r_row['yield_pcs_per_h']):.1f} szt./h | gatunek: {sp_txt}"
+            )
 
-    with tab_info:
-        st.markdown("#### Zatwierdzone założenia metodologiczne i kontrakt danych (`[GRZ-06]` v2.0)")
+        selected_report_id = st.selectbox(
+            "Wybierz rekord do inspekcji zgodności ze źródłem",
+            options=list(candidate_options.keys()),
+            format_func=lambda k: candidate_options[k],
+            index=0,
+        )
+
+        verification = verify_record_against_source_tables(selected_report_id, real_bundle)
+        v_col1, v_col2 = st.columns([2, 3])
+        with v_col1:
+            status_txt = (
+                "ZGODNY 1:1 WE WSZYSTKICH TABELACH ŹRÓDŁOWYCH"
+                if verification["all_fields_match"]
+                else "WYKRYTO ROZBIEŻNOŚĆ"
+            )
+            st.markdown(
+                f"**Status audytu rekordu `{selected_report_id}`:** `{status_txt}`\n\n"
+                f"- **Data zbioru (`observation_date`):** `{verification['observation_date']}`\n"
+                f"- **Odcięcie cech (`feature_cutoff_date`):** `{verification['feature_cutoff_date']}`\n"
+                f"- **Powiat (`region_id`):** `{verification['region_name']} (TERYT {verification['region_id']})`\n"
+                f"- **Lokalizacja w zgłoszeniu (`location_raw`):** `{verification['location_raw']}`\n"
+                f"- **Link do wpisu źródłowego:** [{verification['source_url']}]({verification['source_url']})"
+            )
+        with v_col2:
+            df_checks = pd.DataFrame(verification["comparison_rows"])
+            st.dataframe(df_checks, use_container_width=True, hide_index=True)
+
+        st.divider()
+        st.markdown("#### 3. Podsumowanie spójności tabel w `data/processed/`")
+        summary_rows = [
+            {
+                "Plik w data/processed/": "areas.geojson",
+                "Liczba rekordów": len(real_bundle.areas_by_id),
+                "Jednostka / Klucz": "powiat (area_id, TERYT 0201–0265)",
+                "Opis zawartości": "30 poligonów powiatów woj. dolnośląskiego (GUGiK PRG, EPSG:4326 + BDL)",
+            },
+            {
+                "Plik w data/processed/": "reports.parquet",
+                "Liczba rekordów": len(real_bundle.reports_df),
+                "Jednostka / Klucz": "report_id (DG...)",
+                "Opis zawartości": "518 pobranych zgłoszeń z grzyby.pl (513 walidowanych w oknie 01.09–02.11 + 5 odrzuconych przez walidator temporalny)",
+            },
+            {
+                "Plik w data/processed/": "reports_spatial.parquet",
+                "Liczba rekordów": len(real_bundle.reports_spatial_df),
+                "Jednostka / Klucz": "report_id -> region_id",
+                "Opis zawartości": "Złączenie przestrzenne zgłoszeń z poligonami powiatów (484 point_precise, 34 county_aggregate)",
+            },
+            {
+                "Plik w data/processed/": "forest_features.parquet",
+                "Liczba rekordów": len(real_bundle.forest_features_df),
+                "Jednostka / Klucz": "region_id (TERYT 0201–0265)",
+                "Opis zawartości": "Statyczne cechy siedliskowe i udział gatunków drzewostanowych BDL dla 30 powiatów",
+            },
+            {
+                "Plik w data/processed/": "weather.csv",
+                "Liczba rekordów": len(real_bundle.weather_rows),
+                "Jednostka / Klucz": "(region_id, date)",
+                "Opis zawartości": "2910 rekordów dobowych ERA5-Land (30 powiatów × 97 dni: 2025-08-01 .. 2025-11-05, 0 braków)",
+            },
+            {
+                "Plik w data/processed/": "features.parquet",
+                "Liczba rekordów": len(real_bundle.features_df),
+                "Jednostka / Klucz": "report_id (1:1 z walidowanymi raportami)",
+                "Opis zawartości": "513 rekordów analitycznych Point-in-Time (okna opadów 7/14/21d liczone do t-1 włącznie)",
+            },
+        ]
+        st.dataframe(pd.DataFrame(summary_rows), use_container_width=True, hide_index=True)
+
+    with tab_methodology:
+        st.markdown("#### Założenia metodologiczne, kontrakt danych (`[GRZ-06]`) i wnioski z EDA (`[GRZ-11]`)")
         st.markdown(
             """
-            1. **Zatwierdzona główna zmienna docelowa i jednostka przestrzenna (`[GRZ-06]`):**
-               - **Główna zmienna docelowa (regresja):** `predicted_yield_pcs_per_h` (`[szt./h]`) — znormalizowana wydajność zbioru na 1 grzybiarza (100% kompletności w nagłówku `(X/h)` w próbce `52/52` raportów; surowe pola sztuki+czas występują łącznie tylko w `30,8%` wpisów).
-               - **Pomocnicza etykieta wizualna (klasyfikacja 3-klasowa):** `abundance_class` (`BRAK < 5 szt./h`, `SREDNIO 5–20 szt./h`, `WYSYP > 20 szt./h`) wyznaczana deterministycznie z progów `predicted_yield_pcs_per_h`.
-               - **Jednostka przestrzenna:** Powiat (`area_id`, 4-znakowy kod TERYT `0201`–`0265`). Ze względu na dokładność lokalizacji `place_id` z `grzyby.pl` (wskazującą na ogół miejscowość lub stolicę powiatu) mapa prezentuje wyłącznie poligony powiatów, bez pozornej dokładności pojedynczego lasu.
-            2. **Sposób ewaluacji modeli (`Temporal Split`):**
-               - Podział czasowy (chronologiczny) bez losowego tasowania (`shuffle=False`), wykluczający przeciek informacji z przyszłości.
-               - Metryki dla regresji: **MAE** `[szt./h]` (główna), **RMSE** `[szt./h]` oraz korelacja rangowa **Spearmana ($\rho$)** względem `ranking_score`.
-               - Metryki dla 3 klas obfitości (`BRAK` / `SREDNIO` / `WYSYP`): **Macro-F1** (odporna na dominację klasy `SREDNIO` — `67,3%` w próbce) oraz **Balanced Accuracy**.
-            3. **Moment odcięcia danych pogodowych (`Point-in-Time Cutoff`) i horyzont prognozy:**
-               - Dla prognozy na dzień $t$ odcięcie danych obserwacyjnych następuje o `t-1 23:59:59 UTC`.
-               - Cechy historyczne oparte na reanalizie ERA5-Land liczone są wyłącznie z okna przeszłego $[t-k, t-1]$ (np. `precip_mm_3d`, `precip_mm_7d`, `precip_mm_14d`, średnie temperatury i wilgotności gleby).
-               - **Przyszła rzeczywista pogoda (`realized weather`) z dni $\ge t$ nigdy nie trafia do cech prognozy.** Dla horyzontu $h \in \{0, \dots, 5\}$ dni do przodu dozwolone są wyłącznie cechy do $t-1$ lub archiwalna prognoza synoptyczna wystawiona przed momentem odcięcia.
-            4. **Semantyka braków danych (`NULL` vs `0.0`):**
-               - **Brak wpisu na `grzyby.pl` w danym powiecie i dniu (`81,9%` powiat-dni w próbce) NIE jest traktowany jako raport zerowego zbioru (`0.0 szt./h`)** — pozostaje wartością `NULL` i nie jest imputowany zerami.
-               - Wartość `0.0 szt./h` występuje wyłącznie przy jawnym raporcie zerowego zbioru `(0/h)`.
-            5. **Przeplanowana architektura modelowania (`Model ML + Jawny Wskaźnik Warunków`):**
-               - Z uwagi na rzadkość etykiet per gatunek przeplanowano Sprint 2 na podejście dwutorowe: **Tor A — Jawny Wskaźnik Warunków Siedliskowo-Pogodowych (`Explicit Condition Index`)** pokrywający 100% powiatów każdego dnia + **Tor B — Model ML (`Ridge` / `HistGradientBoosting` / `RandomForest`)** dla ogólnego wysypu (`species_filter = "all"`), korygowany dla poszczególnych gatunków współczynnikiem siedliskowym z warstwy BDL (`pine_share_pct`, `oak_beech_share_pct`, `spruce_share_pct`).
-            6. **Granice regionu, BDL (`[GRZ-05]`) i izolacja `data/demo/`:**
-               - Granice 30 powiatów (`TERYT 02`, `19 941,7 km²`) są zapisane w `EPSG:4326`, a złączenia przestrzenne z wydzieleniami BDL (`area_type_cd = 'D-STAN'`) wykonywane są w `EPSG:2180`.
-               - Dane demonstracyjne w `data/demo/` posiadają flagę `is_demo = True` (`DEMO_MOCK_v0`) i są fizycznie odseparowane od potoku treningowego ML.
+            1. **Zakres etapu `[GRZ-12]` (Eksploracja rzeczywistych obserwacji przed modelem):**
+               - Aplikacja wczytuje rzeczywisty zbiór obserwacyjny z `data/processed/` (`N = 513` zweryfikowanych raportów w okresie `2025-09-01 – 2025-11-02`, obejmujących `28 z 30` powiatów woj. dolnośląskiego).
+               - **Filtr gatunku dotyczy na tym etapie rzeczywistych obserwacji (`dominant_species`), a nie osobnego modelu ML dla gatunku.** Ze względu na fakt, że `37,8%` raportów ma etykietę `mieszane`, a `17,3%` nie deklaruje gatunku (`NULL`), osobne modele nadzorowane per gatunek dysponowałyby zbyt małą próbą (`19–79` rekordów).
+            2. **Semantyka braków danych (`NULL` vs `0.0 szt./h`):**
+               - **Brak raportów w powiecie (`reports_count == 0`) jest prezentowany na mapie, w kartach KPI i w tabeli jako `BRAK DANYCH (0 raportów — NULL)`**, a nie jako zerowy zbiór (`0.0 szt./h`).
+               - W całym 63-dniowym sezonie `0` raportów mają 2 powiaty (`0217 powiat strzeliński` oraz `0262 powiat m. Legnica`), a na poziomie pojedynczych powiat-dni brak raportów występuje w `81,2%` komórek siatki (`1534 / 1890`).
+               - Jawne raporty zerowego zbioru (`yield_pcs_per_h == 0.0`, tj. potwierdzone „puste koszyki”, `N = 45`) są zachowane jako twarde obserwacje negatywne w klasie `BRAK (< 5 szt./h)`.
+            3. **Jednostka przestrzenna i uczciwość wizualizacji (`powiat`, TERYT `0201–0265`):**
+               - Główną jednostką przestrzenną na mapie jest **powiat (`area_id`)**.
+               - Punkty zgłoszeń (`ScatterplotLayer`) są wyświetlane wyłącznie dla wpisów ze zweryfikowaną miejscowością (`point_represents_specific_forest == True`, `479 / 513` wpisów). Raporty ogólnopowiatowe (`county_aggregate`, `34 / 513`) reprezentują wyłącznie poligon powiatu.
+            4. **Odcięcie czasowe cech (`Point-in-Time Cutoff` z `[GRZ-10]`):**
+               - Dla każdego raportu z datą zbioru `observation_date = t` okna opadów (`precip_lag_7d_mm`, `precip_lag_14d_mm`, `precip_lag_21d_mm`), temperatury i wilgotności gleby ERA5-Land są wyliczone wyłącznie z pełnych dób poprzedzających zbiór (`[t - k, t - 1]`, gdzie `feature_cutoff_date = t - 1`).
             """
         )
+
+
+def render_demo_predictions_view(
+    bundle: DatasetBundle,
+    audit_samples: dict[str, Any],
+) -> None:
+    """
+    Widok próbki demonstracyjnej (`data/demo/`, `is_demo=True`) ze Sprintu 1 ([GRZ-02], [GRZ-05]).
+    """
+    with st.sidebar:
+        st.divider()
+        available_dates = sorted({p["target_date"] for p in bundle.predictions}, reverse=True)
+        selected_date = st.selectbox(
+            "Data prognozy (demo)",
+            options=available_dates if available_dates else ["2026-10-31"],
+            help="Data docelowa w próbce demonstracyjnej data/demo/.",
+        )
+
+        available_species = [
+            sp for sp in SPECIES_LABELS if any(p["species_filter"] == sp for p in bundle.predictions)
+        ] or list(SPECIES_LABELS.keys())
+
+        selected_species = st.selectbox(
+            "Filtr gatunku (demo)",
+            options=available_species,
+            format_func=lambda sp: SPECIES_LABELS.get(sp, sp),
+        )
+        st.caption(f"Siedlisko BDL: {SPECIES_HABITAT_HINTS.get(selected_species, '—')}")
+
+        st.divider()
+        st.subheader("Filtr odległości")
+        selected_city = st.selectbox(
+            "Punkt odniesienia",
+            options=list(REFERENCE_CITIES.keys()),
+            index=0,
+        )
+        origin_lat, origin_lon = REFERENCE_CITIES[selected_city]
+
+        radius_km = st.slider(
+            "Promień od punktu [km]",
+            min_value=20,
+            max_value=160,
+            value=120,
+            step=10,
+            help="Odległość w linii prostej (Haversine) do centroidu powiatu.",
+        )
+
+    banner_cls = "status-banner status-banner-warn" if bundle.is_fallback_to_demo else "status-banner"
+    st.markdown(
+        f"<div class='{banner_cls}'><b>Status danych:</b> {bundle.status_message}</div>",
+        unsafe_allow_html=True,
+    )
+
+    records, records_by_area = build_ranking_records(
+        bundle=bundle,
+        target_date=selected_date,
+        species_filter=selected_species,
+        origin_lat=origin_lat,
+        origin_lon=origin_lon,
+        radius_km=float(radius_km),
+    )
+    in_radius_records = [r for r in records if r["in_radius"]]
+
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    kpi1.metric("Powiaty w promieniu", f"{len(in_radius_records)} z {len(records)}")
+    valid_yields = [r for r in in_radius_records if r["predicted_yield_pcs_per_h"] is not None]
+    if valid_yields:
+        best_rec = max(valid_yields, key=lambda r: float(r["predicted_yield_pcs_per_h"]))
+        kpi2.metric(
+            "Maksymalna prognoza (demo)",
+            f"{best_rec['predicted_yield_pcs_per_h']:.1f} szt./h",
+            delta=best_rec["area_name"],
+            delta_color="off",
+        )
+    else:
+        kpi2.metric("Maksymalna prognoza (demo)", "brak danych")
+
+    bdl_covered_count = sum(1 for r in records if r["has_bdl_stand_data"])
+    kpi3.metric("Powiaty z profilem BDL", f"{bdl_covered_count} z {len(records)}")
+    valid_precip = [
+        float(r["precip_lag_14d_mm"])
+        for r in in_radius_records
+        if r["precip_lag_14d_mm"] is not None
+    ]
+    kpi4.metric(
+        "Średni opad skumulowany (14d)",
+        f"{(sum(valid_precip) / len(valid_precip)):.1f} mm" if valid_precip else "brak danych",
+    )
+
+    render_legend(color_mode="predictions", show_bdl_stands=False)
+    enriched_geojson = enrich_geojson_with_predictions(
+        bundle.areas_geojson,
+        records_by_area,
+        color_mode="predictions",
+    )
+    polygon_layer = pdk.Layer(
+        "GeoJsonLayer",
+        data=enriched_geojson,
+        opacity=0.72,
+        stroked=True,
+        filled=True,
+        extruded=False,
+        wireframe=True,
+        get_fill_color="properties.fill_color",
+        get_line_color="properties.line_color",
+        get_line_width=140,
+        line_width_min_pixels=1.5,
+        pickable=True,
+        auto_highlight=True,
+    )
+    view_state = pdk.ViewState(
+        latitude=PILOT_REGION.center_lat,
+        longitude=PILOT_REGION.center_lon,
+        zoom=PILOT_REGION.default_zoom,
+        pitch=0,
+    )
+    tooltip = {
+        "html": (
+            "<b>{tooltip_header}</b><br/>"
+            "{tooltip_sub}<hr style='margin:4px 0;'/>"
+            "{tooltip_bdl}"
+        ),
+        "style": {
+            "backgroundColor": "#1F2421",
+            "color": "#F7F6F2",
+            "fontSize": "12px",
+            "padding": "10px",
+            "borderRadius": "4px",
+        },
+    }
+    st.pydeck_chart(
+        pdk.Deck(
+            layers=[polygon_layer],
+            initial_view_state=view_state,
+            tooltip=tooltip,
+            map_style="light",
+        ),
+        use_container_width=True,
+    )
+    if in_radius_records:
+        st.dataframe(pd.DataFrame(in_radius_records), use_container_width=True, hide_index=True)
+
+
+def main() -> None:
+    st.set_page_config(
+        page_title="Gdzie na grzyby — Dolny Śląsk",
+        layout="wide",
+    )
+    st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+
+    st.markdown(
+        f"<div class='app-header'>"
+        f"<p class='app-title'>Gdzie na grzyby — przestrzenna eksploracja raportów i analiza wysypu</p>"
+        f"<p class='app-subtitle'>"
+        f"Obszar pilotażowy: <b>{PILOT_REGION.voivodeship_name} (TERYT {PILOT_REGION.voivodeship_id}, 30 powiatów)</b> "
+        f"&nbsp;|&nbsp; Jednostka przestrzenna: <b>{PILOT_REGION.spatial_unit_name}</b> "
+        f"&nbsp;|&nbsp; Jednostka wyniku: <b>szt./h</b>"
+        f"</p></div>",
+        unsafe_allow_html=True,
+    )
+
+    with st.sidebar:
+        st.subheader("Źródło danych aplikacji")
+        default_mode = os.getenv("GRZYBY_DATA_ENV", "real").lower()
+        mode_options = {
+            "real": "Rzeczywiste raporty i pokrycie (data/processed/, [GRZ-12])",
+            "demo": "Próbka demonstracyjna UI (data/demo/, [GRZ-02])",
+        }
+        selected_mode = st.selectbox(
+            "Tryb danych",
+            options=list(mode_options.keys()),
+            index=0 if default_mode != "demo" else 1,
+            format_func=lambda k: mode_options[k],
+            help=(
+                "Domyślny tryb [GRZ-12] wczytuje rzeczywiste dane obserwacyjne z data/processed/ "
+                "(reports.parquet, features.parquet, forest_features.parquet, areas.geojson)."
+            ),
+        )
+
+    audit_samples = load_sprint1_audit_samples()
+
+    if selected_mode == "real":
+        real_bundle = load_real_observations_bundle()
+        render_real_observations_view(real_bundle=real_bundle, audit_samples=audit_samples)
+    else:
+        demo_bundle = load_dataset_bundle("demo")
+        render_demo_predictions_view(bundle=demo_bundle, audit_samples=audit_samples)
 
     st.markdown(
         f"<div class='footer-note'>{ACADEMIC_ATTRIBUTION}</div>",

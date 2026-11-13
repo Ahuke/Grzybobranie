@@ -2,7 +2,8 @@
 Testy dymne (smoke tests) szkieletu aplikacji, kontraktu danych ([GRZ-02]),
 granic regionu i wektorowej próbki leśnej BDL ([GRZ-05]), audytu ([GRZ-06]),
 potoku raportów ([GRZ-07]), łączenia przestrzennego ([GRZ-08]), pogody ([GRZ-09]),
-zbioru cech Point-in-Time ([GRZ-10]) oraz protokołu ewaluacji ([GRZ-13]).
+zbioru cech Point-in-Time ([GRZ-10]), EDA ([GRZ-11]), eksploracji w Streamlit ([GRZ-12])
+oraz protokołu ewaluacji ([GRZ-13]).
 
 Uruchomienie:
     pytest -v
@@ -23,21 +24,27 @@ if str(ROOT_DIR) not in sys.path:
 
 from src.config import (
     ABUNDANCE_CLASSES,
+    OBSERVATION_SPECIES_FILTER_LABELS,
     PILOT_REGION,
     PROCESSED_DIR,
     REFERENCE_CITIES,
     SPECIES_LABELS,
 )
 from src.data_loader import (
+    filter_real_observations_and_aggregate_by_county,
     load_areas_geojson,
     load_dataset_bundle,
+    load_real_observations_bundle,
     load_reports_csv,
     load_sprint1_audit_samples,
     load_weather_csv,
+    verify_record_against_source_tables,
 )
 from src.geo_utils import (
+    build_precise_report_points_layer_data,
     enrich_bdl_stands_geojson,
     enrich_geojson_with_predictions,
+    enrich_geojson_with_real_observations,
     haversine_km,
 )
 
@@ -272,7 +279,7 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
 
     def test_spatial_features_and_no_false_precision_grz08(self) -> None:
         """
-        Weryfikuje przetwarzanie przestrzenne [GRZ-08]:
+        Weryfikuje przetwarzanie przestrzymy [GRZ-08]:
         - obecność i schemat `data/processed/forest_features.parquet` i `.csv` z kluczem region_id,
         - obecność klucza region_id w `data/processed/areas.geojson`,
         - jawną klasyfikację precyzji w `reports_spatial.parquet` (point_precise vs county_aggregate),
@@ -476,7 +483,6 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertEqual(row_174806["feature_cutoff_date"], "2025-10-04")
         self.assertEqual(row_174806["window_7d_start_date"], "2025-09-28")
         self.assertEqual(row_174806["window_end_date"], "2025-10-04")
-        # Suma 2025-09-28..2025-10-04 = 0.0 + 0.3 + 1.6 + 2.8 + 0.4 + 0.0 + 7.9 = 13.0 mm (bez 0.9 mm z 2025-10-05!)
         self.assertAlmostEqual(float(row_174806["precip_lag_7d_mm"]), 13.0, places=2)
         self.assertAlmostEqual(float(row_174806["temp_mean_7d_c"]), 8.3, places=1)
         self.assertEqual(int(row_174806["rainy_days_lag_7d_count"]), 3)
@@ -553,7 +559,7 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         import json
         import numpy as np
         import pandas as pd
-        from src.evaluation import classify_abundance, compute_regression_metrics, compute_classification_metrics
+        from src.evaluation import classify_abundance
         from src.baseline import GlobalMeanRegressor, MajorityClassClassifier
 
         split_meta_path = PROCESSED_DIR / "split_metadata.json"
@@ -659,7 +665,6 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
 
         reg_sens = summary["regional_dominance_sensitivity"]
         self.assertEqual(len(reg_sens), 4)
-        # Korelacja z rainy_days_lag_14d pozostaje dodatnia po odrzuceniu Top-1, Top-3 i Top-5 powiatów
         for s in reg_sens:
             self.assertGreater(s["corr_rainy_days_14d"]["pearson_r"], 0.20)
             self.assertGreater(s["corr_precip_slice_15_21d"]["spearman_rho"], 0.14)
@@ -677,7 +682,6 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertIn("precip_slice_15_21d_mm", corr_map)
         self.assertIn("rainy_days_lag_14d_count", corr_map)
 
-        # Odnotowanie słabej/ujemnej korelacji dla krótkiego okna 7d i silniejszej dodatniej dla 14-21d
         self.assertLess(corr_map["precip_lag_7d_mm"]["pearson_r"], 0.0)
         self.assertGreater(corr_map["precip_lag_21d_mm"]["pearson_r"], 0.0)
         self.assertGreater(corr_map["precip_slice_15_21d_mm"]["spearman_rho"], 0.15)
@@ -710,6 +714,129 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         nb_data = json.loads(notebook_path.read_text(encoding="utf-8"))
         self.assertEqual(nb_data["nbformat"], 4)
         self.assertGreaterEqual(len(nb_data["cells"]), 6)
+
+    def test_real_reports_and_coverage_in_streamlit_grz12(self) -> None:
+        """
+        Weryfikuje wszystkie 5 warunków ukończenia zadania [GRZ-12]:
+        1. Mapa wczytuje rzeczywiste dane z `data/processed/` (`is_demo = False`, `N = 513` raportów, 30 powiatów),
+           a nie tylko próbkę demonstracyjną (`data/demo/`).
+        2. Widoczne są okres (`2025-09-01` .. `2025-11-02`), legenda i jednostka przestrzenna (`powiat`, TERYT 4-znaki).
+        3. Filtry (zakres dat / pojedyncza data, gatunek obserwacji, powiat, promień) zmieniają mapę
+           oraz liczebność dostępnych raportów.
+        4. Brak raportów w powiecie (`reports_count == 0`) jest pokazany jako brak danych (`BRAK_DANYCH` / `NULL`),
+           a nigdy jako `0.0 szt./h`.
+        5. Można obejrzeć próbkę rekordów i sprawdzić zgodność 1:1 z tabelą źródłową (`reports.parquet`,
+           `reports_spatial.parquet`, `forest_features.parquet`, `features.parquet`).
+        """
+        real_bundle = load_real_observations_bundle()
+
+        # 1. Rzeczywiste dane, a nie próbka demonstracyjna
+        self.assertEqual(len(real_bundle.areas_by_id), 30)
+        self.assertFalse(any(p.get("is_demo", True) for p in real_bundle.areas_by_id.values()))
+        self.assertEqual(len(real_bundle.reports_df), 518)
+        self.assertEqual(len(real_bundle.features_df), 513)
+        self.assertEqual(real_bundle.min_date, "2025-09-01")
+        self.assertEqual(real_bundle.max_date, "2025-11-02")
+
+        # 2 & 4. Pełny sezon: 28 powiatów z danymi, 2 powiaty (0217, 0262) jako BRAK_DANYCH (mean_yield = None, NIE 0.0)
+        res_all = filter_real_observations_and_aggregate_by_county(
+            real_bundle=real_bundle,
+            date_from="2025-09-01",
+            date_to="2025-11-02",
+            species_filter="all",
+        )
+        self.assertEqual(res_all["filtered_reports_count"], 513)
+        self.assertEqual(res_all["covered_counties_count"], 28)
+        self.assertEqual(res_all["no_data_counties_count"], 2)
+        self.assertEqual(sorted(res_all["no_data_counties_ids"]), ["0217", "0262"])
+
+        for no_data_id in ("0217", "0262"):
+            rec_empty = res_all["county_by_id"][no_data_id]
+            self.assertEqual(rec_empty["reports_count"], 0)
+            self.assertFalse(rec_empty["has_reports"])
+            self.assertEqual(rec_empty["status_code"], "BRAK_DANYCH")
+            self.assertIsNone(rec_empty["mean_yield_pcs_per_h"])
+
+        # Sprawdzenie wzbogacenia GeoJSON na potrzeby mapy w obu trybach kolorowania
+        geo_yield = enrich_geojson_with_real_observations(
+            real_bundle.areas_geojson, res_all["county_by_id"], color_mode="observed_yield"
+        )
+        geo_cov = enrich_geojson_with_real_observations(
+            real_bundle.areas_geojson, res_all["county_by_id"], color_mode="report_coverage"
+        )
+        self.assertEqual(len(geo_yield["features"]), 30)
+        self.assertEqual(len(geo_cov["features"]), 30)
+
+        props_0217 = [
+            f["properties"] for f in geo_yield["features"] if f["properties"]["area_id"] == "0217"
+        ][0]
+        self.assertEqual(props_0217["status_code"], "BRAK_DANYCH")
+        self.assertIn("BRAK DANYCH", props_0217["observed_yield_label"])
+        self.assertEqual(props_0217["fill_color"], [180, 180, 180, 150])
+
+        props_0201_cov = [
+            f["properties"] for f in geo_cov["features"] if f["properties"]["area_id"] == "0201"
+        ][0]
+        self.assertEqual(props_0201_cov["reports_count"], 101)
+        self.assertEqual(props_0201_cov["fill_color"], [29, 78, 137, 215])
+
+        # Punkty precyzyjnych zgłoszeń nie obejmują raportów county_aggregate (479 z 513; 34 to county_aggregate)
+        pts_all = build_precise_report_points_layer_data(res_all["filtered_reports_df"])
+        self.assertEqual(len(pts_all), 479)
+
+        # 3. Zmiana filtrów (okres dat, gatunek obserwacji, pojedynczy powiat) zmienia mapę i liczebność raportów
+        res_podgrzybek = filter_real_observations_and_aggregate_by_county(
+            real_bundle=real_bundle,
+            date_from="2025-09-01",
+            date_to="2025-11-02",
+            species_filter="podgrzybek_brunatny",
+        )
+        self.assertEqual(res_podgrzybek["filtered_reports_count"], 114)
+        self.assertLess(res_podgrzybek["covered_counties_count"], 28)
+        self.assertGreater(res_podgrzybek["no_data_counties_count"], 2)
+
+        res_borowik = filter_real_observations_and_aggregate_by_county(
+            real_bundle=real_bundle,
+            date_from="2025-09-01",
+            date_to="2025-11-02",
+            species_filter="borowik_szlachetny",
+        )
+        self.assertEqual(res_borowik["filtered_reports_count"], 78)
+
+        res_single_day = filter_real_observations_and_aggregate_by_county(
+            real_bundle=real_bundle,
+            date_from="2025-10-05",
+            date_to="2025-10-05",
+            species_filter="all",
+        )
+        self.assertGreater(res_single_day["filtered_reports_count"], 0)
+        self.assertLess(res_single_day["filtered_reports_count"], 50)
+        self.assertGreater(res_single_day["no_data_counties_count"], 15)
+
+        res_county_0208 = filter_real_observations_and_aggregate_by_county(
+            real_bundle=real_bundle,
+            date_from="2025-09-01",
+            date_to="2025-11-02",
+            species_filter="all",
+            region_filter="0208",
+        )
+        self.assertEqual(res_county_0208["in_radius_counties_count"], 1)
+        self.assertEqual(res_county_0208["covered_counties_ids"], ["0208"])
+        self.assertEqual(res_county_0208["filtered_reports_count"], 24)
+
+        # 5. Weryfikacja zgodności próbki rekordów z tabelami źródłowymi (1:1)
+        for sample_rid in ("DG174806", "DG174714", "DG177228", "DG174777"):
+            ver = verify_record_against_source_tables(sample_rid, real_bundle)
+            self.assertTrue(
+                ver["all_fields_match"],
+                f"Rekord {sample_rid} ma niezgodność ze źródłem: {ver['comparison_rows']}",
+            )
+            self.assertEqual(len(ver["comparison_rows"]), 13)
+            self.assertTrue(ver["source_url"].startswith("https://www.grzyby.pl/"))
+
+        # Sprawdzenie słownika etykiet filtra gatunku obserwacji
+        self.assertIn("mieszane", OBSERVATION_SPECIES_FILTER_LABELS)
+        self.assertIn("__NULL__", OBSERVATION_SPECIES_FILTER_LABELS)
 
 
 if __name__ == "__main__":

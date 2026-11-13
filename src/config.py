@@ -1,6 +1,6 @@
 """
 Konfiguracja regionu pilotażowego, ścieżek danych oraz słowników domenowych
-zgodna z ustaleniami w docs/mvp.md oraz docs/data_contract.md ([GRZ-01], [GRZ-02]).
+zgodna z ustaleniami w docs/mvp.md oraz docs/data_contract.md ([GRZ-01], [GRZ-02], [GRZ-12]).
 """
 
 from __future__ import annotations
@@ -74,13 +74,28 @@ SPECIES_LABELS: dict[str, str] = {
     "kania": "Czubajka kania",
 }
 
+# Rozszerzony słownik filtra obserwacji dla rzeczywistych raportów ([GRZ-12])
+# Filtr gatunku dotyczy na tym etapie obserwacji, a nie osobnego modelu dla gatunku.
+OBSERVATION_SPECIES_FILTER_LABELS: dict[str, str] = {
+    "all": "Wszystkie raporty ogółem",
+    "mieszane": "Zbiory mieszane (wielogatunkowe)",
+    "podgrzybek_brunatny": "Podgrzybek brunatny",
+    "borowik_szlachetny": "Borowik szlachetny",
+    "kania": "Czubajka kania",
+    "maslak_zwyczajny": "Maślak zwyczajny",
+    "kurka": "Pieprznik jadalny (kurka)",
+    "__NULL__": "Brak deklaracji gatunku (NULL, w tym zbiory 0.0 szt./h)",
+}
+
 SPECIES_HABITAT_HINTS: dict[str, str] = {
     "all": "Wszystkie typy siedlisk leśnych (BDL)",
+    "mieszane": "Różne typy siedlisk leśnych (kosz wielogatunkowy)",
     "borowik_szlachetny": "Lasy dębowe, bukowe, mieszane i górskie bory świerkowe",
     "podgrzybek_brunatny": "Bory sosnowe i świerkowe na siedliskach świeżych i wilgotnych",
     "kurka": "Bory sosnowe i mieszane na siedliskach świeżych (z mchem)",
     "maslak_zwyczajny": "Młodniki sosnowe i obrzeża borów sosnowych",
     "kania": "Przecinki, obrzeża lasów mieszanych i liściastych",
+    "__NULL__": "Raporty ogólne bez wskazania pojedynczego gatunku lub jawne puste wyjścia (0.0 szt./h)",
 }
 
 # Klasy obfitości wysypu zgodne z docs/mvp.md (Sekcja 3) — stonowana paleta kartograficzna
@@ -104,8 +119,8 @@ ABUNDANCE_CLASSES: dict[str, dict[str, object]] = {
         "hex": "#A84232",
     },
     "BRAK_DANYCH": {
-        "label": "Poza promieniem / brak danych",
-        "description": "Brak predykcji dla wybranego filtra lub obszar poza promieniem",
+        "label": "Brak danych (0 raportów — NULL)",
+        "description": "Brak raportów w wybranym okresie/filtrze lub obszar poza promieniem (NULL != 0.0 szt./h)",
         "rgba": [150, 150, 144, 115],
         "hex": "#969690",
     },

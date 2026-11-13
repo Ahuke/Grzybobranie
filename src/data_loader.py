@@ -4,8 +4,13 @@ Moduł wczytywania i walidacji danych zgodny z kontraktem danych (docs/data_cont
 Zapewnia:
 - ścisłą separację środowiska demonstracyjnego (`data/demo/`, `is_demo = True`)
   od środowiska produkcyjnego (`data/processed/`, `is_demo = False`),
-- zachowanie 4-znakowego kodu TERYT (`area_id`, np. `"0201"`),
+- wczytywanie pełnego zbioru rzeczywistych raportów i pokrycia danych dla widoku
+  eksploracyjnego w Streamlit ([GRZ-12]: `areas.geojson`, `reports.parquet`,
+  `reports_spatial.parquet`, `forest_features.parquet`, `weather.csv`, `features.parquet`),
+- zachowanie 4-znakowego kodu TERYT (`area_id` / `region_id`, np. `"0201"`),
 - poprawne rozróżnienie pomiaru zerowego (`0.0`) od braku informacji (`NULL` / `None`),
+  w tym pokazywanie powiatów z `0` raportów jako `BRAK_DANYCH (NULL)`, a nie `0.0 szt./h`,
+- weryfikację zgodności pojedynczych rekordów z tabelami źródłowymi ([GRZ-12]),
 - dostęp do próbek audytowych ze Sprintu 1 (`data/sample/`, w tym granic regionu i BDL [GRZ-05]),
 - odporność na brak danych BDL (brak plików lub atrybutów BDL nie blokuje wczytania granic regionu).
 """
@@ -13,17 +18,20 @@ Zapewnia:
 from __future__ import annotations
 
 import csv
-import json
 from dataclasses import dataclass
+import json
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
+
 from src.config import DEMO_DIR, PROCESSED_DIR, SAMPLE_DIR
+from src.geo_utils import haversine_km
 
 
 @dataclass(frozen=True)
 class DatasetBundle:
-    """Komplet danych wczytanych dla wybranego środowiska."""
+    """Komplet danych wczytanych dla wybranego środowiska kontraktu danych."""
 
     env_mode: str  # "demo" lub "prod"
     is_fallback_to_demo: bool
@@ -35,11 +43,32 @@ class DatasetBundle:
     weather: list[dict[str, Any]]
 
 
+@dataclass(frozen=True)
+class RealObservationsBundle:
+    """
+    Komplet rzeczywistych danych obserwacyjnych, przestrzennych, pogodowych i cech
+    wczytanych z `data/processed/` na potrzeby eksploracji w Streamlit ([GRZ-12]).
+    """
+
+    status_message: str
+    areas_geojson: dict[str, Any]
+    areas_by_id: dict[str, dict[str, Any]]
+    reports_df: pd.DataFrame
+    reports_spatial_df: pd.DataFrame
+    forest_features_df: pd.DataFrame
+    features_df: pd.DataFrame
+    weather_rows: list[dict[str, Any]]
+    min_date: str
+    max_date: str
+
+
 def _parse_optional_float(value: str | float | int | None) -> float | None:
     """Konwertuje wartość na float, zachowując NULL (pusty ciąg -> None) i 0.0 jako 0.0."""
     if value is None:
         return None
     if isinstance(value, (float, int)):
+        if pd.isna(value):
+            return None
         return float(value)
     text = str(value).strip()
     if text == "" or text.lower() in {"null", "none", "nan"}:
@@ -245,6 +274,418 @@ def load_dataset_bundle(requested_mode: str = "demo") -> DatasetBundle:
         reports=reports,
         weather=weather,
     )
+
+
+def load_real_observations_bundle() -> RealObservationsBundle:
+    """
+    Wczytuje rzeczywisty zbiór danych przetworzonych z `data/processed/` ([GRZ-07]..[GRZ-10], [GRZ-12]):
+    - `areas.geojson` (30 powiatów Dolnego Śląska, `is_demo = False`),
+    - `reports.parquet` (518 raportów ogółem z grzyby.pl),
+    - `reports_spatial.parquet` (518 raportów po złączeniu przestrzennym z powiatami i BDL),
+    - `forest_features.parquet` (30 powiatów z cechami leśnymi BDL),
+    - `features.parquet` (513 ważnych obserwacji treningowych z oknami pogodowymi Point-in-Time),
+    - `weather.csv` (2910 rekordów dobowych Open-Meteo ERA5-Land).
+    """
+    areas_path = PROCESSED_DIR / "areas.geojson"
+    reports_path = PROCESSED_DIR / "reports.parquet"
+    reports_spatial_path = PROCESSED_DIR / "reports_spatial.parquet"
+    forest_path = PROCESSED_DIR / "forest_features.parquet"
+    features_path = PROCESSED_DIR / "features.parquet"
+    weather_path = PROCESSED_DIR / "weather.csv"
+
+    areas_geojson, areas_by_id = load_areas_geojson(areas_path)
+    reports_df = pd.read_parquet(reports_path)
+    reports_spatial_df = pd.read_parquet(reports_spatial_path)
+    forest_features_df = pd.read_parquet(forest_path)
+    features_df = pd.read_parquet(features_path)
+    weather_rows = load_weather_csv(weather_path)
+
+    # Normalizacja kodów TERYT z zachowaniem wiodącego zera
+    reports_df["area_id"] = reports_df["area_id"].astype(str).str.zfill(4)
+    reports_spatial_df["region_id"] = reports_spatial_df["region_id"].astype(str).str.zfill(4)
+    reports_spatial_df["area_id"] = reports_spatial_df["area_id"].astype(str).str.zfill(4)
+    forest_features_df["region_id"] = forest_features_df["region_id"].astype(str).str.zfill(4)
+    features_df["region_id"] = features_df["region_id"].astype(str).str.zfill(4)
+    features_df["area_id"] = features_df["area_id"].astype(str).str.zfill(4)
+
+    min_d = str(features_df["observation_date"].min())
+    max_d = str(features_df["observation_date"].max())
+    active_cnt = int(features_df["region_id"].nunique())
+
+    status_msg = (
+        f"Aktywny zbiór rzeczywistych obserwacji (`data/processed/`, `is_demo = False`): "
+        f"<b>{len(features_df)}</b> zwalidowanych raportów z portalu grzyby.pl "
+        f"(z {len(reports_df)} wyodrębnionych ogółem), okres <b>{min_d} – {max_d}</b>, "
+        f"pokrycie <b>{active_cnt} z {len(areas_by_id)}</b> powiatów Dolnego Śląska."
+    )
+
+    return RealObservationsBundle(
+        status_message=status_msg,
+        areas_geojson=areas_geojson,
+        areas_by_id=areas_by_id,
+        reports_df=reports_df,
+        reports_spatial_df=reports_spatial_df,
+        forest_features_df=forest_features_df,
+        features_df=features_df,
+        weather_rows=weather_rows,
+        min_date=min_d,
+        max_date=max_d,
+    )
+
+
+def _classify_observed_yield(mean_yield: float | None) -> str:
+    """Klasyfikuje obserwowaną średnią wydajność w powiecie lub zwraca BRAK_DANYCH dla None."""
+    if mean_yield is None or pd.isna(mean_yield):
+        return "BRAK_DANYCH"
+    val = float(mean_yield)
+    if val < 5.0:
+        return "BRAK"
+    if val <= 20.0:
+        return "SREDNIO"
+    return "WYSYP"
+
+
+def filter_real_observations_and_aggregate_by_county(
+    real_bundle: RealObservationsBundle,
+    date_from: str,
+    date_to: str,
+    species_filter: str = "all",
+    origin_lat: float = 51.1079,
+    origin_lon: float = 17.0385,
+    radius_km: float = 160.0,
+    region_filter: str = "ALL",
+) -> dict[str, Any]:
+    """
+    Filtruje rzeczywiste obserwacje z `features.parquet` (dołączając `location_raw` i `lat`/`lon`
+    z `reports_spatial.parquet`) po zakresie dat `[date_from, date_to]`, gatunku `species_filter`,
+    promieniu odległości `radius_km` oraz opcjonalnym powiecie `region_filter`.
+
+    Wyznacza dla każdego z 30 powiatów woj. dolnośląskiego (`0201`–`0265`) zagregowane pokrycie
+    i statystyki zbiorów, gwarantując spełnienie warunków [GRZ-12]:
+    - Filtry zmieniają zarówno liczebność dostępnych raportów, jak i mapę powiatów.
+    - Brak raportów w powiecie (`reports_count == 0`) jest jawnie oznaczony jako
+      `status_code = "BRAK_DANYCH"` i `mean_yield_pcs_per_h = None` (`NULL`), a NIGDY jako `0.0 szt./h`.
+    """
+    df = real_bundle.features_df.copy()
+
+    # Dołączenie surowej nazwy lokalizacji i współrzędnych z reports_spatial (relacja 1:1 po report_id)
+    spatial_extra = real_bundle.reports_spatial_df[
+        ["report_id", "location_raw", "lat", "lon", "is_county_aggregate", "spatial_precision_note"]
+    ].drop_duplicates(subset=["report_id"])
+    df = df.merge(spatial_extra, on="report_id", how="left")
+
+    # 1. Filtr zakresu dat obserwacji [date_from, date_to]
+    mask_date = (df["observation_date"] >= str(date_from)) & (
+        df["observation_date"] <= str(date_to)
+    )
+    df = df[mask_date]
+
+    # 2. Filtr gatunku (dotyczy obserwacji, a nie osobnego modelu ML dla gatunku!)
+    if species_filter and species_filter != "all":
+        if species_filter == "__NULL__":
+            df = df[df["dominant_species"].isna()]
+        else:
+            df = df[df["dominant_species"] == species_filter]
+
+    # 3. Odległość powiatów od punktu odniesienia
+    dist_by_region: dict[str, float] = {}
+    in_radius_by_region: dict[str, bool] = {}
+    for area_id, props in real_bundle.areas_by_id.items():
+        d_km = haversine_km(
+            origin_lat,
+            origin_lon,
+            float(props["centroid_lat"]),
+            float(props["centroid_lon"]),
+        )
+        dist_by_region[area_id] = d_km
+        in_radius_by_region[area_id] = d_km <= float(radius_km)
+
+    # Odfiltrowanie raportów spoza promienia i ewentualnego filtra pojedynczego powiatu
+    df["distance_from_origin_km"] = df["region_id"].map(dist_by_region)
+    df["in_radius"] = df["region_id"].map(in_radius_by_region)
+    df = df[df["in_radius"]]
+
+    if region_filter and region_filter != "ALL":
+        reg_norm = _normalize_area_id(region_filter)
+        df = df[df["region_id"] == reg_norm]
+
+    df = df.sort_values(
+        by=["observation_date", "region_id", "report_id"], ascending=[False, True, True]
+    ).reset_index(drop=True)
+
+    # 4. Najnowszy rekord pogodowy z końca wybranego okresu (date <= date_to) dla każdego powiatu
+    weather_by_area: dict[str, dict[str, Any]] = {}
+    for w in sorted(real_bundle.weather_rows, key=lambda x: x["date"]):
+        if w["date"] <= str(date_to):
+            weather_by_area[w["area_id"]] = w
+
+    # 5. Agregacja na poziomie wszystkich 30 powiatów
+    county_records: list[dict[str, Any]] = []
+    county_by_id: dict[str, dict[str, Any]] = {}
+
+    grouped = {reg_id: grp for reg_id, grp in df.groupby("region_id")}
+
+    for area_id, area_props in real_bundle.areas_by_id.items():
+        d_km = dist_by_region[area_id]
+        in_rad = in_radius_by_region[area_id]
+        if region_filter and region_filter != "ALL" and area_id != _normalize_area_id(region_filter):
+            in_rad = False
+
+        grp = grouped.get(area_id)
+        rep_cnt = int(len(grp)) if grp is not None else 0
+
+        if rep_cnt > 0 and grp is not None and in_rad:
+            mean_y = round(float(grp["yield_pcs_per_h"].mean()), 2)
+            med_y = round(float(grp["yield_pcs_per_h"].median()), 2)
+            max_y = round(float(grp["yield_pcs_per_h"].max()), 2)
+            zero_cnt = int((grp["yield_pcs_per_h"] == 0.0).sum())
+            precise_cnt = int((grp["point_represents_specific_forest"] == True).sum())
+            county_agg_cnt = int((grp["point_represents_specific_forest"] == False).sum())
+            last_rep_date = str(grp["observation_date"].max())
+            status_code = _classify_observed_yield(mean_y)
+            has_reports = True
+        else:
+            # Kluczowa reguła [GRZ-12]: brak raportów to BRAK_DANYCH (None / NULL), nigdy 0.0 szt./h!
+            mean_y = None
+            med_y = None
+            max_y = None
+            zero_cnt = 0
+            precise_cnt = 0
+            county_agg_cnt = 0
+            last_rep_date = None
+            status_code = "BRAK_DANYCH" if in_rad else "POZA_PROMIENIEM"
+            has_reports = False
+
+        w_rec = weather_by_area.get(area_id, {})
+
+        rec = {
+            "area_id": area_id,
+            "region_id": area_id,
+            "area_name": area_props.get("area_name", area_id),
+            "total_area_km2": area_props.get("total_area_km2"),
+            "distance_km": d_km,
+            "in_radius": in_rad,
+            "reports_count": rep_cnt if in_rad else 0,
+            "has_reports": has_reports,
+            "status_code": status_code,
+            "abundance_class": status_code if status_code in {"WYSYP", "SREDNIO", "BRAK"} else "BRAK_DANYCH",
+            "mean_yield_pcs_per_h": mean_y,
+            "median_yield_pcs_per_h": med_y,
+            "max_yield_pcs_per_h": max_y,
+            "zero_harvest_reports_count": zero_cnt,
+            "point_precise_count": precise_cnt,
+            "county_aggregate_count": county_agg_cnt,
+            "last_report_date": last_rep_date,
+            "forest_cover_pct": area_props.get("forest_cover_pct"),
+            "pine_share_pct": area_props.get("pine_share_pct"),
+            "oak_beech_share_pct": area_props.get("oak_beech_share_pct"),
+            "spruce_share_pct": area_props.get("spruce_share_pct"),
+            "mean_stand_age_years": area_props.get("mean_stand_age_years"),
+            "dominant_moisture_type": area_props.get("dominant_moisture_type"),
+            "has_bdl_stand_data": bool(
+                area_props.get("has_bdl_stand_data")
+                or (
+                    area_props.get("pine_share_pct") is not None
+                    and area_props.get("mean_stand_age_years") is not None
+                )
+            ),
+            "bdl_sample_stands_count": int(area_props.get("bdl_sample_stands_count") or 0),
+            "precip_lag_7d_mm": w_rec.get("precip_lag_7d_mm"),
+            "precip_lag_14d_mm": w_rec.get("precip_lag_14d_mm"),
+            "precip_lag_21d_mm": w_rec.get("precip_lag_21d_mm"),
+            "temp_min_night_c": w_rec.get("temp_min_night_c"),
+            "soil_moisture_0_7cm_m3m3": w_rec.get("soil_moisture_0_7cm_m3m3"),
+            "is_demo": False,
+        }
+        county_records.append(rec)
+        county_by_id[area_id] = rec
+
+    county_records.sort(
+        key=lambda r: (
+            r["in_radius"],
+            r["has_reports"],
+            r["reports_count"],
+            r["mean_yield_pcs_per_h"] if r["mean_yield_pcs_per_h"] is not None else -1.0,
+            -r["distance_km"],
+        ),
+        reverse=True,
+    )
+
+    in_radius_counties = [r for r in county_records if r["in_radius"]]
+    covered_counties = [r for r in in_radius_counties if r["has_reports"]]
+    missing_counties = [r for r in in_radius_counties if not r["has_reports"]]
+
+    return {
+        "filtered_reports_df": df,
+        "filtered_reports_count": int(len(df)),
+        "total_valid_reports_count": int(len(real_bundle.features_df)),
+        "county_records": county_records,
+        "county_by_id": county_by_id,
+        "in_radius_counties_count": len(in_radius_counties),
+        "covered_counties_count": len(covered_counties),
+        "no_data_counties_count": len(missing_counties),
+        "covered_counties_ids": [r["area_id"] for r in covered_counties],
+        "no_data_counties_ids": [r["area_id"] for r in missing_counties],
+        "date_from": str(date_from),
+        "date_to": str(date_to),
+        "species_filter": species_filter,
+    }
+
+
+def verify_record_against_source_tables(
+    report_id: str,
+    real_bundle: RealObservationsBundle,
+) -> dict[str, Any]:
+    """
+    Porównuje pojedynczy rekord `report_id` pomiędzy:
+    1) tabelą źródłową raportów `data/processed/reports.parquet` ([GRZ-07]),
+    2) tabelą przestrzenną `data/processed/reports_spatial.parquet` ([GRZ-08]),
+    3) tabelą cech leśnych `data/processed/forest_features.parquet` ([GRZ-08]),
+    4) finalną tabelą analityczną `data/processed/features.parquet` ([GRZ-10]).
+
+    Pozwala użytkownikowi w Streamlit sprawdzić ręcznie zgodność próbki rekordów
+    z tabelami źródłowymi (warunek ukończenia #5 zadania [GRZ-12]).
+    """
+    rid = str(report_id).strip()
+    rep_rows = real_bundle.reports_df[real_bundle.reports_df["report_id"] == rid]
+    spat_rows = real_bundle.reports_spatial_df[real_bundle.reports_spatial_df["report_id"] == rid]
+    feat_rows = real_bundle.features_df[real_bundle.features_df["report_id"] == rid]
+
+    if rep_rows.empty or spat_rows.empty or feat_rows.empty:
+        raise KeyError(f"Nie znaleziono raportu o identyfikatorze {rid} w tabelach przetworzonych.")
+
+    r_src = rep_rows.iloc[0]
+    r_spat = spat_rows.iloc[0]
+    r_feat = feat_rows.iloc[0]
+
+    reg_id = str(r_feat["region_id"]).zfill(4)
+    f_rows = real_bundle.forest_features_df[real_bundle.forest_features_df["region_id"] == reg_id]
+    r_forest = f_rows.iloc[0] if not f_rows.empty else {}
+
+    def _fmt(v: Any) -> str:
+        if v is None or pd.isna(v):
+            return "NULL"
+        if isinstance(v, float):
+            return f"{v:.4g}" if abs(v) < 1.0 and v != 0.0 else f"{v:.2f}"
+        return str(v)
+
+    def _same(a: Any, b: Any) -> bool:
+        if (a is None or pd.isna(a)) and (b is None or pd.isna(b)):
+            return True
+        if (a is None or pd.isna(a)) or (b is None or pd.isna(b)):
+            return False
+        if isinstance(a, (float, int)) and isinstance(b, (float, int)):
+            return abs(float(a) - float(b)) < 1e-4
+        return str(a).strip() == str(b).strip()
+
+    checks = [
+        (
+            "report_id (ID raportu)",
+            "reports.parquet [GRZ-07]",
+            r_src.get("report_id"),
+            r_feat.get("report_id"),
+        ),
+        (
+            "harvest_date / observation_date",
+            "reports.parquet [GRZ-07]",
+            r_src.get("harvest_date"),
+            r_feat.get("observation_date"),
+        ),
+        (
+            "publication_date (data publikacji)",
+            "reports.parquet [GRZ-07]",
+            r_src.get("publication_date"),
+            r_feat.get("publication_date"),
+        ),
+        (
+            "region_id / area_id (TERYT powiatu)",
+            "reports.parquet + reports_spatial.parquet",
+            r_src.get("area_id"),
+            r_feat.get("region_id"),
+        ),
+        (
+            "place_id (ID lokalizacji grzyby.pl)",
+            "reports.parquet [GRZ-07]",
+            r_src.get("place_id"),
+            r_feat.get("place_id"),
+        ),
+        (
+            "yield_pcs_per_h [szt./h] (etykieta)",
+            "reports.parquet [GRZ-07]",
+            r_src.get("yield_pcs_per_h"),
+            r_feat.get("yield_pcs_per_h"),
+        ),
+        (
+            "dominant_species (gatunek dominujący)",
+            "reports.parquet [GRZ-07]",
+            r_src.get("dominant_species"),
+            r_feat.get("dominant_species"),
+        ),
+        (
+            "harvest_duration_h [h] (czas zbioru)",
+            "reports.parquet [GRZ-07]",
+            r_src.get("harvest_duration_h"),
+            r_feat.get("harvest_duration_h"),
+        ),
+        (
+            "total_pieces [szt.] (liczba sztuk)",
+            "reports.parquet [GRZ-07]",
+            r_src.get("total_pieces"),
+            r_feat.get("total_pieces"),
+        ),
+        (
+            "spatial_precision (dokładność lokalizacji)",
+            "reports_spatial.parquet [GRZ-08]",
+            r_spat.get("spatial_precision"),
+            r_feat.get("spatial_precision"),
+        ),
+        (
+            "forest_cover_pct [%] (lesistość powiatu)",
+            "forest_features.parquet [GRZ-08]",
+            r_forest.get("forest_cover_pct"),
+            r_feat.get("forest_cover_pct"),
+        ),
+        (
+            "pine_share_pct [%] (udział sosny BDL)",
+            "forest_features.parquet [GRZ-08]",
+            r_forest.get("pine_share_pct"),
+            r_feat.get("pine_share_pct"),
+        ),
+        (
+            "source_url (adres źródła grzyby.pl)",
+            "reports.parquet [GRZ-07]",
+            r_src.get("source_url"),
+            r_feat.get("source_url"),
+        ),
+    ]
+
+    comparison_rows: list[dict[str, Any]] = []
+    all_match = True
+    for field_label, source_table, src_val, feat_val in checks:
+        matched = _same(src_val, feat_val)
+        if not matched:
+            all_match = False
+        comparison_rows.append(
+            {
+                "Pole": field_label,
+                "Tabela źródłowa": source_table,
+                "Wartość w tabeli źródłowej": _fmt(src_val),
+                "Wartość w features.parquet": _fmt(feat_val),
+                "Zgodność": "TAK (1:1)" if matched else "NIEZGODNOŚĆ",
+            }
+        )
+
+    return {
+        "report_id": rid,
+        "region_id": reg_id,
+        "region_name": str(r_feat.get("region_name", reg_id)),
+        "location_raw": str(r_src.get("location_raw") or "—"),
+        "observation_date": str(r_feat.get("observation_date")),
+        "feature_cutoff_date": str(r_feat.get("feature_cutoff_date")),
+        "source_url": str(r_src.get("source_url") or ""),
+        "all_fields_match": all_match,
+        "comparison_rows": comparison_rows,
+    }
 
 
 def load_sprint1_audit_samples() -> dict[str, Any]:

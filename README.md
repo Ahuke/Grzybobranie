@@ -4,7 +4,7 @@
 
 ---
 
-## 1. Szybki start — instalacja i uruchomienie aplikacji (`[GRZ-02]`, `[GRZ-05]`, `[GRZ-06]`)
+## 1. Szybki start — instalacja i uruchomienie aplikacji (`[GRZ-02]`, `[GRZ-05]`, `[GRZ-06]`, `[GRZ-12]`)
 
 ### Wymagania wstępne
 - **Python 3.11+** (zalecane użycie wirtualnego środowiska `.venv`)
@@ -48,15 +48,16 @@ pytest -v
 
 Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w [`docs/data_contract.md`](docs/data_contract.md) oraz [`docs/data_audit.md`](docs/data_audit.md) i obsługuje dwa odseparowane środowiska:
 
-1. **Tryb demonstracyjny UI (`data/demo/` — domyślny na starcie, wersjonowany w Git):**
-   - `data/demo/areas_demo.geojson` — rzeczywiste granice wszystkich **30 powiatów woj. dolnośląskiego (`TERYT 02`, `EPSG:4326`)** z Państwowego Rejestru Granic (PRG) wraz z cechami siedlisk leśnych BDL (`[GRZ-05]`),
-   - `data/demo/predictions_demo.csv` — przykładowe predykcje wydajności zbioru `[szt./h]` oraz klas (`BRAK`, `SREDNIO`, `WYSYP`),
-   - `data/demo/reports_demo.csv` — przykładowe raporty zbieraczy,
-   - `data/demo/weather_demo.csv` — przykładowe szeregi pogodowe z oknami opóźnień (`lag 7d/14d/21d`).
+1. **Tryb rzeczywistych obserwacji i pokrycia danych (`data/processed/` — domyślny widok eksploracyjny `[GRZ-12]`):**
+   - `data/processed/areas.geojson` — rzeczywiste granice **30 powiatów woj. dolnośląskiego (`TERYT 02`, `EPSG:4326`, `is_demo = False`)** wraz z cechami siedliskowymi BDL,
+   - `data/processed/reports.parquet` (`N = 518`) oraz `data/processed/reports_spatial.parquet` (`N = 518`) — rzeczywiste zgłoszenia z portalu `grzyby.pl` po złączeniu przestrzennym z powiatami (`484 point_precise`, `34 county_aggregate`),
+   - `data/processed/forest_features.parquet` (`N = 30`) — profil leśny BDL dla 30 powiatów,
+   - `data/processed/weather.csv` (`N = 2910`) — szeregi dobowe Open-Meteo ERA5-Land (`2025-08-01 .. 2025-11-05`),
+   - `data/processed/features.parquet` (`N = 513`) — zwalidowany zbiór analityczny Point-in-Time (`2025-09-01 .. 2025-11-02`, pokrycie `28 z 30` powiatów).
+   - *Kluczowe właściwości widoku `[GRZ-12]`:* interaktywne filtrowanie po zakresie dat / pojedynczym dniu, gatunku obserwacji (`dominant_species`), powiecie i promieniu odległości; pokazywanie powiatów z `0` raportów jako `BRAK DANYCH (NULL)` (nigdy jako `0.0 szt./h`); interaktywny weryfikator zgodności 1:1 pojedynczego rekordu z tabelami źródłowymi.
+2. **Tryb demonstracyjny UI (`data/demo/` — wersjonowany w Git, dostępny z przełącznika w panelu bocznym `[GRZ-02]`):**
+   - `data/demo/areas_demo.geojson`, `data/demo/predictions_demo.csv`, `data/demo/reports_demo.csv`, `data/demo/weather_demo.csv`.
    - *Bezpieczeństwo:* wszystkie rekordy w `data/demo/` mają flagę `is_demo = True` i są wykluczone z treningu ML.
-2. **Tryb produkcyjny (`data/processed/` — generowany przez potok danych):**
-   - `data/processed/areas.geojson` (wersjonowany plik rzeczywistych granic 30 powiatów Dolnego Śląska w `EPSG:4326`, `is_demo = False`), `data/processed/reports.csv`, `data/processed/weather.csv`, `data/processed/predictions.csv`.
-   - Jeżeli wszystkie 4 pliki w `data/processed/` nie zostały jeszcze wygenerowane lokalnie, aplikacja wyświetla informację i bezpiecznie przełącza się na `data/demo/`.
 3. **Rzeczywiste próbki audytowe ze Sprintu 1 (`data/sample/` — wersjonowane w Git):**
    - `data/sample/reports_audit_52_ds.csv` — 52 rzeczywiste raporty z Dolnego Śląska (`[GRZ-03]`),
    - `data/sample/weather_daily_sample_ds.csv` — 210 dobowych rekordów z Open-Meteo ERA5-Land (`[GRZ-04]`),
@@ -77,8 +78,8 @@ Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w 
 ├── src/                                      # Kod źródłowy aplikacji i modułów wspólnych
 │   ├── __init__.py
 │   ├── config.py                             # Konfiguracja regionu pilotażowego (Dolny Śląsk, TERYT 02) i słowników
-│   ├── data_loader.py                        # Wczytywanie i walidacja plików wg kontraktu danych (NULL vs 0.0)
-│   ├── geo_utils.py                          # Obliczenia odległości (Haversine) i wzbogacanie warstw GeoJSON (powiaty + BDL)
+│   ├── data_loader.py                        # Wczytywanie, filtrowanie i weryfikacja 1:1 plików wg kontraktu ([GRZ-02], [GRZ-12])
+│   ├── geo_utils.py                          # Obliczenia odległości (Haversine) i wzbogacanie warstw GeoJSON ([GRZ-05], [GRZ-12])
 │   ├── features.py                           # Budowa zbioru cech Point-in-Time i słownika kolumn ([GRZ-10])
 │   ├── eda.py                                # Analiza eksploracyjna (EDA), opóźnienia 7/14/21d i wykresy ([GRZ-11])
 │   ├── evaluation.py                         # Protokół ewaluacji, podział czasowy i metryki ([GRZ-13])

@@ -1,8 +1,8 @@
 # Analizy i Eksploracja Danych (`notebooks/`)
 
 Katalog przeznaczony na notatniki Jupyter (`.ipynb`) oraz raporty analityczne:
-- eksploracyjna analiza danych (EDA) raportów z `grzyby.pl` (`[GRZ-11]`),
-- badanie opóźnienia opad $\rightarrow$ wysyp grzybów (*Lag Effect* 7 / 14 / 21 dni),
-- eksperymenty z cechami leśnymi BDL i ewaluacją modeli bazowych (`[GRZ-13]`, `[GRZ-17]`).
+- [`01_eda_lag_effect.ipynb`](01_eda_lag_effect.ipynb) — kompletny notatnik eksploracyjnej analizy danych (EDA) i badania opóźnienia opad $\rightarrow$ raportowane zbiory (`[GRZ-11]`),
+- pełny raport analityczny z osadzonymi wykresami: [`docs/eda_and_lag_analysis.md`](../docs/eda_and_lag_analysis.md),
+- skrypt odtwarzający obliczenia, wykresy PNG (`docs/figures/`) i notatnik: `python scripts/run_eda_and_lag_analysis.py`.
 
-> **Zasada higieny repozytorium:** Przed zatwierdzeniem zmian do Git wyczyść ciężkie wyjścia komórek lub zapisuj gotowe wykresy podsumowujące w `docs/`. Katalog `.ipynb_checkpoints/` jest ignorowany w `.gitignore`.
+> **Zasada higieny repozytorium:** Przed zatwierdzeniem zmian do Git wyczyść ciężkie wyjścia komórek lub zapisuj gotowe wykresy podsumowujące w `docs/figures/`. Katalog `.ipynb_checkpoints/` jest ignorowany w `.gitignore`.

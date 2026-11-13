@@ -80,6 +80,7 @@ Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w 
 │   ├── data_loader.py                        # Wczytywanie i walidacja plików wg kontraktu danych (NULL vs 0.0)
 │   ├── geo_utils.py                          # Obliczenia odległości (Haversine) i wzbogacanie warstw GeoJSON (powiaty + BDL)
 │   ├── features.py                           # Budowa zbioru cech Point-in-Time i słownika kolumn ([GRZ-10])
+│   ├── eda.py                                # Analiza eksploracyjna (EDA), opóźnienia 7/14/21d i wykresy ([GRZ-11])
 │   ├── evaluation.py                         # Protokół ewaluacji, podział czasowy i metryki ([GRZ-13])
 │   └── baseline.py                           # Modele bazowe (GlobalMean, PowiatMean, MajorityClass, Seasonal) ([GRZ-13])
 ├── scripts/                                  # Skrypty potoku danych, scrapingu, pogody i GIS/BDL
@@ -90,14 +91,17 @@ Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w 
 │   ├── build_spatial_features.py             # Łączenie przestrzenne raportów z lasami i powiatami ([GRZ-08])
 │   ├── build_weather_dataset.py              # Budowa historii pogodowej i okien 7/14/21d dla 30 powiatów ([GRZ-09])
 │   ├── build_features_dataset.py             # Łączenie raportów, lasów i pogody w features.parquet Point-in-Time ([GRZ-10])
+│   ├── run_eda_and_lag_analysis.py           # Odtwarzanie EDA, 5 wykresów PNG i notatnika Jupyter ([GRZ-11])
 │   └── build_split_and_baseline.py           # Podział czasowy train/val/test i benchmarki bazowe ([GRZ-13])
 ├── notebooks/                                # Notatniki Jupyter i analizy eksploracyjne (EDA, Lag Effect)
+│   ├── 01_eda_lag_effect.ipynb               # Notatnik EDA i analizy opóźnienia opad -> zbiory ([GRZ-11])
 │   └── README.md
 ├── models/                                   # Artefakty wytrenowanych modeli ML i metadane (binaria ignorowane w Git)
 │   └── README.md
 ├── tests/                                    # Testy jednostkowe i dymne szkieletu aplikacji, GIS/BDL i kontraktu danych
 │   └── test_smoke.py
 ├── docs/                                     # Dokumentacja projektowa, architektoniczna i raporty z audytów
+│   ├── figures/                              # Wykresy analityczne PNG z jednostkami, okresem i próbą n ([GRZ-11])
 │   ├── mvp.md                                # Zakres MVP zatwierdzony po audycie ([GRZ-01], [GRZ-06])
 │   ├── data_contract.md                      # Kontrakt danych: areas, reports, weather, predictions ([GRZ-01], [GRZ-06])
 │   ├── data_audit.md                         # Zbiorczy audyt danych, cel predykcji, odcięcie pogody i plan modelowania ([GRZ-06])
@@ -108,6 +112,7 @@ Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w 
 │   ├── spatial_join_bdl.md                   # Dokumentacja łączenia przestrzennego z powiatami i BDL ([GRZ-08])
 │   ├── weather_pipeline.md                   # Dokumentacja potoku pogodowego Open-Meteo dla 30 powiatów ([GRZ-09])
 │   ├── features_engineering.md               # Dokumentacja zbioru cech features.parquet i weryfikacji Point-in-Time ([GRZ-10])
+│   ├── eda_and_lag_analysis.md               # Raport EDA, efektu opóźnienia opad -> zbiory i rekomendacji ML ([GRZ-11])
 │   └── evaluation_protocol.md                # Dokumentacja podziału czasowego i modeli bazowych ([GRZ-13])
 └── data/                                     # Katalog danych
     ├── demo/                                 # Próbka demonstracyjna do budowy UI (is_demo = True, 30 powiatów)
@@ -120,6 +125,7 @@ Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w 
 
 ## 4. Dokumentacja projektu
 
+- [**Eksploracyjna Analiza Danych (EDA) i Opóźnienie Opad → Zbiory (`docs/eda_and_lag_analysis.md`)**](docs/eda_and_lag_analysis.md) *(`[GRZ-11]`)*
 - [**Inżynieria Cech i Zbiór Analityczny Point-in-Time (`docs/features_engineering.md`)**](docs/features_engineering.md) *(`[GRZ-10]`)*
 - [**Protokół Ewaluacji, Podział Czasowy i Modele Bazowe (`docs/evaluation_protocol.md`)**](docs/evaluation_protocol.md) *(`[GRZ-13]`)*
 - [**Potok Pogodowy dla Regionu Pilotażowego (`docs/weather_pipeline.md`)**](docs/weather_pipeline.md) *(`[GRZ-09]`)*

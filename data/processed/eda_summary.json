@@ -1,0 +1,1664 @@
+{
+  "task": "[GRZ-11] Eksploracyjna analiza danych (EDA) i badanie opóźnienia opad -> raportowane zbiory",
+  "yield_and_reports_distribution": {
+    "n_valid_observations": 513,
+    "n_total_extracted_reports": 518,
+    "n_excluded_reports": 5,
+    "period_start": "2025-09-01",
+    "period_end": "2025-11-02",
+    "calendar_days_span": 63,
+    "active_reporting_days": 62,
+    "mean_pcs_per_h": 18.59,
+    "std_pcs_per_h": 18.0,
+    "median_pcs_per_h": 15.0,
+    "iqr_25_pcs_per_h": 5.0,
+    "iqr_75_pcs_per_h": 30.0,
+    "p90_pcs_per_h": 40.0,
+    "min_pcs_per_h": 0.0,
+    "max_pcs_per_h": 120.0,
+    "skewness": 1.869,
+    "zero_harvest_reports_count": 45,
+    "zero_harvest_reports_pct": 8.77,
+    "abundance_classes_counts": {
+      "SREDNIO": 239,
+      "WYSYP": 162,
+      "BRAK": 112
+    },
+    "abundance_classes_pct": {
+      "SREDNIO": 46.59,
+      "WYSYP": 31.58,
+      "BRAK": 21.83
+    }
+  },
+  "regional_concentration": {
+    "total_pilot_regions": 30,
+    "active_regions_with_reports": 28,
+    "zero_report_regions": [
+      "0217",
+      "0262"
+    ],
+    "gini_coefficient_all_30_regions": 0.5443,
+    "gini_coefficient_active_28_regions": 0.5118,
+    "top_1_region_id": "0201",
+    "top_1_region_share_pct": 19.69,
+    "top_3_regions_ids": [
+      "0201",
+      "0214",
+      "0213"
+    ],
+    "top_3_regions_share_pct": 42.5,
+    "top_5_regions_ids": [
+      "0201",
+      "0214",
+      "0213",
+      "0220",
+      "0208"
+    ],
+    "top_5_regions_share_pct": 54.59,
+    "per_region_table": [
+      {
+        "region_id": "0201",
+        "region_name": "powiat bolesławiecki",
+        "reports_count": 101,
+        "mean_yield_pcs_per_h": 23.24,
+        "median_yield_pcs_per_h": 20.0,
+        "zero_reports_count": 3,
+        "forest_cover_pct": 61.4,
+        "share_of_total_reports_pct": 19.69
+      },
+      {
+        "region_id": "0214",
+        "region_name": "powiat oleśnicki",
+        "reports_count": 59,
+        "mean_yield_pcs_per_h": 14.97,
+        "median_yield_pcs_per_h": 12.0,
+        "zero_reports_count": 6,
+        "forest_cover_pct": 27.9,
+        "share_of_total_reports_pct": 11.5
+      },
+      {
+        "region_id": "0213",
+        "region_name": "powiat milicki",
+        "reports_count": 58,
+        "mean_yield_pcs_per_h": 26.52,
+        "median_yield_pcs_per_h": 20.0,
+        "zero_reports_count": 2,
+        "forest_cover_pct": 43.5,
+        "share_of_total_reports_pct": 11.31
+      },
+      {
+        "region_id": "0220",
+        "region_name": "powiat trzebnicki",
+        "reports_count": 38,
+        "mean_yield_pcs_per_h": 10.24,
+        "median_yield_pcs_per_h": 5.0,
+        "zero_reports_count": 3,
+        "forest_cover_pct": 28.4,
+        "share_of_total_reports_pct": 7.41
+      },
+      {
+        "region_id": "0208",
+        "region_name": "powiat kłodzki",
+        "reports_count": 24,
+        "mean_yield_pcs_per_h": 20.08,
+        "median_yield_pcs_per_h": 15.0,
+        "zero_reports_count": 5,
+        "forest_cover_pct": 48.9,
+        "share_of_total_reports_pct": 4.68
+      },
+      {
+        "region_id": "0222",
+        "region_name": "powiat wołowski",
+        "reports_count": 19,
+        "mean_yield_pcs_per_h": 17.21,
+        "median_yield_pcs_per_h": 15.0,
+        "zero_reports_count": 2,
+        "forest_cover_pct": 32.8,
+        "share_of_total_reports_pct": 3.7
+      },
+      {
+        "region_id": "0202",
+        "region_name": "powiat dzierżoniowski",
+        "reports_count": 19,
+        "mean_yield_pcs_per_h": 7.0,
+        "median_yield_pcs_per_h": 5.0,
+        "zero_reports_count": 0,
+        "forest_cover_pct": 27.5,
+        "share_of_total_reports_pct": 3.7
+      },
+      {
+        "region_id": "0206",
+        "region_name": "powiat karkonoski",
+        "reports_count": 18,
+        "mean_yield_pcs_per_h": 27.5,
+        "median_yield_pcs_per_h": 30.0,
+        "zero_reports_count": 2,
+        "forest_cover_pct": 45.8,
+        "share_of_total_reports_pct": 3.51
+      },
+      {
+        "region_id": "0218",
+        "region_name": "powiat średzki",
+        "reports_count": 17,
+        "mean_yield_pcs_per_h": 13.59,
+        "median_yield_pcs_per_h": 10.0,
+        "zero_reports_count": 1,
+        "forest_cover_pct": 11.8,
+        "share_of_total_reports_pct": 3.31
+      },
+      {
+        "region_id": "0223",
+        "region_name": "powiat wrocławski",
+        "reports_count": 16,
+        "mean_yield_pcs_per_h": 10.62,
+        "median_yield_pcs_per_h": 2.0,
+        "zero_reports_count": 3,
+        "forest_cover_pct": 14.2,
+        "share_of_total_reports_pct": 3.12
+      },
+      {
+        "region_id": "0215",
+        "region_name": "powiat oławski",
+        "reports_count": 15,
+        "mean_yield_pcs_per_h": 19.53,
+        "median_yield_pcs_per_h": 15.0,
+        "zero_reports_count": 1,
+        "forest_cover_pct": 18.5,
+        "share_of_total_reports_pct": 2.92
+      },
+      {
+        "region_id": "0216",
+        "region_name": "powiat polkowicki",
+        "reports_count": 15,
+        "mean_yield_pcs_per_h": 29.0,
+        "median_yield_pcs_per_h": 25.0,
+        "zero_reports_count": 0,
+        "forest_cover_pct": 34.1,
+        "share_of_total_reports_pct": 2.92
+      },
+      {
+        "region_id": "0219",
+        "region_name": "powiat świdnicki",
+        "reports_count": 14,
+        "mean_yield_pcs_per_h": 6.36,
+        "median_yield_pcs_per_h": 3.0,
+        "zero_reports_count": 4,
+        "forest_cover_pct": 21.2,
+        "share_of_total_reports_pct": 2.73
+      },
+      {
+        "region_id": "0221",
+        "region_name": "powiat wałbrzyski",
+        "reports_count": 13,
+        "mean_yield_pcs_per_h": 6.54,
+        "median_yield_pcs_per_h": 5.0,
+        "zero_reports_count": 2,
+        "forest_cover_pct": 41.6,
+        "share_of_total_reports_pct": 2.53
+      },
+      {
+        "region_id": "0205",
+        "region_name": "powiat jaworski",
+        "reports_count": 13,
+        "mean_yield_pcs_per_h": 24.23,
+        "median_yield_pcs_per_h": 20.0,
+        "zero_reports_count": 1,
+        "forest_cover_pct": 21.9,
+        "share_of_total_reports_pct": 2.53
+      },
+      {
+        "region_id": "0204",
+        "region_name": "powiat górowski",
+        "reports_count": 12,
+        "mean_yield_pcs_per_h": 28.42,
+        "median_yield_pcs_per_h": 22.5,
+        "zero_reports_count": 0,
+        "forest_cover_pct": 23.4,
+        "share_of_total_reports_pct": 2.34
+      },
+      {
+        "region_id": "0207",
+        "region_name": "powiat kamiennogórski",
+        "reports_count": 9,
+        "mean_yield_pcs_per_h": 11.28,
+        "median_yield_pcs_per_h": 5.0,
+        "zero_reports_count": 1,
+        "forest_cover_pct": 39.8,
+        "share_of_total_reports_pct": 1.75
+      },
+      {
+        "region_id": "0211",
+        "region_name": "powiat lubiński",
+        "reports_count": 8,
+        "mean_yield_pcs_per_h": 6.12,
+        "median_yield_pcs_per_h": 2.0,
+        "zero_reports_count": 4,
+        "forest_cover_pct": 31.5,
+        "share_of_total_reports_pct": 1.56
+      },
+      {
+        "region_id": "0264",
+        "region_name": "powiat m. Wrocław",
+        "reports_count": 7,
+        "mean_yield_pcs_per_h": 12.29,
+        "median_yield_pcs_per_h": 10.0,
+        "zero_reports_count": 1,
+        "forest_cover_pct": 7.6,
+        "share_of_total_reports_pct": 1.36
+      },
+      {
+        "region_id": "0210",
+        "region_name": "powiat lubański",
+        "reports_count": 7,
+        "mean_yield_pcs_per_h": 23.43,
+        "median_yield_pcs_per_h": 19.0,
+        "zero_reports_count": 0,
+        "forest_cover_pct": 44.2,
+        "share_of_total_reports_pct": 1.36
+      },
+      {
+        "region_id": "0209",
+        "region_name": "powiat legnicki",
+        "reports_count": 6,
+        "mean_yield_pcs_per_h": 20.83,
+        "median_yield_pcs_per_h": 12.5,
+        "zero_reports_count": 1,
+        "forest_cover_pct": 17.4,
+        "share_of_total_reports_pct": 1.17
+      },
+      {
+        "region_id": "0261",
+        "region_name": "powiat m. Jelenia Góra",
+        "reports_count": 6,
+        "mean_yield_pcs_per_h": 24.67,
+        "median_yield_pcs_per_h": 25.0,
+        "zero_reports_count": 1,
+        "forest_cover_pct": 26.2,
+        "share_of_total_reports_pct": 1.17
+      },
+      {
+        "region_id": "0225",
+        "region_name": "powiat zgorzelecki",
+        "reports_count": 5,
+        "mean_yield_pcs_per_h": 17.6,
+        "median_yield_pcs_per_h": 18.0,
+        "zero_reports_count": 0,
+        "forest_cover_pct": 60.8,
+        "share_of_total_reports_pct": 0.97
+      },
+      {
+        "region_id": "0203",
+        "region_name": "powiat głogowski",
+        "reports_count": 5,
+        "mean_yield_pcs_per_h": 16.0,
+        "median_yield_pcs_per_h": 10.0,
+        "zero_reports_count": 1,
+        "forest_cover_pct": 19.8,
+        "share_of_total_reports_pct": 0.97
+      },
+      {
+        "region_id": "0265",
+        "region_name": "powiat m. Wałbrzych",
+        "reports_count": 3,
+        "mean_yield_pcs_per_h": 15.0,
+        "median_yield_pcs_per_h": 10.0,
+        "zero_reports_count": 0,
+        "forest_cover_pct": 25.8,
+        "share_of_total_reports_pct": 0.58
+      },
+      {
+        "region_id": "0226",
+        "region_name": "powiat złotoryjski",
+        "reports_count": 3,
+        "mean_yield_pcs_per_h": 18.33,
+        "median_yield_pcs_per_h": 20.0,
+        "zero_reports_count": 1,
+        "forest_cover_pct": 50.3,
+        "share_of_total_reports_pct": 0.58
+      },
+      {
+        "region_id": "0224",
+        "region_name": "powiat ząbkowicki",
+        "reports_count": 2,
+        "mean_yield_pcs_per_h": 10.0,
+        "median_yield_pcs_per_h": 10.0,
+        "zero_reports_count": 0,
+        "forest_cover_pct": 22.6,
+        "share_of_total_reports_pct": 0.39
+      },
+      {
+        "region_id": "0212",
+        "region_name": "powiat lwówecki",
+        "reports_count": 1,
+        "mean_yield_pcs_per_h": 20.0,
+        "median_yield_pcs_per_h": 20.0,
+        "zero_reports_count": 0,
+        "forest_cover_pct": 35.2,
+        "share_of_total_reports_pct": 0.19
+      }
+    ]
+  },
+  "weather_and_habitat_correlations": [
+    {
+      "feature": "precip_cutoff_1d_mm",
+      "label": "Opad dobowy w dniu odcięcia (t-1) [mm]",
+      "n": 513,
+      "pearson_r": -0.0881,
+      "pearson_p": 0.046162,
+      "spearman_rho": -0.0483,
+      "spearman_p": 0.274991,
+      "mean_in_BRAK": 3.257,
+      "mean_in_SREDNIO": 1.285,
+      "mean_in_WYSYP": 1.542,
+      "kruskal_h": 5.401,
+      "kruskal_p": 0.067171
+    },
+    {
+      "feature": "precip_lag_7d_mm",
+      "label": "Skumulowany opad 7-dniowy [t-7..t-1] [mm]",
+      "n": 513,
+      "pearson_r": -0.1013,
+      "pearson_p": 0.021752,
+      "spearman_rho": -0.1306,
+      "spearman_p": 0.003033,
+      "mean_in_BRAK": 19.914,
+      "mean_in_SREDNIO": 12.92,
+      "mean_in_WYSYP": 13.894,
+      "kruskal_h": 30.699,
+      "kruskal_p": 0.0
+    },
+    {
+      "feature": "precip_lag_14d_mm",
+      "label": "Skumulowany opad 14-dniowy [t-14..t-1] [mm]",
+      "n": 513,
+      "pearson_r": -0.0047,
+      "pearson_p": 0.915565,
+      "spearman_rho": -0.0087,
+      "spearman_p": 0.844843,
+      "mean_in_BRAK": 38.759,
+      "mean_in_SREDNIO": 30.125,
+      "mean_in_WYSYP": 34.873,
+      "kruskal_h": 29.693,
+      "kruskal_p": 0.0
+    },
+    {
+      "feature": "precip_lag_21d_mm",
+      "label": "Skumulowany opad 21-dniowy [t-21..t-1] [mm]",
+      "n": 513,
+      "pearson_r": 0.0555,
+      "pearson_p": 0.209467,
+      "spearman_rho": 0.0415,
+      "spearman_p": 0.348488,
+      "mean_in_BRAK": 51.406,
+      "mean_in_SREDNIO": 50.678,
+      "mean_in_WYSYP": 52.538,
+      "kruskal_h": 1.031,
+      "kruskal_p": 0.59712
+    },
+    {
+      "feature": "precip_slice_1_7d_mm",
+      "label": "Opad w 1. tygodniu przed zbiorem [t-7..t-1] [mm]",
+      "n": 513,
+      "pearson_r": -0.1013,
+      "pearson_p": 0.021752,
+      "spearman_rho": -0.1306,
+      "spearman_p": 0.003033,
+      "mean_in_BRAK": 19.914,
+      "mean_in_SREDNIO": 12.92,
+      "mean_in_WYSYP": 13.894,
+      "kruskal_h": 30.699,
+      "kruskal_p": 0.0
+    },
+    {
+      "feature": "precip_slice_8_14d_mm",
+      "label": "Opad w 2. tygodniu przed zbiorem [t-14..t-8] [mm]",
+      "n": 513,
+      "pearson_r": 0.0744,
+      "pearson_p": 0.092248,
+      "spearman_rho": 0.1105,
+      "spearman_p": 0.012273,
+      "mean_in_BRAK": 18.845,
+      "mean_in_SREDNIO": 17.205,
+      "mean_in_WYSYP": 20.979,
+      "kruskal_h": 8.908,
+      "kruskal_p": 0.011634
+    },
+    {
+      "feature": "precip_slice_15_21d_mm",
+      "label": "Opad w 3. tygodniu przed zbiorem [t-21..t-15] [mm]",
+      "n": 513,
+      "pearson_r": 0.0869,
+      "pearson_p": 0.049064,
+      "spearman_rho": 0.1799,
+      "spearman_p": 4.2e-05,
+      "mean_in_BRAK": 12.647,
+      "mean_in_SREDNIO": 20.553,
+      "mean_in_WYSYP": 17.664,
+      "kruskal_h": 33.247,
+      "kruskal_p": 0.0
+    },
+    {
+      "feature": "precip_hours_lag_7d_h",
+      "label": "Suma godzin z opadem w oknie 7 dni [h]",
+      "n": 513,
+      "pearson_r": 0.1095,
+      "pearson_p": 0.01312,
+      "spearman_rho": 0.0855,
+      "spearman_p": 0.053045,
+      "mean_in_BRAK": 32.652,
+      "mean_in_SREDNIO": 30.515,
+      "mean_in_WYSYP": 35.889,
+      "kruskal_h": 12.864,
+      "kruskal_p": 0.001609
+    },
+    {
+      "feature": "rainy_days_lag_7d_count",
+      "label": "Liczba dni deszczowych (>=1 mm) w oknie 7 dni [dni]",
+      "n": 513,
+      "pearson_r": 0.15,
+      "pearson_p": 0.000654,
+      "spearman_rho": 0.1449,
+      "spearman_p": 0.000997,
+      "mean_in_BRAK": 3.062,
+      "mean_in_SREDNIO": 2.975,
+      "mean_in_WYSYP": 3.494,
+      "kruskal_h": 13.397,
+      "kruskal_p": 0.001233
+    },
+    {
+      "feature": "rainy_days_lag_14d_count",
+      "label": "Liczba dni deszczowych (>=1 mm) w oknie 14 dni [dni]",
+      "n": 513,
+      "pearson_r": 0.2617,
+      "pearson_p": 0.0,
+      "spearman_rho": 0.2997,
+      "spearman_p": 0.0,
+      "mean_in_BRAK": 5.705,
+      "mean_in_SREDNIO": 6.172,
+      "mean_in_WYSYP": 6.951,
+      "kruskal_h": 38.278,
+      "kruskal_p": 0.0
+    },
+    {
+      "feature": "soil_moisture_0_7cm_m3m3",
+      "label": "Modelowana wilgotność gleby 0-7 cm (t-1) [m³/m³]",
+      "n": 513,
+      "pearson_r": -0.067,
+      "pearson_p": 0.129365,
+      "spearman_rho": -0.0968,
+      "spearman_p": 0.028321,
+      "mean_in_BRAK": 0.299,
+      "mean_in_SREDNIO": 0.282,
+      "mean_in_WYSYP": 0.283,
+      "kruskal_h": 8.38,
+      "kruskal_p": 0.015143
+    },
+    {
+      "feature": "soil_moisture_mean_7d_m3m3",
+      "label": "Średnia wilgotność gleby 0-7 cm (7d) [m³/m³]",
+      "n": 513,
+      "pearson_r": 0.003,
+      "pearson_p": 0.945994,
+      "spearman_rho": 0.0059,
+      "spearman_p": 0.893686,
+      "mean_in_BRAK": 0.284,
+      "mean_in_SREDNIO": 0.282,
+      "mean_in_WYSYP": 0.287,
+      "kruskal_h": 1.356,
+      "kruskal_p": 0.507674
+    },
+    {
+      "feature": "soil_moisture_mean_14d_m3m3",
+      "label": "Średnia wilgotność gleby 0-7 cm (14d) [m³/m³]",
+      "n": 513,
+      "pearson_r": 0.0446,
+      "pearson_p": 0.313075,
+      "spearman_rho": 0.0649,
+      "spearman_p": 0.142421,
+      "mean_in_BRAK": 0.264,
+      "mean_in_SREDNIO": 0.28,
+      "mean_in_WYSYP": 0.281,
+      "kruskal_h": 2.541,
+      "kruskal_p": 0.280669
+    },
+    {
+      "feature": "temp_min_night_c",
+      "label": "Temperatura minimalna nocna (t-1) [°C]",
+      "n": 513,
+      "pearson_r": -0.0127,
+      "pearson_p": 0.774204,
+      "spearman_rho": -0.0564,
+      "spearman_p": 0.201922,
+      "mean_in_BRAK": 9.856,
+      "mean_in_SREDNIO": 7.846,
+      "mean_in_WYSYP": 9.162,
+      "kruskal_h": 26.851,
+      "kruskal_p": 1e-06
+    },
+    {
+      "feature": "temp_min_lag_3d_c",
+      "label": "Najniższa temperatura nocna z 3 dób [°C]",
+      "n": 513,
+      "pearson_r": -0.0309,
+      "pearson_p": 0.48504,
+      "spearman_rho": -0.0768,
+      "spearman_p": 0.082436,
+      "mean_in_BRAK": 8.584,
+      "mean_in_SREDNIO": 6.47,
+      "mean_in_WYSYP": 7.598,
+      "kruskal_h": 31.389,
+      "kruskal_p": 0.0
+    },
+    {
+      "feature": "temp_min_lag_7d_c",
+      "label": "Najniższa temperatura nocna z 7 dób [°C]",
+      "n": 513,
+      "pearson_r": -0.1004,
+      "pearson_p": 0.022934,
+      "spearman_rho": -0.1591,
+      "spearman_p": 0.000298,
+      "mean_in_BRAK": 7.704,
+      "mean_in_SREDNIO": 5.416,
+      "mean_in_WYSYP": 5.79,
+      "kruskal_h": 32.995,
+      "kruskal_p": 0.0
+    },
+    {
+      "feature": "frost_nights_lag_7d_count",
+      "label": "Liczba nocy z przymrozkiem (<=0°C) w 7d [dni]",
+      "n": 513,
+      "pearson_r": 0.0387,
+      "pearson_p": 0.38197,
+      "spearman_rho": 0.0891,
+      "spearman_p": 0.043568,
+      "mean_in_BRAK": 0.009,
+      "mean_in_SREDNIO": 0.092,
+      "mean_in_WYSYP": 0.093,
+      "kruskal_h": 6.422,
+      "kruskal_p": 0.040324
+    },
+    {
+      "feature": "temp_mean_7d_c",
+      "label": "Średnia temperatura dobowa z 7 dni [°C]",
+      "n": 513,
+      "pearson_r": -0.1254,
+      "pearson_p": 0.004434,
+      "spearman_rho": -0.1572,
+      "spearman_p": 0.000351,
+      "mean_in_BRAK": 14.521,
+      "mean_in_SREDNIO": 12.528,
+      "mean_in_WYSYP": 12.686,
+      "kruskal_h": 27.429,
+      "kruskal_p": 1e-06
+    },
+    {
+      "feature": "temp_mean_14d_c",
+      "label": "Średnia temperatura dobowa z 14 dni [°C]",
+      "n": 513,
+      "pearson_r": -0.177,
+      "pearson_p": 5.5e-05,
+      "spearman_rho": -0.227,
+      "spearman_p": 0.0,
+      "mean_in_BRAK": 14.994,
+      "mean_in_SREDNIO": 13.221,
+      "mean_in_WYSYP": 12.868,
+      "kruskal_h": 36.377,
+      "kruskal_p": 0.0
+    },
+    {
+      "feature": "soil_temp_mean_7d_c",
+      "label": "Średnia temperatura gleby 0-7 cm z 7 dni [°C]",
+      "n": 513,
+      "pearson_r": -0.1569,
+      "pearson_p": 0.000362,
+      "spearman_rho": -0.2017,
+      "spearman_p": 4e-06,
+      "mean_in_BRAK": 14.705,
+      "mean_in_SREDNIO": 12.754,
+      "mean_in_WYSYP": 12.683,
+      "kruskal_h": 32.737,
+      "kruskal_p": 0.0
+    },
+    {
+      "feature": "forest_cover_pct",
+      "label": "Lesistość powiatu wg BDL [%]",
+      "n": 513,
+      "pearson_r": 0.1971,
+      "pearson_p": 7e-06,
+      "spearman_rho": 0.2221,
+      "spearman_p": 0.0,
+      "mean_in_BRAK": 32.379,
+      "mean_in_SREDNIO": 37.468,
+      "mean_in_WYSYP": 40.606,
+      "kruskal_h": 17.136,
+      "kruskal_p": 0.00019
+    },
+    {
+      "feature": "pine_share_pct",
+      "label": "Udział drzewostanów sosnowych wg BDL [%]",
+      "n": 433,
+      "pearson_r": 0.161,
+      "pearson_p": 0.000775,
+      "spearman_rho": 0.2409,
+      "spearman_p": 0.0,
+      "mean_in_BRAK": 44.188,
+      "mean_in_SREDNIO": 60.756,
+      "mean_in_WYSYP": 63.401,
+      "kruskal_h": 30.068,
+      "kruskal_p": 0.0
+    },
+    {
+      "feature": "spruce_share_pct",
+      "label": "Udział drzewostanów świerkowych wg BDL [%]",
+      "n": 433,
+      "pearson_r": -0.0961,
+      "pearson_p": 0.045577,
+      "spearman_rho": -0.14,
+      "spearman_p": 0.003515,
+      "mean_in_BRAK": 23.78,
+      "mean_in_SREDNIO": 12.233,
+      "mean_in_WYSYP": 12.949,
+      "kruskal_h": 13.419,
+      "kruskal_p": 0.001219
+    },
+    {
+      "feature": "oak_beech_share_pct",
+      "label": "Udział drzewostanów dębowo-bukowych wg BDL [%]",
+      "n": 433,
+      "pearson_r": -0.202,
+      "pearson_p": 2.3e-05,
+      "spearman_rho": -0.2572,
+      "spearman_p": 0.0,
+      "mean_in_BRAK": 26.726,
+      "mean_in_SREDNIO": 21.816,
+      "mean_in_WYSYP": 18.704,
+      "kruskal_h": 27.166,
+      "kruskal_p": 1e-06
+    },
+    {
+      "feature": "mean_stand_age_years",
+      "label": "Średni wiek drzewostanów w powiecie wg BDL [lata]",
+      "n": 426,
+      "pearson_r": -0.0664,
+      "pearson_p": 0.171159,
+      "spearman_rho": -0.1392,
+      "spearman_p": 0.003982,
+      "mean_in_BRAK": 71.238,
+      "mean_in_SREDNIO": 68.063,
+      "mean_in_WYSYP": 67.864,
+      "kruskal_h": 15.173,
+      "kruskal_p": 0.000507
+    }
+  ],
+  "rolling_lag_curve_1_to_21_days": [
+    {
+      "window_days_k": 1,
+      "cum_precip_mean_mm": 1.8,
+      "cum_precip_pearson_r": -0.0881,
+      "cum_precip_pearson_p": 0.046162,
+      "cum_precip_spearman_rho": -0.0483,
+      "cum_precip_spearman_p": 0.274991,
+      "rainy_days_mean_count": 0.41,
+      "rainy_days_pearson_r": 0.0026,
+      "rainy_days_pearson_p": 0.952396,
+      "rainy_days_spearman_rho": 0.0065,
+      "rainy_days_spearman_p": 0.882753,
+      "single_lag_day_pearson_r": -0.0881,
+      "single_lag_day_spearman_rho": -0.0483
+    },
+    {
+      "window_days_k": 2,
+      "cum_precip_mean_mm": 3.9,
+      "cum_precip_pearson_r": -0.1018,
+      "cum_precip_pearson_p": 0.021125,
+      "cum_precip_spearman_rho": -0.0412,
+      "cum_precip_spearman_p": 0.352185,
+      "rainy_days_mean_count": 0.9,
+      "rainy_days_pearson_r": 0.0762,
+      "rainy_days_pearson_p": 0.084867,
+      "rainy_days_spearman_rho": 0.0715,
+      "rainy_days_spearman_p": 0.105763,
+      "single_lag_day_pearson_r": -0.0548,
+      "single_lag_day_spearman_rho": 0.028
+    },
+    {
+      "window_days_k": 3,
+      "cum_precip_mean_mm": 5.98,
+      "cum_precip_pearson_r": -0.1253,
+      "cum_precip_pearson_p": 0.004472,
+      "cum_precip_spearman_rho": -0.0748,
+      "cum_precip_spearman_p": 0.090557,
+      "rainy_days_mean_count": 1.36,
+      "rainy_days_pearson_r": 0.0774,
+      "rainy_days_pearson_p": 0.079935,
+      "rainy_days_spearman_rho": 0.0724,
+      "rainy_days_spearman_p": 0.101444,
+      "single_lag_day_pearson_r": -0.0716,
+      "single_lag_day_spearman_rho": -0.0471
+    },
+    {
+      "window_days_k": 4,
+      "cum_precip_mean_mm": 8.06,
+      "cum_precip_pearson_r": -0.148,
+      "cum_precip_pearson_p": 0.000773,
+      "cum_precip_spearman_rho": -0.1386,
+      "cum_precip_spearman_p": 0.00165,
+      "rainy_days_mean_count": 1.81,
+      "rainy_days_pearson_r": 0.0678,
+      "rainy_days_pearson_p": 0.125034,
+      "rainy_days_spearman_rho": 0.046,
+      "rainy_days_spearman_p": 0.298888,
+      "single_lag_day_pearson_r": -0.0721,
+      "single_lag_day_spearman_rho": -0.0324
+    },
+    {
+      "window_days_k": 5,
+      "cum_precip_mean_mm": 10.07,
+      "cum_precip_pearson_r": -0.1613,
+      "cum_precip_pearson_p": 0.000245,
+      "cum_precip_spearman_rho": -0.1722,
+      "cum_precip_spearman_p": 8.9e-05,
+      "rainy_days_mean_count": 2.26,
+      "rainy_days_pearson_r": 0.0702,
+      "rainy_days_pearson_p": 0.112297,
+      "rainy_days_spearman_rho": 0.0491,
+      "rainy_days_spearman_p": 0.266929,
+      "single_lag_day_pearson_r": -0.0666,
+      "single_lag_day_spearman_rho": -0.0159
+    },
+    {
+      "window_days_k": 6,
+      "cum_precip_mean_mm": 12.35,
+      "cum_precip_pearson_r": -0.1285,
+      "cum_precip_pearson_p": 0.00355,
+      "cum_precip_spearman_rho": -0.1552,
+      "cum_precip_spearman_p": 0.000418,
+      "rainy_days_mean_count": 2.72,
+      "rainy_days_pearson_r": 0.1028,
+      "rainy_days_pearson_p": 0.019892,
+      "rainy_days_spearman_rho": 0.0948,
+      "rainy_days_spearman_p": 0.031894,
+      "single_lag_day_pearson_r": 0.0213,
+      "single_lag_day_spearman_rho": 0.0661
+    },
+    {
+      "window_days_k": 7,
+      "cum_precip_mean_mm": 14.75,
+      "cum_precip_pearson_r": -0.1013,
+      "cum_precip_pearson_p": 0.021752,
+      "cum_precip_spearman_rho": -0.1306,
+      "cum_precip_spearman_p": 0.003048,
+      "rainy_days_mean_count": 3.16,
+      "rainy_days_pearson_r": 0.15,
+      "rainy_days_pearson_p": 0.000654,
+      "rainy_days_spearman_rho": 0.1449,
+      "rainy_days_spearman_p": 0.000997,
+      "single_lag_day_pearson_r": 0.0217,
+      "single_lag_day_spearman_rho": 0.1552
+    },
+    {
+      "window_days_k": 8,
+      "cum_precip_mean_mm": 17.4,
+      "cum_precip_pearson_r": -0.126,
+      "cum_precip_pearson_p": 0.004251,
+      "cum_precip_spearman_rho": -0.1469,
+      "cum_precip_spearman_p": 0.000847,
+      "rainy_days_mean_count": 3.6,
+      "rainy_days_pearson_r": 0.1398,
+      "rainy_days_pearson_p": 0.001508,
+      "rainy_days_spearman_rho": 0.1354,
+      "rainy_days_spearman_p": 0.002124,
+      "single_lag_day_pearson_r": -0.0912,
+      "single_lag_day_spearman_rho": 0.014
+    },
+    {
+      "window_days_k": 9,
+      "cum_precip_mean_mm": 20.13,
+      "cum_precip_pearson_r": -0.115,
+      "cum_precip_pearson_p": 0.009159,
+      "cum_precip_spearman_rho": -0.1355,
+      "cum_precip_spearman_p": 0.002106,
+      "rainy_days_mean_count": 4.1,
+      "rainy_days_pearson_r": 0.1823,
+      "rainy_days_pearson_p": 3.3e-05,
+      "rainy_days_spearman_rho": 0.169,
+      "rainy_days_spearman_p": 0.00012,
+      "single_lag_day_pearson_r": 0.005,
+      "single_lag_day_spearman_rho": 0.0991
+    },
+    {
+      "window_days_k": 10,
+      "cum_precip_mean_mm": 23.25,
+      "cum_precip_pearson_r": -0.0851,
+      "cum_precip_pearson_p": 0.054169,
+      "cum_precip_spearman_rho": -0.1053,
+      "cum_precip_spearman_p": 0.016994,
+      "rainy_days_mean_count": 4.63,
+      "rainy_days_pearson_r": 0.2038,
+      "rainy_days_pearson_p": 3e-06,
+      "rainy_days_spearman_rho": 0.2035,
+      "rainy_days_spearman_p": 3e-06,
+      "single_lag_day_pearson_r": 0.0713,
+      "single_lag_day_spearman_rho": 0.1587
+    },
+    {
+      "window_days_k": 11,
+      "cum_precip_mean_mm": 25.92,
+      "cum_precip_pearson_r": -0.0462,
+      "cum_precip_pearson_p": 0.296447,
+      "cum_precip_spearman_rho": -0.0817,
+      "cum_precip_spearman_p": 0.064562,
+      "rainy_days_mean_count": 5.08,
+      "rainy_days_pearson_r": 0.2096,
+      "rainy_days_pearson_p": 2e-06,
+      "rainy_days_spearman_rho": 0.2168,
+      "rainy_days_spearman_p": 1e-06,
+      "single_lag_day_pearson_r": 0.0968,
+      "single_lag_day_spearman_rho": 0.079
+    },
+    {
+      "window_days_k": 12,
+      "cum_precip_mean_mm": 27.96,
+      "cum_precip_pearson_r": -0.0423,
+      "cum_precip_pearson_p": 0.338562,
+      "cum_precip_spearman_rho": -0.0627,
+      "cum_precip_spearman_p": 0.15604,
+      "rainy_days_mean_count": 5.5,
+      "rainy_days_pearson_r": 0.2305,
+      "rainy_days_pearson_p": 0.0,
+      "rainy_days_spearman_rho": 0.2453,
+      "rainy_days_spearman_p": 0.0,
+      "single_lag_day_pearson_r": 0.0067,
+      "single_lag_day_spearman_rho": 0.1285
+    },
+    {
+      "window_days_k": 13,
+      "cum_precip_mean_mm": 30.44,
+      "cum_precip_pearson_r": -0.0229,
+      "cum_precip_pearson_p": 0.605126,
+      "cum_precip_spearman_rho": -0.0296,
+      "cum_precip_spearman_p": 0.503171,
+      "rainy_days_mean_count": 5.91,
+      "rainy_days_pearson_r": 0.2429,
+      "rainy_days_pearson_p": 0.0,
+      "rainy_days_spearman_rho": 0.2719,
+      "rainy_days_spearman_p": 0.0,
+      "single_lag_day_pearson_r": 0.0574,
+      "single_lag_day_spearman_rho": 0.1323
+    },
+    {
+      "window_days_k": 14,
+      "cum_precip_mean_mm": 33.51,
+      "cum_precip_pearson_r": -0.0047,
+      "cum_precip_pearson_p": 0.915565,
+      "cum_precip_spearman_rho": -0.0085,
+      "cum_precip_spearman_p": 0.847109,
+      "rainy_days_mean_count": 6.32,
+      "rainy_days_pearson_r": 0.2617,
+      "rainy_days_pearson_p": 0.0,
+      "rainy_days_spearman_rho": 0.2997,
+      "rainy_days_spearman_p": 0.0,
+      "single_lag_day_pearson_r": 0.0452,
+      "single_lag_day_spearman_rho": 0.1121
+    },
+    {
+      "window_days_k": 15,
+      "cum_precip_mean_mm": 36.18,
+      "cum_precip_pearson_r": -0.0043,
+      "cum_precip_pearson_p": 0.922185,
+      "cum_precip_spearman_rho": -0.0212,
+      "cum_precip_spearman_p": 0.631269,
+      "rainy_days_mean_count": 6.75,
+      "rainy_days_pearson_r": 0.2806,
+      "rainy_days_pearson_p": 0.0,
+      "rainy_days_spearman_rho": 0.3107,
+      "rainy_days_spearman_p": 0.0,
+      "single_lag_day_pearson_r": 0.0005,
+      "single_lag_day_spearman_rho": 0.0897
+    },
+    {
+      "window_days_k": 16,
+      "cum_precip_mean_mm": 38.14,
+      "cum_precip_pearson_r": -0.0115,
+      "cum_precip_pearson_p": 0.794462,
+      "cum_precip_spearman_rho": -0.0242,
+      "cum_precip_spearman_p": 0.584647,
+      "rainy_days_mean_count": 7.16,
+      "rainy_days_pearson_r": 0.2984,
+      "rainy_days_pearson_p": 0.0,
+      "rainy_days_spearman_rho": 0.3295,
+      "rainy_days_spearman_p": 0.0,
+      "single_lag_day_pearson_r": -0.0285,
+      "single_lag_day_spearman_rho": 0.0637
+    },
+    {
+      "window_days_k": 17,
+      "cum_precip_mean_mm": 41.0,
+      "cum_precip_pearson_r": -0.0242,
+      "cum_precip_pearson_p": 0.584509,
+      "cum_precip_spearman_rho": -0.0324,
+      "cum_precip_spearman_p": 0.464232,
+      "rainy_days_mean_count": 7.55,
+      "rainy_days_pearson_r": 0.309,
+      "rainy_days_pearson_p": 0.0,
+      "rainy_days_spearman_rho": 0.3428,
+      "rainy_days_spearman_p": 0.0,
+      "single_lag_day_pearson_r": -0.0359,
+      "single_lag_day_spearman_rho": 0.0893
+    },
+    {
+      "window_days_k": 18,
+      "cum_precip_mean_mm": 43.96,
+      "cum_precip_pearson_r": 0.008,
+      "cum_precip_pearson_p": 0.856162,
+      "cum_precip_spearman_rho": 0.0022,
+      "cum_precip_spearman_p": 0.960115,
+      "rainy_days_mean_count": 7.99,
+      "rainy_days_pearson_r": 0.3256,
+      "rainy_days_pearson_p": 0.0,
+      "rainy_days_spearman_rho": 0.3596,
+      "rainy_days_spearman_p": 0.0,
+      "single_lag_day_pearson_r": 0.0982,
+      "single_lag_day_spearman_rho": 0.162
+    },
+    {
+      "window_days_k": 19,
+      "cum_precip_mean_mm": 46.42,
+      "cum_precip_pearson_r": 0.02,
+      "cum_precip_pearson_p": 0.651948,
+      "cum_precip_spearman_rho": 0.01,
+      "cum_precip_spearman_p": 0.821176,
+      "rainy_days_mean_count": 8.41,
+      "rainy_days_pearson_r": 0.3302,
+      "rainy_days_pearson_p": 0.0,
+      "rainy_days_spearman_rho": 0.364,
+      "rainy_days_spearman_p": 0.0,
+      "single_lag_day_pearson_r": 0.0454,
+      "single_lag_day_spearman_rho": 0.1404
+    },
+    {
+      "window_days_k": 20,
+      "cum_precip_mean_mm": 48.5,
+      "cum_precip_pearson_r": 0.0329,
+      "cum_precip_pearson_p": 0.457055,
+      "cum_precip_spearman_rho": 0.0202,
+      "cum_precip_spearman_p": 0.648253,
+      "rainy_days_mean_count": 8.73,
+      "rainy_days_pearson_r": 0.3372,
+      "rainy_days_pearson_p": 0.0,
+      "rainy_days_spearman_rho": 0.3668,
+      "rainy_days_spearman_p": 0.0,
+      "single_lag_day_pearson_r": 0.0529,
+      "single_lag_day_spearman_rho": 0.0738
+    },
+    {
+      "window_days_k": 21,
+      "cum_precip_mean_mm": 51.42,
+      "cum_precip_pearson_r": 0.0555,
+      "cum_precip_pearson_p": 0.209467,
+      "cum_precip_spearman_rho": 0.0414,
+      "cum_precip_spearman_p": 0.348853,
+      "rainy_days_mean_count": 9.09,
+      "rainy_days_pearson_r": 0.3369,
+      "rainy_days_pearson_p": 0.0,
+      "rainy_days_spearman_rho": 0.3679,
+      "rainy_days_spearman_p": 0.0,
+      "single_lag_day_pearson_r": 0.0798,
+      "single_lag_day_spearman_rho": 0.0573
+    }
+  ],
+  "regional_dominance_sensitivity": [
+    {
+      "subset_name": "Pełna próba (28 aktywnych powiatów, n=513)",
+      "n": 513,
+      "mean_yield_pcs_per_h": 18.59,
+      "median_yield_pcs_per_h": 15.0,
+      "corr_precip_7d": {
+        "n": 513,
+        "pearson_r": -0.1013,
+        "pearson_p": 0.021752,
+        "spearman_rho": -0.1306,
+        "spearman_p": 0.003033
+      },
+      "corr_precip_14d": {
+        "n": 513,
+        "pearson_r": -0.0047,
+        "pearson_p": 0.915565,
+        "spearman_rho": -0.0087,
+        "spearman_p": 0.844843
+      },
+      "corr_precip_21d": {
+        "n": 513,
+        "pearson_r": 0.0555,
+        "pearson_p": 0.209467,
+        "spearman_rho": 0.0415,
+        "spearman_p": 0.348488
+      },
+      "corr_precip_slice_15_21d": {
+        "n": 513,
+        "pearson_r": 0.0869,
+        "pearson_p": 0.049064,
+        "spearman_rho": 0.1799,
+        "spearman_p": 4.2e-05
+      },
+      "corr_rainy_days_14d": {
+        "n": 513,
+        "pearson_r": 0.2617,
+        "pearson_p": 0.0,
+        "spearman_rho": 0.2997,
+        "spearman_p": 0.0
+      },
+      "corr_soil_moisture_14d": {
+        "n": 513,
+        "pearson_r": 0.0446,
+        "pearson_p": 0.313075,
+        "spearman_rho": 0.0649,
+        "spearman_p": 0.142421
+      },
+      "corr_forest_cover": {
+        "n": 513,
+        "pearson_r": 0.1971,
+        "pearson_p": 7e-06,
+        "spearman_rho": 0.2221,
+        "spearman_p": 0.0
+      }
+    },
+    {
+      "subset_name": "Bez Top-1 powiatu (0201 bolesławiecki, n=412)",
+      "n": 412,
+      "mean_yield_pcs_per_h": 17.45,
+      "median_yield_pcs_per_h": 14.0,
+      "corr_precip_7d": {
+        "n": 412,
+        "pearson_r": -0.1012,
+        "pearson_p": 0.040109,
+        "spearman_rho": -0.122,
+        "spearman_p": 0.013212
+      },
+      "corr_precip_14d": {
+        "n": 412,
+        "pearson_r": -0.0327,
+        "pearson_p": 0.507603,
+        "spearman_rho": -0.0585,
+        "spearman_p": 0.236095
+      },
+      "corr_precip_21d": {
+        "n": 412,
+        "pearson_r": 0.0316,
+        "pearson_p": 0.522648,
+        "spearman_rho": 0.0188,
+        "spearman_p": 0.704131
+      },
+      "corr_precip_slice_15_21d": {
+        "n": 412,
+        "pearson_r": 0.0891,
+        "pearson_p": 0.070824,
+        "spearman_rho": 0.1985,
+        "spearman_p": 5e-05
+      },
+      "corr_rainy_days_14d": {
+        "n": 412,
+        "pearson_r": 0.237,
+        "pearson_p": 1e-06,
+        "spearman_rho": 0.2682,
+        "spearman_p": 0.0
+      },
+      "corr_soil_moisture_14d": {
+        "n": 412,
+        "pearson_r": 0.0755,
+        "pearson_p": 0.125859,
+        "spearman_rho": 0.1015,
+        "spearman_p": 0.039461
+      },
+      "corr_forest_cover": {
+        "n": 412,
+        "pearson_r": 0.1695,
+        "pearson_p": 0.00055,
+        "spearman_rho": 0.1385,
+        "spearman_p": 0.004861
+      }
+    },
+    {
+      "subset_name": "Bez Top-3 powiatów (0201, 0214, 0213, n=295)",
+      "n": 295,
+      "mean_yield_pcs_per_h": 16.16,
+      "median_yield_pcs_per_h": 10.0,
+      "corr_precip_7d": {
+        "n": 295,
+        "pearson_r": -0.0815,
+        "pearson_p": 0.162889,
+        "spearman_rho": -0.1066,
+        "spearman_p": 0.067557
+      },
+      "corr_precip_14d": {
+        "n": 295,
+        "pearson_r": 0.0214,
+        "pearson_p": 0.714827,
+        "spearman_rho": -0.0379,
+        "spearman_p": 0.516632
+      },
+      "corr_precip_21d": {
+        "n": 295,
+        "pearson_r": 0.1104,
+        "pearson_p": 0.058247,
+        "spearman_rho": 0.0667,
+        "spearman_p": 0.2537
+      },
+      "corr_precip_slice_15_21d": {
+        "n": 295,
+        "pearson_r": 0.1465,
+        "pearson_p": 0.011737,
+        "spearman_rho": 0.2251,
+        "spearman_p": 9.6e-05
+      },
+      "corr_rainy_days_14d": {
+        "n": 295,
+        "pearson_r": 0.24,
+        "pearson_p": 3.1e-05,
+        "spearman_rho": 0.2825,
+        "spearman_p": 1e-06
+      },
+      "corr_soil_moisture_14d": {
+        "n": 295,
+        "pearson_r": 0.1036,
+        "pearson_p": 0.075725,
+        "spearman_rho": 0.1466,
+        "spearman_p": 0.011702
+      },
+      "corr_forest_cover": {
+        "n": 295,
+        "pearson_r": 0.1174,
+        "pearson_p": 0.043929,
+        "spearman_rho": 0.093,
+        "spearman_p": 0.111009
+      }
+    },
+    {
+      "subset_name": "Bez Top-5 powiatów (0201, 0214, 0213, 0220, 0208, n=233)",
+      "n": 233,
+      "mean_yield_pcs_per_h": 16.72,
+      "median_yield_pcs_per_h": 13.0,
+      "corr_precip_7d": {
+        "n": 233,
+        "pearson_r": -0.0486,
+        "pearson_p": 0.460242,
+        "spearman_rho": -0.0668,
+        "spearman_p": 0.309602
+      },
+      "corr_precip_14d": {
+        "n": 233,
+        "pearson_r": 0.0649,
+        "pearson_p": 0.323905,
+        "spearman_rho": 0.0213,
+        "spearman_p": 0.746734
+      },
+      "corr_precip_21d": {
+        "n": 233,
+        "pearson_r": 0.0814,
+        "pearson_p": 0.215629,
+        "spearman_rho": 0.0644,
+        "spearman_p": 0.327955
+      },
+      "corr_precip_slice_15_21d": {
+        "n": 233,
+        "pearson_r": 0.0442,
+        "pearson_p": 0.502451,
+        "spearman_rho": 0.1592,
+        "spearman_p": 0.014976
+      },
+      "corr_rainy_days_14d": {
+        "n": 233,
+        "pearson_r": 0.2651,
+        "pearson_p": 4.2e-05,
+        "spearman_rho": 0.3138,
+        "spearman_p": 1e-06
+      },
+      "corr_soil_moisture_14d": {
+        "n": 233,
+        "pearson_r": 0.0653,
+        "pearson_p": 0.320954,
+        "spearman_rho": 0.0938,
+        "spearman_p": 0.153433
+      },
+      "corr_forest_cover": {
+        "n": 233,
+        "pearson_r": 0.1133,
+        "pearson_p": 0.084368,
+        "spearman_rho": 0.1282,
+        "spearman_p": 0.050586
+      }
+    }
+  ],
+  "seasonal_dominance_sensitivity": [
+    {
+      "subset_name": "Wczesna jesień (Wrzesień: 01.09–30.09)",
+      "n": 288,
+      "mean_yield_pcs_per_h": 16.48,
+      "median_yield_pcs_per_h": 10.0,
+      "corr_precip_7d": {
+        "n": 288,
+        "pearson_r": -0.1982,
+        "pearson_p": 0.000716,
+        "spearman_rho": -0.2947,
+        "spearman_p": 0.0
+      },
+      "corr_precip_14d": {
+        "n": 288,
+        "pearson_r": 0.0348,
+        "pearson_p": 0.556141,
+        "spearman_rho": -0.0269,
+        "spearman_p": 0.649736
+      },
+      "corr_precip_21d": {
+        "n": 288,
+        "pearson_r": 0.2368,
+        "pearson_p": 4.9e-05,
+        "spearman_rho": 0.2275,
+        "spearman_p": 9.8e-05
+      },
+      "corr_precip_slice_15_21d": {
+        "n": 288,
+        "pearson_r": 0.2186,
+        "pearson_p": 0.000185,
+        "spearman_rho": 0.318,
+        "spearman_p": 0.0
+      },
+      "corr_rainy_days_14d": {
+        "n": 288,
+        "pearson_r": 0.36,
+        "pearson_p": 0.0,
+        "spearman_rho": 0.3982,
+        "spearman_p": 0.0
+      },
+      "corr_soil_moisture_14d": {
+        "n": 288,
+        "pearson_r": 0.0951,
+        "pearson_p": 0.107352,
+        "spearman_rho": 0.1421,
+        "spearman_p": 0.015832
+      },
+      "corr_forest_cover": {
+        "n": 288,
+        "pearson_r": 0.2526,
+        "pearson_p": 1.4e-05,
+        "spearman_rho": 0.2939,
+        "spearman_p": 0.0
+      },
+      "season_phase": "early_autumn_sep",
+      "mean_precip_7d_mm": 15.91,
+      "mean_precip_14d_mm": 40.52,
+      "mean_precip_21d_mm": 63.36,
+      "mean_rainy_days_14d": 5.98,
+      "mean_temp_min_7d_c": 8.93
+    },
+    {
+      "subset_name": "Szczyt jesieni (Wczesny październik: 01.10–15.10)",
+      "n": 110,
+      "mean_yield_pcs_per_h": 16.8,
+      "median_yield_pcs_per_h": 15.0,
+      "corr_precip_7d": {
+        "n": 110,
+        "pearson_r": 0.2628,
+        "pearson_p": 0.005544,
+        "spearman_rho": 0.2465,
+        "spearman_p": 0.009428
+      },
+      "corr_precip_14d": {
+        "n": 110,
+        "pearson_r": 0.1484,
+        "pearson_p": 0.121761,
+        "spearman_rho": 0.0836,
+        "spearman_p": 0.385071
+      },
+      "corr_precip_21d": {
+        "n": 110,
+        "pearson_r": 0.1596,
+        "pearson_p": 0.095882,
+        "spearman_rho": 0.0384,
+        "spearman_p": 0.690319
+      },
+      "corr_precip_slice_15_21d": {
+        "n": 110,
+        "pearson_r": 0.0391,
+        "pearson_p": 0.685394,
+        "spearman_rho": 0.0085,
+        "spearman_p": 0.929956
+      },
+      "corr_rainy_days_14d": {
+        "n": 110,
+        "pearson_r": 0.2234,
+        "pearson_p": 0.018963,
+        "spearman_rho": 0.1738,
+        "spearman_p": 0.069369
+      },
+      "corr_soil_moisture_14d": {
+        "n": 110,
+        "pearson_r": 0.0409,
+        "pearson_p": 0.671717,
+        "spearman_rho": -0.0325,
+        "spearman_p": 0.735708
+      },
+      "corr_forest_cover": {
+        "n": 110,
+        "pearson_r": 0.151,
+        "pearson_p": 0.115405,
+        "spearman_rho": 0.1575,
+        "spearman_p": 0.10038
+      },
+      "season_phase": "peak_autumn_oct_early",
+      "mean_precip_7d_mm": 13.54,
+      "mean_precip_14d_mm": 21.84,
+      "mean_precip_21d_mm": 32.34,
+      "mean_rainy_days_14d": 5.84,
+      "mean_temp_min_7d_c": 2.23
+    },
+    {
+      "subset_name": "Późna jesień (Późny październik i listopad: 16.10–02.11)",
+      "n": 115,
+      "mean_yield_pcs_per_h": 25.57,
+      "median_yield_pcs_per_h": 20.0,
+      "corr_precip_7d": {
+        "n": 115,
+        "pearson_r": 0.1079,
+        "pearson_p": 0.250881,
+        "spearman_rho": 0.0779,
+        "spearman_p": 0.407796
+      },
+      "corr_precip_14d": {
+        "n": 115,
+        "pearson_r": 0.1079,
+        "pearson_p": 0.251144,
+        "spearman_rho": 0.0745,
+        "spearman_p": 0.428476
+      },
+      "corr_precip_21d": {
+        "n": 115,
+        "pearson_r": 0.1249,
+        "pearson_p": 0.183683,
+        "spearman_rho": 0.1025,
+        "spearman_p": 0.275716
+      },
+      "corr_precip_slice_15_21d": {
+        "n": 115,
+        "pearson_r": 0.0339,
+        "pearson_p": 0.718992,
+        "spearman_rho": 0.0676,
+        "spearman_p": 0.472804
+      },
+      "corr_rainy_days_14d": {
+        "n": 115,
+        "pearson_r": -0.1153,
+        "pearson_p": 0.219663,
+        "spearman_rho": -0.1719,
+        "spearman_p": 0.066173
+      },
+      "corr_soil_moisture_14d": {
+        "n": 115,
+        "pearson_r": -0.2292,
+        "pearson_p": 0.01373,
+        "spearman_rho": -0.2226,
+        "spearman_p": 0.016817
+      },
+      "corr_forest_cover": {
+        "n": 115,
+        "pearson_r": 0.2162,
+        "pearson_p": 0.02028,
+        "spearman_rho": 0.1934,
+        "spearman_p": 0.038381
+      },
+      "season_phase": "late_autumn_oct_late_nov",
+      "mean_precip_7d_mm": 13.01,
+      "mean_precip_14d_mm": 27.11,
+      "mean_precip_21d_mm": 39.79,
+      "mean_rainy_days_14d": 7.63,
+      "mean_temp_min_7d_c": 2.42
+    }
+  ],
+  "report_volume_vs_mushroom_abundance": {
+    "total_calendar_days": 63,
+    "active_reporting_days": 62,
+    "zero_report_days": 1,
+    "weekend_calendar_days": 18,
+    "weekday_calendar_days": 45,
+    "report_volume_weekday_mean_per_day": 5.58,
+    "report_volume_weekday_median_per_day": 4.0,
+    "report_volume_weekend_mean_per_day": 14.56,
+    "report_volume_weekend_median_per_day": 12.5,
+    "weekend_to_weekday_volume_ratio": 2.61,
+    "report_volume_mannwhitney_u": 698.0,
+    "report_volume_mannwhitney_p": 8e-06,
+    "mushroom_yield_weekday_n": 251,
+    "mushroom_yield_weekday_mean_pcs_per_h": 18.07,
+    "mushroom_yield_weekday_median_pcs_per_h": 15.0,
+    "mushroom_yield_weekend_n": 262,
+    "mushroom_yield_weekend_mean_pcs_per_h": 19.08,
+    "mushroom_yield_weekend_median_pcs_per_h": 15.0,
+    "mushroom_yield_mannwhitney_u": 33468.0,
+    "mushroom_yield_mannwhitney_p": 0.725852,
+    "daily_volume_vs_daily_mean_yield_correlation": {
+      "n": 62,
+      "pearson_r": 0.2244,
+      "pearson_p": 0.079469,
+      "spearman_rho": 0.3737,
+      "spearman_p": 0.002771
+    },
+    "key_conclusion": "Liczba raportów dziennie (obfitość raportów) rośnie w weekendy aż 2.61-krotnie (średnio 14.56 vs 5.58 raportu/dzień, p < 0.0001), podczas gdy faktyczna wydajność zbioru grzybów (obfitość grzybów: yield_pcs_per_h) ma identyczną medianę w dni robocze i w weekendy (15.0 vs 15.0 szt./h, p = 0.726). Dowodzi to, że wolumen zgłoszeń odzwierciedla aktywność rekreacyjną ludzi, a nie zagęszczenie owocników w lesie."
+  },
+  "missingness_profile": [
+    {
+      "column": "harvest_duration_h",
+      "description": "Deklarowany czas grzybobrania [h]",
+      "null_count": 397,
+      "null_pct": 77.39,
+      "non_null_count": 116,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "total_pieces",
+      "description": "Deklarowana łączna liczba sztuk [szt.]",
+      "null_count": 327,
+      "null_pct": 63.74,
+      "non_null_count": 186,
+      "explicit_zero_count": 45
+    },
+    {
+      "column": "dominant_species",
+      "description": "Dominujący gatunek grzyba",
+      "null_count": 89,
+      "null_pct": 17.35,
+      "non_null_count": 424,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "pine_share_pct",
+      "description": "Udział sosny w powiecie wg BDL [%]",
+      "null_count": 80,
+      "null_pct": 15.59,
+      "non_null_count": 433,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "oak_beech_share_pct",
+      "description": "Udział dębu i buka wg BDL [%]",
+      "null_count": 80,
+      "null_pct": 15.59,
+      "non_null_count": 433,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "spruce_share_pct",
+      "description": "Udział świerka wg BDL [%]",
+      "null_count": 80,
+      "null_pct": 15.59,
+      "non_null_count": 433,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "mean_stand_age_years",
+      "description": "Średni wiek drzewostanów wg BDL [lata]",
+      "null_count": 87,
+      "null_pct": 16.96,
+      "non_null_count": 426,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "dominant_moisture_type",
+      "description": "Dominujący typ uwilgotnienia siedliska BDL",
+      "null_count": 87,
+      "null_pct": 16.96,
+      "non_null_count": 426,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "forest_cover_pct",
+      "description": "Lesistość powiatu [%]",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "non_null_count": 513,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "precip_lag_7d_mm",
+      "description": "Skumulowany opad 7-dniowy [mm]",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "non_null_count": 513,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "precip_lag_14d_mm",
+      "description": "Skumulowany opad 14-dniowy [mm]",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "non_null_count": 513,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "precip_lag_21d_mm",
+      "description": "Skumulowany opad 21-dniowy [mm]",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "non_null_count": 513,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "soil_moisture_0_7cm_m3m3",
+      "description": "Wilgotność gleby ERA5-Land (0-7 cm) [m³/m³]",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "non_null_count": 513,
+      "explicit_zero_count": 0
+    },
+    {
+      "column": "yield_pcs_per_h",
+      "description": "Wydajność zbioru (zmienna celu) [szt./h]",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "non_null_count": 513,
+      "explicit_zero_count": 45
+    }
+  ],
+  "species_filtering_constraints": {
+    "total_valid_observations": 513,
+    "mixed_or_null_species_count": 283,
+    "mixed_or_null_species_pct": 55.17,
+    "single_dominant_species_count": 230,
+    "single_dominant_species_pct": 44.83,
+    "species_breakdown": [
+      {
+        "species_key": "mieszane",
+        "reports_count": 194,
+        "share_pct": 37.82,
+        "covered_regions_count": 25,
+        "mean_yield_pcs_per_h": 20.44,
+        "median_yield_pcs_per_h": 20.0
+      },
+      {
+        "species_key": "podgrzybek_brunatny",
+        "reports_count": 114,
+        "share_pct": 22.22,
+        "covered_regions_count": 19,
+        "mean_yield_pcs_per_h": 24.57,
+        "median_yield_pcs_per_h": 20.0
+      },
+      {
+        "species_key": "BRAK_DEKLARACJI_NULL",
+        "reports_count": 89,
+        "share_pct": 17.35,
+        "covered_regions_count": 21,
+        "mean_yield_pcs_per_h": 8.43,
+        "median_yield_pcs_per_h": 2.0
+      },
+      {
+        "species_key": "borowik_szlachetny",
+        "reports_count": 78,
+        "share_pct": 15.2,
+        "covered_regions_count": 22,
+        "mean_yield_pcs_per_h": 20.26,
+        "median_yield_pcs_per_h": 20.0
+      },
+      {
+        "species_key": "kania",
+        "reports_count": 17,
+        "share_pct": 3.31,
+        "covered_regions_count": 10,
+        "mean_yield_pcs_per_h": 10.47,
+        "median_yield_pcs_per_h": 4.0
+      },
+      {
+        "species_key": "maslak_zwyczajny",
+        "reports_count": 11,
+        "share_pct": 2.14,
+        "covered_regions_count": 9,
+        "mean_yield_pcs_per_h": 16.27,
+        "median_yield_pcs_per_h": 17.0
+      },
+      {
+        "species_key": "kurka",
+        "reports_count": 10,
+        "share_pct": 1.95,
+        "covered_regions_count": 7,
+        "mean_yield_pcs_per_h": 8.0,
+        "median_yield_pcs_per_h": 3.5
+      }
+    ],
+    "filtering_limitations": [
+      "Ponad połowa zbioru (283 z 513 raportów, tj. 55.17%) nie wskazuje pojedynczego gatunku: 194 raporty (37.82%) to zbiory 'mieszane', a 89 raportów (17.35%) ma wartość NULL (w tym 45 raportów zerowych).",
+      "Spośród gatunków pojedynczych jedynie podgrzybek brunatny (n=114, 22.22%) i borowik szlachetny (n=78, 15.20%) przekraczają próg 50 obserwacji w całym 9-tygodniowym okresie.",
+      "Gatunki takie jak kania (n=17, 3.31%), maślak zwyczajny (n=11, 2.14%) i kurka / pieprznik jadalny (n=10, 1.95%) mają zbyt małą liczebność na trening osobnych klasyfikatorów lub regresorów per gatunek (średnio <0.5 obserwacji na powiat).",
+      "Wniosek dla aplikacji i modelu: model ML musi być trenowany na zagregowanej wydajności ogólnej (yield_pcs_per_h / abundance_class), natomiast wybór gatunku w interfejsie Streamlit powinien pełnić rolę filtra obserwacji historycznych oraz post-hoc wagi siedliskowej BDL (np. udział sosny dla podgrzybka/maślaka, udział dębu/buka i świerka dla borowika)."
+    ]
+  },
+  "modeling_recommendations": [
+    {
+      "id": "REC-01",
+      "category": "Cechy opadowe i efekt opóźnienia (Lag Effect)",
+      "finding": "Surowa suma opadów z krótkiego okna 1d (r=-0.088) i 7d (r=-0.101) wykazuje słabą ujemną korelację z wydajnością zbioru (ulewne deszcze we wrześniu przed startem grzybni oraz mniejsza aktywność zbieraczy w dni ulewne), natomiast suma 21-dniowa przechodzi w dodatnią (r=+0.056), wyraźny dodatni sygnał rangowy niesie 3. tydzień przed zbiorem [t-21..t-15] (r=+0.087, p=0.049; rho=+0.180, p=0.00004), a najsilniejszy sygnał wykazuje częstość dni deszczowych rainy_days_lag_14d_count (r=+0.262, rho=+0.300, p<1e-8) oraz 21-dniowa liczba dni deszczowych (r=+0.337, rho=+0.368, p<1e-12).",
+      "action_for_model": "Włączyć do modelu zarówno skumulowane okna opadów (7d, 14d, 21d), jak i cechy częstości opadu (rainy_days_lag_14d_count, rainy_days_lag_7d_count, precip_hours_lag_7d_h) oraz różnice międzyokresowe (precip_lag_21d_mm - precip_lag_14d_mm), które oddają impuls wilgotnościowy sprzed 2–3 tygodni."
+    },
+    {
+      "id": "REC-02",
+      "category": "Nieliniowa interakcja pogoda x temperatura x sezon",
+      "finding": "Zależność opad -> grzyby jest silnie warunkowana fazą sezonu i temperaturą minimalną. W szczycie i późnej jesieni (październik) korelacja z wilgotnością i częstością opadów jest wyraźna, ale przymrozki (temp_min_lag_7d_c <= 0°C) mogą zahamować owocnikowanie mimo wysokiego opadu.",
+      "action_for_model": "Zastosować modele drzewiaste (RandomForest, HistGradientBoosting / LightGBM) zdolne do wychwycenia progowych interakcji między opadem 14/21d, temperaturą nocną (temp_min_lag_7d_c) i fazą sezonu (day_of_year_sin/cos), a w modelach liniowych (Ridge/LogisticRegression) dodać cechy interakcyjne lub wielomianowe."
+    },
+    {
+      "id": "REC-03",
+      "category": "Asymetria rozkładu zmiennej docelowej (yield_pcs_per_h)",
+      "finding": "Zmienna docelowa yield_pcs_per_h jest prawostronnie skośna (skośność = 1.869, średnia = 18.59 szt./h > mediana = 15.0 szt./h, zakres 0–120 szt./h, 45 raportów zerowych).",
+      "action_for_model": "W zadaniach regresyjnych przetestować transformację log1p(yield_pcs_per_h) lub funkcję straty odporną na wartości odstające (MAE / Huber / Poisson deviance) i bezwzględnie raportować MAE obok RMSE zgodnie z protokołem [GRZ-13]."
+    },
+    {
+      "id": "REC-04",
+      "category": "Obsługa braków danych BDL (NULL != 0.0)",
+      "finding": "Dokładnie 80 obserwacji (15.59%) z 11 powiatów nie posiada szczegółowej taksacji gatunkowej BDL (pine_share_pct = NULL), ale wszystkie 513 obserwacji posiada lesistość ogólną (forest_cover_pct, korelacja z wydajnością r=+0.197, rho=+0.222, p<1e-5).",
+      "action_for_model": "Używać natywnej obsługi NaN w HistGradientBoosting albo jawnej flagi has_bdl_stand_data + imputacji medianą wyliczoną wyłącznie na zbiorze treningowym (fit_transform na Train), nigdy nie zastępując NULL zerem."
+    },
+    {
+      "id": "REC-05",
+      "category": "Kontrola obciążenia selekcyjnego i efektu weekendu",
+      "finding": "Powiat bolesławiecki (0201) generuje 19.69% raportów, a Top-3 powiaty (0201, 0214, 0213) 42.50% próby. Dni weekendowe generują 2.61x więcej zgłoszeń dziennie niż dni robocze.",
+      "action_for_model": "Nie używać liczby raportów jako zmiennej docelowej obfitości grzybów. W ewaluacji modelu ([GRZ-15]) sprawdzić błąd predykcji również z podziałem na powiaty o dużej i małej liczbie zgłoszeń oraz zachować cechę is_weekend i spatial_precision jako zmienne kontrolne."
+    }
+  ]
+}

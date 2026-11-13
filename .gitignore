@@ -14,6 +14,7 @@ env/
 .mypy_cache/
 .ruff_cache/
 .ipynb_checkpoints/
+docs/.mplcache/
 
 # Sekrety i konfiguracja lokalna
 .env
@@ -44,6 +45,7 @@ data/processed/*
 !data/processed/features.parquet
 !data/processed/features.csv
 !data/processed/features_quality_report.json
+!data/processed/eda_summary.json
 *.shp
 *.shx
 *.dbf

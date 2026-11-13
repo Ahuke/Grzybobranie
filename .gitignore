@@ -42,6 +42,8 @@ data/processed/*
 !data/processed/weather_quality_report.json
 !data/processed/split_metadata.json
 !data/processed/baseline_metrics.json
+!data/processed/prediction_inputs_sample.parquet
+!data/processed/prediction_inputs_quality_report.json
 !data/processed/features.parquet
 !data/processed/features.csv
 !data/processed/features_quality_report.json

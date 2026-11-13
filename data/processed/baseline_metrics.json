@@ -1,0 +1,391 @@
+{
+  "evaluation_protocol_version": "1.0",
+  "target_primary_regression": "yield_pcs_per_h",
+  "target_secondary_classification": "abundance_class",
+  "split_used": "primary_train_test",
+  "train_samples": 386,
+  "test_samples": 127,
+  "regression_benchmarks": {
+    "global_mean": {
+      "name": "Globalna Średnia Treningowa",
+      "fitted_parameter_value": 16.55,
+      "train_metrics": {
+        "sample_count": 386,
+        "mae_pcs_per_h": 12.221,
+        "rmse_pcs_per_h": 15.81,
+        "pearson_r": 0.0,
+        "spearman_rho": 0.0,
+        "r2_score": 0.0,
+        "r2_interpretable": true
+      },
+      "test_metrics": {
+        "sample_count": 127,
+        "mae_pcs_per_h": 15.726,
+        "rmse_pcs_per_h": 23.746,
+        "pearson_r": 0.0,
+        "spearman_rho": 0.0,
+        "r2_score": -0.1356,
+        "r2_interpretable": false
+      },
+      "notes": "Minimalizuje MSE na train; czuły na asymetrię rozkładu."
+    },
+    "global_median": {
+      "name": "Globalna Mediana Treningowa",
+      "fitted_parameter_value": 13.5,
+      "train_metrics": {
+        "sample_count": 386,
+        "mae_pcs_per_h": 11.974,
+        "rmse_pcs_per_h": 16.102,
+        "pearson_r": 0.0,
+        "spearman_rho": 0.0,
+        "r2_score": -0.0373,
+        "r2_interpretable": true
+      },
+      "test_metrics": {
+        "sample_count": 127,
+        "mae_pcs_per_h": 16.433,
+        "rmse_pcs_per_h": 24.966,
+        "pearson_r": 0.0,
+        "spearman_rho": 0.0,
+        "r2_score": -0.2553,
+        "r2_interpretable": false
+      },
+      "notes": "Minimalizuje MAE na train; odporny na wartości odstające."
+    },
+    "powiat_historical_mean": {
+      "name": "Średnia Powiatowa z Treningu (z fallbackiem do globalnej)",
+      "covered_powiats_in_train": 27,
+      "train_metrics": {
+        "sample_count": 386,
+        "mae_pcs_per_h": 10.518,
+        "rmse_pcs_per_h": 14.349,
+        "pearson_r": 0.4199,
+        "spearman_rho": 0.4405,
+        "r2_score": 0.1763,
+        "r2_interpretable": true
+      },
+      "test_metrics": {
+        "sample_count": 127,
+        "mae_pcs_per_h": 15.286,
+        "rmse_pcs_per_h": 23.348,
+        "pearson_r": 0.2745,
+        "spearman_rho": 0.3156,
+        "r2_score": -0.0979,
+        "r2_interpretable": false
+      },
+      "notes": "Uwzględnia lokalną stałą specyfikę powiatu bez cech pogody."
+    }
+  },
+  "classification_benchmarks": {
+    "majority_class": {
+      "name": "Klasa Dominująca (Dummy Majority)",
+      "fitted_majority_class": "SREDNIO",
+      "train_metrics": {
+        "sample_count": 386,
+        "macro_f1": 0.2136,
+        "weighted_f1": 0.3022,
+        "confusion_matrix": [
+          [
+            0,
+            97,
+            0
+          ],
+          [
+            0,
+            182,
+            0
+          ],
+          [
+            0,
+            107,
+            0
+          ]
+        ],
+        "labels": [
+          "BRAK",
+          "SREDNIO",
+          "WYSYP"
+        ],
+        "per_class": {
+          "BRAK": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0.0,
+            "support": 97
+          },
+          "SREDNIO": {
+            "precision": 0.4715,
+            "recall": 1.0,
+            "f1_score": 0.6408,
+            "support": 182
+          },
+          "WYSYP": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0.0,
+            "support": 107
+          }
+        }
+      },
+      "test_metrics": {
+        "sample_count": 127,
+        "macro_f1": 0.2065,
+        "weighted_f1": 0.2781,
+        "confusion_matrix": [
+          [
+            0,
+            15,
+            0
+          ],
+          [
+            0,
+            57,
+            0
+          ],
+          [
+            0,
+            55,
+            0
+          ]
+        ],
+        "labels": [
+          "BRAK",
+          "SREDNIO",
+          "WYSYP"
+        ],
+        "per_class": {
+          "BRAK": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0.0,
+            "support": 15
+          },
+          "SREDNIO": {
+            "precision": 0.4488,
+            "recall": 1.0,
+            "f1_score": 0.6196,
+            "support": 57
+          },
+          "WYSYP": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0.0,
+            "support": 55
+          }
+        }
+      },
+      "notes": "Zawsze przewiduje klasę SREDNIO. Załamanie Macro-F1 dla rzadszych klas BRAK i WYSYP."
+    },
+    "powiat_historical_majority": {
+      "name": "Dominanta Powiatowa z Treningu",
+      "train_metrics": {
+        "sample_count": 386,
+        "macro_f1": 0.4608,
+        "weighted_f1": 0.4986,
+        "confusion_matrix": [
+          [
+            44,
+            47,
+            6
+          ],
+          [
+            26,
+            148,
+            8
+          ],
+          [
+            17,
+            73,
+            17
+          ]
+        ],
+        "labels": [
+          "BRAK",
+          "SREDNIO",
+          "WYSYP"
+        ],
+        "per_class": {
+          "BRAK": {
+            "precision": 0.5057,
+            "recall": 0.4536,
+            "f1_score": 0.4783,
+            "support": 97
+          },
+          "SREDNIO": {
+            "precision": 0.5522,
+            "recall": 0.8132,
+            "f1_score": 0.6578,
+            "support": 182
+          },
+          "WYSYP": {
+            "precision": 0.5484,
+            "recall": 0.1589,
+            "f1_score": 0.2464,
+            "support": 107
+          }
+        }
+      },
+      "test_metrics": {
+        "sample_count": 127,
+        "macro_f1": 0.3918,
+        "weighted_f1": 0.3884,
+        "confusion_matrix": [
+          [
+            7,
+            8,
+            0
+          ],
+          [
+            10,
+            45,
+            2
+          ],
+          [
+            2,
+            47,
+            6
+          ]
+        ],
+        "labels": [
+          "BRAK",
+          "SREDNIO",
+          "WYSYP"
+        ],
+        "per_class": {
+          "BRAK": {
+            "precision": 0.3684,
+            "recall": 0.4667,
+            "f1_score": 0.4118,
+            "support": 15
+          },
+          "SREDNIO": {
+            "precision": 0.45,
+            "recall": 0.7895,
+            "f1_score": 0.5732,
+            "support": 57
+          },
+          "WYSYP": {
+            "precision": 0.75,
+            "recall": 0.1091,
+            "f1_score": 0.1905,
+            "support": 55
+          }
+        }
+      },
+      "notes": "Pozwala na zróżnicowanie etykiet per powiat na podstawie historii."
+    },
+    "stratified_random": {
+      "name": "Losowy Stratyfikowany (Rozkład z Treningu)",
+      "random_state": 42,
+      "train_metrics": {
+        "sample_count": 386,
+        "macro_f1": 0.3425,
+        "weighted_f1": 0.3775,
+        "confusion_matrix": [
+          [
+            27,
+            40,
+            30
+          ],
+          [
+            39,
+            94,
+            49
+          ],
+          [
+            32,
+            50,
+            25
+          ]
+        ],
+        "labels": [
+          "BRAK",
+          "SREDNIO",
+          "WYSYP"
+        ],
+        "per_class": {
+          "BRAK": {
+            "precision": 0.2755,
+            "recall": 0.2784,
+            "f1_score": 0.2769,
+            "support": 97
+          },
+          "SREDNIO": {
+            "precision": 0.5109,
+            "recall": 0.5165,
+            "f1_score": 0.5137,
+            "support": 182
+          },
+          "WYSYP": {
+            "precision": 0.2404,
+            "recall": 0.2336,
+            "f1_score": 0.237,
+            "support": 107
+          }
+        }
+      },
+      "test_metrics": {
+        "sample_count": 127,
+        "macro_f1": 0.3512,
+        "weighted_f1": 0.3927,
+        "confusion_matrix": [
+          [
+            5,
+            6,
+            4
+          ],
+          [
+            11,
+            31,
+            15
+          ],
+          [
+            13,
+            28,
+            14
+          ]
+        ],
+        "labels": [
+          "BRAK",
+          "SREDNIO",
+          "WYSYP"
+        ],
+        "per_class": {
+          "BRAK": {
+            "precision": 0.1724,
+            "recall": 0.3333,
+            "f1_score": 0.2273,
+            "support": 15
+          },
+          "SREDNIO": {
+            "precision": 0.4769,
+            "recall": 0.5439,
+            "f1_score": 0.5082,
+            "support": 57
+          },
+          "WYSYP": {
+            "precision": 0.4242,
+            "recall": 0.2545,
+            "f1_score": 0.3182,
+            "support": 55
+          }
+        }
+      },
+      "notes": "Losowanie ważone proporcjami z train (31.3% BRAK, 47.7% SREDNIO, 21.0% WYSYP)."
+    }
+  },
+  "target_evaluation_criteria_for_ml_models": {
+    "honest_comparison_statement": "Celem ewaluacji nie jest bezwzględna obietnica, że model ML z lagami pogodowymi musi pokonać prosty baseline w każdych warunkach, lecz rzetelne ustalenie, czy dynamiczne cechy pogodowo-siedliskowe wnoszą mierzalną wartość predykcyjną ponad statyczny punkt odniesienia.",
+    "regression_target": {
+      "primary_metric": "MAE [szt./h]",
+      "baseline_to_beat": "Global Mean MAE = 15.726 szt./h",
+      "success_threshold": "Obniżenie testowego MAE poniżej 14.5 szt./h i osiągnięcie dodatniego współczynnika rangowego Spearmana (> 0.20)",
+      "r2_interpretability_rule": "Współczynnik R² w teście poza czasem (Out-of-Time) może przybierać wartości ujemne z powodu przesunięcia średniej sezonowej (koniec października charakteryzuje się niższą średnią niż wrzesień). Dlatego R² traktujemy jako metrykę pomocniczą, a główną miarą jest MAE oraz korelacja rangowa Spearmana."
+    },
+    "classification_target": {
+      "primary_metric": "Macro-F1",
+      "baseline_to_beat": "Majority Class Macro-F1 = 0.2065",
+      "success_threshold": "Macro-F1 na zbiorze testowym > 0.45 z niezerowym Recall dla klas BRAK i WYSYP"
+    }
+  }
+}

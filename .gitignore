@@ -39,6 +39,8 @@ data/processed/*
 !data/processed/weather.csv
 !data/processed/weather_daily.parquet
 !data/processed/weather_quality_report.json
+!data/processed/split_metadata.json
+!data/processed/baseline_metrics.json
 *.shp
 *.shx
 *.dbf

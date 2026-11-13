@@ -1,0 +1,87 @@
+{
+  "task": "[GRZ-09] Historia pogody dla całego pilotażu z kontrolą braków",
+  "data_source": "Open-Meteo Historical Archive API (ERA5-Land reanalysis ~9 km grid)",
+  "timezone": "Europe/Warsaw",
+  "date_range": {
+    "start_date": "2025-08-01",
+    "end_date": "2025-11-05",
+    "days_per_area": 97,
+    "history_buffer_days_before_first_report": 31,
+    "longest_lag_window_required_days": 21,
+    "has_sufficient_history_buffer": true
+  },
+  "spatial_coverage": {
+    "total_powiats_in_region": 30,
+    "covered_powiats_count": 30,
+    "spatial_representation_type": "point_approximation_centroid",
+    "spatial_representation_note": "Pojedynczy punkt centroidu leśno-geometrycznego powiatu w siatce ERA5-Land (~9 km). Stanowi przybliżenie punktowe, a nie średnią powierzchniową z całego obszaru."
+  },
+  "integrity_and_missing_data": {
+    "total_observations_count": 2910,
+    "expected_observations_count": 2910,
+    "has_unique_area_date_keys": true,
+    "total_missing_days_count": 0,
+    "missing_days_by_powiat": {
+      "0201": 0,
+      "0202": 0,
+      "0203": 0,
+      "0204": 0,
+      "0205": 0,
+      "0206": 0,
+      "0207": 0,
+      "0208": 0,
+      "0209": 0,
+      "0210": 0,
+      "0211": 0,
+      "0212": 0,
+      "0213": 0,
+      "0214": 0,
+      "0215": 0,
+      "0216": 0,
+      "0217": 0,
+      "0218": 0,
+      "0219": 0,
+      "0220": 0,
+      "0221": 0,
+      "0222": 0,
+      "0223": 0,
+      "0224": 0,
+      "0225": 0,
+      "0226": 0,
+      "0261": 0,
+      "0262": 0,
+      "0264": 0,
+      "0265": 0
+    }
+  },
+  "variable_units_and_ranges": {
+    "precip_mm_1d": {
+      "unit": "mm (dobowa suma opadów)",
+      "min": 0.0,
+      "mean": 2.34,
+      "max": 41.7,
+      "missing_count": 0
+    },
+    "temp_min_night_c": {
+      "unit": "°C (minimalna temperatura dobowa / nocna)",
+      "min": -2.7,
+      "mean": 9.58,
+      "max": 19.3,
+      "missing_count": 0
+    },
+    "soil_moisture_0_7cm_m3m3": {
+      "unit": "m³/m³ (objętościowa wilgotność gleby w warstwie 0-7 cm z modelu ERA5-Land)",
+      "min": 0.0499,
+      "mean": 0.2772,
+      "max": 0.5097,
+      "missing_count": 0
+    },
+    "precip_lag_21d_mm": {
+      "unit": "mm (skumulowany opad z okna [t-21, t-1])",
+      "min": 0.6,
+      "mean": 43.92,
+      "max": 112.3,
+      "valid_count_from_day_22": 2280
+    }
+  }
+}

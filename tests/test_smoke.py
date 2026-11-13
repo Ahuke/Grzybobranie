@@ -31,6 +31,7 @@ from src.data_loader import (
     load_dataset_bundle,
     load_reports_csv,
     load_sprint1_audit_samples,
+    load_weather_csv,
 )
 from src.geo_utils import (
     enrich_bdl_stands_geojson,
@@ -342,6 +343,69 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertEqual(sq_report["multiplication_invariants"]["multiplication_factor"], 1.0)
         self.assertTrue(sq_report["multiplication_invariants"]["has_1_to_1_integrity"])
         self.assertEqual(sq_report["precision_breakdown"]["unassigned_count"], 0)
+
+    def test_pilot_weather_complete_and_no_missing_days_grz09(self) -> None:
+        """
+        Weryfikuje pełny zbiór pogodowy [GRZ-09]:
+        - obecność i schemat `weather.parquet`, `weather.csv`, `weather_daily.parquet`
+          oraz `weather_quality_report.json`,
+        - unikalność klucza (area_id, date) dla wszystkich 2910 rekordów,
+        - pokrycie 30 powiatów Dolnego Śląska przez 97 kolejnych dni (2025-08-01 .. 2025-11-05),
+        - 0 brakujących dni w szeregach czasowych,
+        - 31 dni zapasu historii przed 2025-09-01 (w 100% wyliczone okno precip_lag_21d_mm),
+        - poprawność wczytywania przez loader kontraktu danych `load_weather_csv`.
+        """
+        import json
+        import pandas as pd
+
+        weather_parquet = PROCESSED_DIR / "weather.parquet"
+        weather_csv = PROCESSED_DIR / "weather.csv"
+        weather_daily_parquet = PROCESSED_DIR / "weather_daily.parquet"
+        weather_quality_path = PROCESSED_DIR / "weather_quality_report.json"
+
+        self.assertTrue(weather_parquet.exists())
+        self.assertTrue(weather_csv.exists())
+        self.assertTrue(weather_daily_parquet.exists())
+        self.assertTrue(weather_quality_path.exists())
+
+        # 1. Weryfikacja liczby wierszy i unikalności klucza głównego (30 powiatów x 97 dni)
+        df_weather = pd.read_parquet(weather_parquet)
+        self.assertEqual(len(df_weather), 2910)
+        self.assertEqual(df_weather["area_id"].nunique(), 30)
+        self.assertTrue(df_weather["area_id"].str.startswith("02").all())
+
+        unique_keys = df_weather[["area_id", "date"]].drop_duplicates()
+        self.assertEqual(len(unique_keys), 2910)
+
+        # 2. Zakres dat i zapas historii
+        self.assertEqual(df_weather["date"].min(), "2025-08-01")
+        self.assertEqual(df_weather["date"].max(), "2025-11-05")
+        self.assertEqual(df_weather["date"].nunique(), 97)
+
+        # Na dzień pierwszych raportów (2025-09-01) precip_lag_21d_mm musi być w pełni wyliczony
+        sep01_records = df_weather[df_weather["date"] == "2025-09-01"]
+        self.assertEqual(len(sep01_records), 30)
+        self.assertTrue(sep01_records["precip_lag_21d_mm"].notna().all())
+        self.assertTrue((sep01_records["precip_lag_21d_mm"] >= 0.0).all())
+
+        # 3. Weryfikacja wczytywania przez moduł produkcyjny src/data_loader.py
+        loaded_csv_rows = load_weather_csv(weather_csv)
+        self.assertEqual(len(loaded_csv_rows), 2910)
+        self.assertTrue(all(not r["is_demo"] for r in loaded_csv_rows))
+        self.assertTrue(all(r["area_id"].startswith("02") for r in loaded_csv_rows))
+
+        # 4. Sprawdzenie surowego zbioru weather_daily z reprezentacją punktową
+        df_daily = pd.read_parquet(weather_daily_parquet)
+        self.assertEqual(len(df_daily), 2910)
+        self.assertIn("spatial_representation", df_daily.columns)
+        self.assertTrue((df_daily["spatial_representation"] == "point_approximation_centroid").all())
+        self.assertTrue(df_daily["soil_moisture_0_7cm_m3m3"].notna().all())
+
+        # 5. Sprawdzenie raportu jakości
+        q_report = json.loads(weather_quality_path.read_text(encoding="utf-8"))
+        self.assertEqual(q_report["integrity_and_missing_data"]["total_missing_days_count"], 0)
+        self.assertTrue(q_report["integrity_and_missing_data"]["has_unique_area_date_keys"])
+        self.assertEqual(q_report["date_range"]["history_buffer_days_before_first_report"], 31)
 
 
 if __name__ == "__main__":

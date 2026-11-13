@@ -838,6 +838,117 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertIn("mieszane", OBSERVATION_SPECIES_FILTER_LABELS)
         self.assertIn("__NULL__", OBSERVATION_SPECIES_FILTER_LABELS)
 
+    def test_prediction_input_builder_grz15(self) -> None:
+        """
+        Weryfikuje budowanie wejścia do prognoz [GRZ-15]:
+        1. Nazwy, jednostki i typy cech zgadzają się z tabelą treningową (`features.parquet`).
+        2. Rekordy zawierają jawne `issued_at` i `target_date` dla horyzontów 1–3 dni.
+        3. Przyszła rzeczywista pogoda (`date > issued_at`) nie jest używana w historycznej symulacji.
+        4. Niepełna historia zwraca `NULL` zamiast `0.0` i oznacza `PARTIAL_HISTORY`.
+        5. Obszar spoza pokrycia (`9999`) jest poprawnie blokowany lub oznaczany jako `OUT_OF_COVERAGE`.
+        """
+        import json
+        import pandas as pd
+        from src.features import FEATURE_DICTIONARY
+        from src.inference_features import (
+            MODEL_INPUT_FEATURE_COLUMNS,
+            RegionOutOfCoverageError,
+            build_prediction_input_row,
+            build_prediction_inputs_batch,
+            load_inference_reference_data,
+        )
+
+        sample_parquet = PROCESSED_DIR / "prediction_inputs_sample.parquet"
+        report_json = PROCESSED_DIR / "prediction_inputs_quality_report.json"
+        doc_path = ROOT_DIR / "docs" / "prediction_input_contract.md"
+
+        self.assertTrue(sample_parquet.exists(), "Brak prediction_inputs_sample.parquet")
+        self.assertTrue(report_json.exists(), "Brak prediction_inputs_quality_report.json")
+        self.assertTrue(doc_path.exists(), "Brak docs/prediction_input_contract.md")
+
+        df_train = pd.read_parquet(PROCESSED_DIR / "features.parquet")
+        df_sample = pd.read_parquet(sample_parquet)
+
+        # 1. Nazwy i typy cech zgodne z pipeline'em treningowym
+        self.assertEqual(len(df_sample), 90)  # 30 powiatów * 3 horyzonty
+        for col in MODEL_INPUT_FEATURE_COLUMNS:
+            self.assertIn(col, df_sample.columns)
+            self.assertIn(col, df_train.columns)
+            self.assertIn(col, FEATURE_DICTIONARY)
+            if FEATURE_DICTIONARY[col]["type"] in ("float64", "float64 (nullable)"):
+                self.assertEqual(str(df_sample[col].dtype), "float64")
+
+        # 2. Sprawdzenie dat wystawienia i docelowych dla horyzontów 1, 2, 3
+        self.assertTrue((df_sample["issued_at"] == "2025-10-18").all())
+        self.assertTrue((df_sample["feature_cutoff_date"] == "2025-10-18").all())
+        self.assertEqual(
+            sorted(df_sample["target_date"].unique().tolist()),
+            ["2025-10-19", "2025-10-20", "2025-10-21"],
+        )
+
+        # 3. Brak wycieku przyszłej rzeczywistej pogody
+        forest_lookup, weather_lookup = load_inference_reference_data()
+        truncated_weather = {k: v for k, v in weather_lookup.items() if k[1] <= "2025-10-18"}
+
+        df_full = build_prediction_inputs_batch(
+            issued_at="2025-10-18",
+            horizons=(1, 2, 3),
+            region_ids=("0201", "0208", "0218"),
+            forest_lookup=forest_lookup,
+            weather_lookup=weather_lookup,
+        )
+        df_trunc = build_prediction_inputs_batch(
+            issued_at="2025-10-18",
+            horizons=(1, 2, 3),
+            region_ids=("0201", "0208", "0218"),
+            forest_lookup=forest_lookup,
+            weather_lookup=truncated_weather,
+        )
+        pd.testing.assert_frame_equal(
+            df_full[MODEL_INPUT_FEATURE_COLUMNS],
+            df_trunc[MODEL_INPUT_FEATURE_COLUMNS],
+        )
+
+        # 4. Niepełna historia (2025-08-10: archiwum od 2025-08-01 -> okno 14d i 21d muszą być NULL)
+        row_partial = build_prediction_input_row(
+            region_id="0201",
+            issued_at="2025-08-10",
+            horizon_days=2,
+            forest_lookup=forest_lookup,
+            weather_lookup=weather_lookup,
+        )
+        self.assertEqual(row_partial["history_completeness"], "PARTIAL_HISTORY")
+        self.assertEqual(row_partial["missing_weather_days_21d"], 11)
+        self.assertIsNotNone(row_partial["precip_lag_7d_mm"])
+        self.assertIsNone(row_partial["precip_lag_14d_mm"])
+        self.assertIsNone(row_partial["precip_lag_21d_mm"])
+
+        # 5. Obszar spoza pokrycia
+        with self.assertRaises(RegionOutOfCoverageError):
+            build_prediction_input_row(
+                region_id="9999",
+                issued_at="2025-10-18",
+                horizon_days=1,
+                forest_lookup=forest_lookup,
+                weather_lookup=weather_lookup,
+            )
+
+        row_ooc = build_prediction_input_row(
+            region_id="9999",
+            issued_at="2025-10-18",
+            horizon_days=1,
+            forest_lookup=forest_lookup,
+            weather_lookup=weather_lookup,
+            allow_out_of_coverage=True,
+        )
+        self.assertFalse(row_ooc["is_region_covered"])
+        self.assertEqual(row_ooc["history_completeness"], "OUT_OF_COVERAGE")
+
+        # Raport jakości z CLI
+        rep = json.loads(report_json.read_text(encoding="utf-8"))
+        self.assertEqual(rep["rows_generated"], 90)
+        self.assertTrue(rep["edge_case_checks"]["future_weather_leakage_test"]["identical_features_without_future_weather"])
+
 
 if __name__ == "__main__":
     unittest.main()

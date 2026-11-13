@@ -267,6 +267,82 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertEqual(q_report["funnel_stages"]["stage_5_valid_for_training_in_reports_csv"], 513)
         self.assertEqual(q_report["regional_coverage"]["covered_powiats_count"], 28)
 
+    def test_spatial_features_and_no_false_precision_grz08(self) -> None:
+        """
+        Weryfikuje przetwarzanie przestrzenne [GRZ-08]:
+        - obecność i schemat `data/processed/forest_features.parquet` i `.csv` z kluczem region_id,
+        - obecność klucza region_id w `data/processed/areas.geojson`,
+        - jawną klasyfikację precyzji w `reports_spatial.parquet` (point_precise vs county_aggregate),
+        - brak pozornej dokładności dla raportów powiatowych (point_represents_specific_forest=False),
+        - brak multiplikacji wierszy (współczynnik = 1.0; 518 wejściowych -> 518 wyjściowych),
+        - brak nieprzypisanych lokalizacji (unassigned == 0).
+        """
+        import json
+        import pandas as pd
+
+        forest_parquet = PROCESSED_DIR / "forest_features.parquet"
+        forest_csv = PROCESSED_DIR / "forest_features.csv"
+        reports_spatial_parquet = PROCESSED_DIR / "reports_spatial.parquet"
+        reports_spatial_csv = PROCESSED_DIR / "reports_spatial.csv"
+        spatial_quality_path = PROCESSED_DIR / "spatial_quality_report.json"
+        areas_path = PROCESSED_DIR / "areas.geojson"
+
+        self.assertTrue(forest_parquet.exists())
+        self.assertTrue(forest_csv.exists())
+        self.assertTrue(reports_spatial_parquet.exists())
+        self.assertTrue(reports_spatial_csv.exists())
+        self.assertTrue(spatial_quality_path.exists())
+
+        # 1. Sprawdzenie tabeli forest_features (30 powiatów Dolnego Śląska)
+        df_forest = pd.read_parquet(forest_parquet)
+        self.assertEqual(len(df_forest), 30)
+        self.assertIn("region_id", df_forest.columns)
+        self.assertIn("area_id", df_forest.columns)
+        self.assertTrue(df_forest["region_id"].str.startswith("02").all())
+        self.assertEqual(df_forest["region_id"].nunique(), 30)
+
+        # 2. Sprawdzenie obecności region_id w areas.geojson
+        areas_data, areas_by_id = load_areas_geojson(areas_path)
+        self.assertEqual(len(areas_by_id), 30)
+        for feat in areas_data["features"]:
+            self.assertIn("region_id", feat["properties"])
+            self.assertEqual(feat["properties"]["region_id"], feat["properties"]["area_id"])
+
+        # 3. Sprawdzenie reports_spatial i niezmiennika braku multiplikacji
+        df_spatial = pd.read_parquet(reports_spatial_parquet)
+        self.assertEqual(len(df_spatial), 518)  # Dokładnie 1:1 z reports.parquet
+        self.assertEqual(df_spatial["report_id"].nunique(), 518)
+
+        # 4. Sprawdzenie eliminacji pozornej dokładności (false precision)
+        self.assertIn("spatial_precision", df_spatial.columns)
+        self.assertIn("point_represents_specific_forest", df_spatial.columns)
+
+        county_agg = df_spatial[df_spatial["spatial_precision"] == "county_aggregate"]
+        self.assertEqual(len(county_agg), 34)
+        self.assertTrue((county_agg["point_represents_specific_forest"] == False).all())
+        self.assertTrue(county_agg["is_county_aggregate"].all())
+
+        point_precise = df_spatial[df_spatial["spatial_precision"] == "point_precise"]
+        self.assertEqual(len(point_precise), 484)
+        self.assertTrue((point_precise["point_represents_specific_forest"] == True).all())
+        self.assertFalse(point_precise["is_county_aggregate"].any())
+
+        # 5. Sprawdzenie braku nieprzypisanych lokalizacji i poprawności odległości metrycznych
+        self.assertTrue(df_spatial["region_id"].notna().all())
+        self.assertTrue((df_spatial["region_id"] != "").all())
+        self.assertTrue(df_spatial["distance_to_county_centroid_km"].notna().all())
+        self.assertTrue((df_spatial["distance_to_county_centroid_km"] >= 0.0).all())
+
+        # 6. Sprawdzenie pliku CSV dla zbioru treningowego (dokładnie 513 rekordów)
+        df_spatial_csv = pd.read_csv(reports_spatial_csv)
+        self.assertEqual(len(df_spatial_csv), 513)
+
+        # 7. Weryfikacja raportu jakości
+        sq_report = json.loads(spatial_quality_path.read_text(encoding="utf-8"))
+        self.assertEqual(sq_report["multiplication_invariants"]["multiplication_factor"], 1.0)
+        self.assertTrue(sq_report["multiplication_invariants"]["has_1_to_1_integrity"])
+        self.assertEqual(sq_report["precision_breakdown"]["unassigned_count"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,963 @@
+{
+  "task": "[GRZ-10] Połączenie raportów, lasów i pogody w zbiór cech (features.parquet)",
+  "dataset_summary": {
+    "total_input_reports": 518,
+    "valid_training_observations_count": 513,
+    "columns_count": 70,
+    "unique_report_ids_count": 513,
+    "unique_observation_ids_count": 513,
+    "multiplication_factor": 1.0,
+    "has_1_to_1_label_integrity": true,
+    "covered_regions_count": 28,
+    "total_regions_in_pilot": 30,
+    "covered_regions_list": [
+      "0201",
+      "0202",
+      "0203",
+      "0204",
+      "0205",
+      "0206",
+      "0207",
+      "0208",
+      "0209",
+      "0210",
+      "0211",
+      "0212",
+      "0213",
+      "0214",
+      "0215",
+      "0216",
+      "0218",
+      "0219",
+      "0220",
+      "0221",
+      "0222",
+      "0223",
+      "0224",
+      "0225",
+      "0226",
+      "0261",
+      "0264",
+      "0265"
+    ],
+    "unobserved_regions_list": [
+      "0217",
+      "0262"
+    ]
+  },
+  "temporal_ranges_and_cutoff_rules": {
+    "horizon_days": 1,
+    "observation_date_min": "2025-09-01",
+    "observation_date_max": "2025-11-02",
+    "target_date_min": "2025-09-01",
+    "target_date_max": "2025-11-02",
+    "issued_at_min": "2025-08-31",
+    "issued_at_max": "2025-11-01",
+    "feature_cutoff_date_min": "2025-08-31",
+    "feature_cutoff_date_max": "2025-11-01",
+    "earliest_21d_weather_window_start": "2025-08-11",
+    "weather_archive_available_from": "2025-08-01",
+    "no_weather_after_cutoff_verified": true
+  },
+  "splits_distribution": {
+    "split_2way": {
+      "train": 386,
+      "test": 127
+    },
+    "split_3way": {
+      "train": 333,
+      "val": 111,
+      "test": 69
+    },
+    "abundance_class": {
+      "SREDNIO": 239,
+      "WYSYP": 162,
+      "BRAK": 112
+    }
+  },
+  "null_handling_and_completeness": {
+    "zero_harvest_reports_count": 45,
+    "weather_lag_features_null_count": 0,
+    "bdl_stand_features_null_rows_count": 80,
+    "bdl_stand_features_present_rows_count": 433,
+    "columns_null_breakdown": {
+      "observation_id": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "report_id": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "region_id": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "area_id": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "region_name": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "place_id": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "observation_date": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "harvest_date": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "date": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "publication_date": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "target_date": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "issued_at": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "feature_cutoff_date": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "horizon_days": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "window_7d_start_date": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "window_14d_start_date": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "window_21d_start_date": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "window_end_date": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "yield_pcs_per_h": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "abundance_class": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "dominant_species": {
+        "null_count": 89,
+        "null_pct": 17.35,
+        "non_null_count": 424
+      },
+      "harvest_duration_h": {
+        "null_count": 397,
+        "null_pct": 77.39,
+        "non_null_count": 116
+      },
+      "total_pieces": {
+        "null_count": 327,
+        "null_pct": 63.74,
+        "non_null_count": 186
+      },
+      "precip_lag_7d_mm": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "precip_lag_14d_mm": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "precip_lag_21d_mm": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "precip_cutoff_1d_mm": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "precip_hours_lag_7d_h": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "rainy_days_lag_7d_count": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "rainy_days_lag_14d_count": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "temp_min_night_c": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "temp_min_lag_3d_c": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "temp_min_lag_7d_c": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "frost_nights_lag_7d_count": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "temp_mean_cutoff_1d_c": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "temp_mean_7d_c": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "temp_mean_14d_c": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "temp_max_cutoff_1d_c": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "wind_speed_mean_7d_kmh": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "soil_moisture_0_7cm_m3m3": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "soil_moisture_mean_7d_m3m3": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "soil_moisture_mean_14d_m3m3": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "soil_temperature_0_7cm_c": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "soil_temp_mean_7d_c": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "grid_elevation_m": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "total_area_km2": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "forest_cover_pct": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "forest_area_km2": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "pine_share_pct": {
+        "null_count": 80,
+        "null_pct": 15.59,
+        "non_null_count": 433
+      },
+      "oak_beech_share_pct": {
+        "null_count": 80,
+        "null_pct": 15.59,
+        "non_null_count": 433
+      },
+      "spruce_share_pct": {
+        "null_count": 80,
+        "null_pct": 15.59,
+        "non_null_count": 433
+      },
+      "mean_stand_age_years": {
+        "null_count": 87,
+        "null_pct": 16.96,
+        "non_null_count": 426
+      },
+      "dominant_moisture_type": {
+        "null_count": 87,
+        "null_pct": 16.96,
+        "non_null_count": 426
+      },
+      "has_bdl_stand_data": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "spatial_precision": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "point_represents_specific_forest": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "distance_to_county_centroid_km": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "month": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "day_of_year": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "week_of_year": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "day_of_week": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "is_weekend": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "day_of_year_sin": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "day_of_year_cos": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "season_phase": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "split_2way": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "split_3way": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "source_url": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "is_valid_for_training": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      },
+      "is_demo": {
+        "null_count": 0,
+        "null_pct": 0.0,
+        "non_null_count": 513
+      }
+    }
+  },
+  "manual_verifications_grz10": {
+    "check_1_manual_7d_window": {
+      "report_id": "DG174806",
+      "region_id": "0201",
+      "region_name": "powiat bolesławiecki",
+      "observation_date": "2025-10-05",
+      "target_date": "2025-10-05",
+      "issued_at": "2025-10-04",
+      "feature_cutoff_date": "2025-10-04",
+      "window_7d_range": "2025-09-28 .. 2025-10-04",
+      "daily_precip_mm_in_window": {
+        "2025-09-28": 0.0,
+        "2025-09-29": 0.3,
+        "2025-09-30": 1.6,
+        "2025-10-01": 2.8,
+        "2025-10-02": 0.4,
+        "2025-10-03": 0.0,
+        "2025-10-04": 7.9
+      },
+      "manual_sum_precip_7d_mm": 13.0,
+      "features_table_precip_lag_7d_mm": 13.0,
+      "excluded_target_date_precip_mm": {
+        "date": "2025-10-05",
+        "precip_mm_1d": 0.9,
+        "included_in_window": false
+      },
+      "daily_temp_mean_c_in_window": {
+        "2025-09-28": 11.8,
+        "2025-09-29": 9.0,
+        "2025-09-30": 7.2,
+        "2025-10-01": 8.1,
+        "2025-10-02": 6.9,
+        "2025-10-03": 7.3,
+        "2025-10-04": 8.1
+      },
+      "manual_mean_temp_7d_c": 8.3,
+      "features_table_temp_mean_7d_c": 8.3,
+      "verification_passed": true
+    },
+    "check_2_missing_data_null_semantics": {
+      "bdl_and_report_null_preservation_case": {
+        "report_id": "DG177228",
+        "region_id": "0218",
+        "region_name": "powiat średzki",
+        "has_bdl_stand_data": false,
+        "forest_cover_pct_present": 11.8,
+        "pine_share_pct_is_null": true,
+        "oak_beech_share_pct_is_null": true,
+        "spruce_share_pct_is_null": true,
+        "mean_stand_age_years_is_null": true,
+        "dominant_moisture_type_is_null": true,
+        "harvest_duration_h_is_null": true
+      },
+      "explicit_zero_harvest_vs_null_species_case": {
+        "report_id": "DG174777",
+        "region_id": "0222",
+        "yield_pcs_per_h": 0.0,
+        "dominant_species_is_null": true
+      },
+      "missing_weather_day_in_window_test": {
+        "removed_key": [
+          "0201",
+          "2025-10-02"
+        ],
+        "resulting_precip_lag_7d_mm": null,
+        "not_imputed_with_zero": true
+      },
+      "verification_passed": true
+    },
+    "check_3_three_way_join": {
+      "report_id": "DG174714",
+      "join_keys": {
+        "region_id": "0208",
+        "observation_date": "2025-10-05",
+        "feature_cutoff_date": "2025-10-04"
+      },
+      "from_reports_spatial": {
+        "yield_pcs_per_h": 20.0,
+        "dominant_species": "podgrzybek_brunatny",
+        "harvest_duration_h": 3.0,
+        "total_pieces": 60.0,
+        "spatial_precision": "point_precise"
+      },
+      "from_forest_features": {
+        "region_name": "powiat kłodzki",
+        "total_area_km2": 1640.9,
+        "forest_cover_pct": 48.9,
+        "pine_share_pct": 9.8,
+        "oak_beech_share_pct": 28.4,
+        "spruce_share_pct": 58.0,
+        "mean_stand_age_years": 81.2,
+        "dominant_moisture_type": "wilgotne"
+      },
+      "from_weather_daily_at_cutoff": {
+        "window_7d": "2025-09-28 .. 2025-10-04",
+        "precip_lag_7d_mm": 9.8,
+        "precip_lag_14d_mm": 24.8,
+        "precip_lag_21d_mm": 33.5,
+        "temp_min_night_c_at_cutoff": -2.1,
+        "soil_moisture_0_7cm_m3m3_at_cutoff": 0.3248
+      },
+      "joined_feature_row_matches_sources_100pct": true,
+      "verification_passed": true
+    }
+  },
+  "column_dictionary": {
+    "observation_id": {
+      "type": "string",
+      "unit": "id",
+      "source": "reports_spatial.report_id",
+      "description": "Unikalny klucz główny obserwacji (1:1 ze źródłowym report_id)."
+    },
+    "report_id": {
+      "type": "string",
+      "unit": "id",
+      "source": "reports_spatial.report_id",
+      "description": "Identyfikator źródłowego raportu z portalu grzyby.pl (np. DG174806)."
+    },
+    "region_id": {
+      "type": "string",
+      "unit": "TERYT (4 znaki)",
+      "source": "forest_features.region_id",
+      "description": "Kod TERYT powiatu z zachowaniem wiodącego zera (np. 0201)."
+    },
+    "area_id": {
+      "type": "string",
+      "unit": "TERYT (4 znaki)",
+      "source": "forest_features.area_id",
+      "description": "Alias klucza powiatu zgodny z docs/data_contract.md."
+    },
+    "region_name": {
+      "type": "string",
+      "unit": "tekst",
+      "source": "forest_features.region_name",
+      "description": "Nazwa powiatu (np. powiat bolesławiecki)."
+    },
+    "place_id": {
+      "type": "string",
+      "unit": "id",
+      "source": "reports_spatial.place_id",
+      "description": "Identyfikator lokalizacji z bazy grzyby.pl."
+    },
+    "observation_date": {
+      "type": "string",
+      "unit": "YYYY-MM-DD",
+      "source": "reports_spatial.harvest_date",
+      "description": "Data faktycznego grzybobrania (obserwacji terenowej w lesie)."
+    },
+    "harvest_date": {
+      "type": "string",
+      "unit": "YYYY-MM-DD",
+      "source": "reports_spatial.harvest_date",
+      "description": "Data zbioru (alias observation_date używany w module ewaluacji)."
+    },
+    "date": {
+      "type": "string",
+      "unit": "YYYY-MM-DD",
+      "source": "reports_spatial.date",
+      "description": "Data obserwacji (alias zgodny z kontraktem danych)."
+    },
+    "publication_date": {
+      "type": "string",
+      "unit": "YYYY-MM-DD",
+      "source": "reports_spatial.publication_date",
+      "description": "Data publikacji raportu na portalu grzyby.pl."
+    },
+    "target_date": {
+      "type": "string",
+      "unit": "YYYY-MM-DD",
+      "source": "wyliczona (t)",
+      "description": "Data docelowa, na którą wystawiana jest prognoza (t = observation_date)."
+    },
+    "issued_at": {
+      "type": "string",
+      "unit": "YYYY-MM-DD",
+      "source": "wyliczona (t0 = t - horizon_days)",
+      "description": "Data wystawienia prognozy (moment symulacji predykcji)."
+    },
+    "feature_cutoff_date": {
+      "type": "string",
+      "unit": "YYYY-MM-DD",
+      "source": "wyliczona (t_cutoff = issued_at)",
+      "description": "Data odcięcia dostępności cech pogodowych (ostatnia pełna doba znana w chwili wystawienia prognozy)."
+    },
+    "horizon_days": {
+      "type": "int64",
+      "unit": "dni",
+      "source": "parametr potoku (domyślnie 1)",
+      "description": "Horyzont wyprzedzenia prognozy w dniach (target_date - issued_at)."
+    },
+    "window_7d_start_date": {
+      "type": "string",
+      "unit": "YYYY-MM-DD",
+      "source": "wyliczona (feature_cutoff_date - 6 dni)",
+      "description": "Początek zamkniętego 7-dniowego okna pogodowego [t_cutoff-6, t_cutoff]."
+    },
+    "window_14d_start_date": {
+      "type": "string",
+      "unit": "YYYY-MM-DD",
+      "source": "wyliczona (feature_cutoff_date - 13 dni)",
+      "description": "Początek zamkniętego 14-dniowego okna pogodowego [t_cutoff-13, t_cutoff]."
+    },
+    "window_21d_start_date": {
+      "type": "string",
+      "unit": "YYYY-MM-DD",
+      "source": "wyliczona (feature_cutoff_date - 20 dni)",
+      "description": "Początek zamkniętego 21-dniowego okna pogodowego [t_cutoff-20, t_cutoff]."
+    },
+    "window_end_date": {
+      "type": "string",
+      "unit": "YYYY-MM-DD",
+      "source": "wyliczona (== feature_cutoff_date)",
+      "description": "Koniec wszystkich okien pogodowych (nigdy nie przekracza feature_cutoff_date)."
+    },
+    "yield_pcs_per_h": {
+      "type": "float64",
+      "unit": "szt./h",
+      "source": "reports_spatial.yield_pcs_per_h",
+      "description": "Główna zmienna docelowa (Target regresji): wydajność grzybobrania na 1 osobę i 1 godzinę."
+    },
+    "abundance_class": {
+      "type": "string",
+      "unit": "enum (BRAK, SREDNIO, WYSYP)",
+      "source": "wyliczona z yield_pcs_per_h",
+      "description": "Zmienna docelowa klasyfikacji (<5 BRAK, 5-20 SREDNIO, >20 WYSYP)."
+    },
+    "dominant_species": {
+      "type": "string (nullable)",
+      "unit": "słownik gatunków",
+      "source": "reports_spatial.dominant_species",
+      "description": "Dominujący gatunek grzyba w raporcie (NULL gdy nie podano)."
+    },
+    "harvest_duration_h": {
+      "type": "float64 (nullable)",
+      "unit": "h",
+      "source": "reports_spatial.harvest_duration_h",
+      "description": "Deklarowany czas zbierania w godzinach (>0 lub NULL)."
+    },
+    "total_pieces": {
+      "type": "float64 (nullable)",
+      "unit": "szt.",
+      "source": "reports_spatial.total_pieces",
+      "description": "Deklarowana łączna liczba zebranych grzybów (NULL gdy nie podano)."
+    },
+    "precip_lag_7d_mm": {
+      "type": "float64 (nullable)",
+      "unit": "mm",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Skumulowana suma opadów z pełnych 7 dni kończących się w dniu odcięcia."
+    },
+    "precip_lag_14d_mm": {
+      "type": "float64 (nullable)",
+      "unit": "mm",
+      "source": "weather_daily (okno 14d do feature_cutoff_date)",
+      "description": "Skumulowana suma opadów z pełnych 14 dni kończących się w dniu odcięcia."
+    },
+    "precip_lag_21d_mm": {
+      "type": "float64 (nullable)",
+      "unit": "mm",
+      "source": "weather_daily (okno 21d do feature_cutoff_date)",
+      "description": "Skumulowana suma opadów z pełnych 21 dni kończących się w dniu odcięcia."
+    },
+    "precip_cutoff_1d_mm": {
+      "type": "float64 (nullable)",
+      "unit": "mm",
+      "source": "weather_daily (w dniu feature_cutoff_date)",
+      "description": "Dobowa suma opadów w dniu odcięcia cech (ostatnia doba przed prognozą)."
+    },
+    "precip_hours_lag_7d_h": {
+      "type": "float64 (nullable)",
+      "unit": "h",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Suma godzin z opadem atmosferycznym w oknie 7 dni przed odcięciem."
+    },
+    "rainy_days_lag_7d_count": {
+      "type": "float64 (nullable)",
+      "unit": "dni (0-7)",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Liczba dni z opadem dobowym >= 1.0 mm w oknie 7 dni przed odcięciem."
+    },
+    "rainy_days_lag_14d_count": {
+      "type": "float64 (nullable)",
+      "unit": "dni (0-14)",
+      "source": "weather_daily (okno 14d do feature_cutoff_date)",
+      "description": "Liczba dni z opadem dobowym >= 1.0 mm w oknie 14 dni przed odcięciem."
+    },
+    "temp_min_night_c": {
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (w dniu feature_cutoff_date)",
+      "description": "Minimalna temperatura nocna/poranna w dobie odcięcia cech."
+    },
+    "temp_min_lag_3d_c": {
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (okno 3d do feature_cutoff_date)",
+      "description": "Najniższa temperatura minimalna z ostatnich 3 dób przed odcięciem."
+    },
+    "temp_min_lag_7d_c": {
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Najniższa temperatura minimalna z ostatnich 7 dób przed odcięciem."
+    },
+    "frost_nights_lag_7d_count": {
+      "type": "float64 (nullable)",
+      "unit": "dni (0-7)",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Liczba dób z przymrozkiem (temp_min_night_c <= 0.0°C) w oknie 7 dni przed odcięciem."
+    },
+    "temp_mean_cutoff_1d_c": {
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (w dniu feature_cutoff_date)",
+      "description": "Średnia temperatura dobowa na 2 m w dniu odcięcia cech."
+    },
+    "temp_mean_7d_c": {
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Średnia temperatura dobowa z okna 7 dni kończącego się w dniu odcięcia."
+    },
+    "temp_mean_14d_c": {
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (okno 14d do feature_cutoff_date)",
+      "description": "Średnia temperatura dobowa z okna 14 dni kończącego się w dniu odcięcia."
+    },
+    "temp_max_cutoff_1d_c": {
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (w dniu feature_cutoff_date)",
+      "description": "Maksymalna temperatura dobowa w dniu odcięcia cech."
+    },
+    "wind_speed_mean_7d_kmh": {
+      "type": "float64 (nullable)",
+      "unit": "km/h",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Średnia z dobowych maksimów prędkości wiatru w oknie 7 dni przed odcięciem."
+    },
+    "soil_moisture_0_7cm_m3m3": {
+      "type": "float64 (nullable)",
+      "unit": "m³/m³",
+      "source": "weather_daily (ERA5-Land w dniu feature_cutoff_date)",
+      "description": "Modelowana objętościowa wilgotność gleby (0-7 cm) w dniu odcięcia cech."
+    },
+    "soil_moisture_mean_7d_m3m3": {
+      "type": "float64 (nullable)",
+      "unit": "m³/m³",
+      "source": "weather_daily (okno 7d ERA5-Land do feature_cutoff_date)",
+      "description": "Średnia modelowana wilgotność gleby (0-7 cm) z okna 7 dni przed odcięciem."
+    },
+    "soil_moisture_mean_14d_m3m3": {
+      "type": "float64 (nullable)",
+      "unit": "m³/m³",
+      "source": "weather_daily (okno 14d ERA5-Land do feature_cutoff_date)",
+      "description": "Średnia modelowana wilgotność gleby (0-7 cm) z okna 14 dni przed odcięciem."
+    },
+    "soil_temperature_0_7cm_c": {
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (ERA5-Land w dniu feature_cutoff_date)",
+      "description": "Modelowana temperatura wierzchniej warstwy gleby (0-7 cm) w dniu odcięcia."
+    },
+    "soil_temp_mean_7d_c": {
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (okno 7d ERA5-Land do feature_cutoff_date)",
+      "description": "Średnia modelowana temperatura gleby (0-7 cm) z okna 7 dni przed odcięciem."
+    },
+    "grid_elevation_m": {
+      "type": "float64 (nullable)",
+      "unit": "m n.p.m.",
+      "source": "weather_daily.grid_elevation_m",
+      "description": "Wysokość n.p.m. oczka siatki ERA5-Land reprezentującego powiat."
+    },
+    "total_area_km2": {
+      "type": "float64",
+      "unit": "km²",
+      "source": "forest_features.total_area_km2",
+      "description": "Całkowita powierzchnia geometryczna powiatu w układzie EPSG:2180."
+    },
+    "forest_cover_pct": {
+      "type": "float64 (nullable)",
+      "unit": "%",
+      "source": "forest_features.forest_cover_pct",
+      "description": "Lesistość powiatu (udział lasów w powierzchni całkowitej)."
+    },
+    "forest_area_km2": {
+      "type": "float64 (nullable)",
+      "unit": "km²",
+      "source": "forest_features.forest_area_km2",
+      "description": "Szacowana powierzchnia lasów w powiecie."
+    },
+    "pine_share_pct": {
+      "type": "float64 (nullable)",
+      "unit": "%",
+      "source": "forest_features.pine_share_pct",
+      "description": "Udział drzewostanów z panującą sosną (SO) wg BDL (NULL przy braku danych BDL)."
+    },
+    "oak_beech_share_pct": {
+      "type": "float64 (nullable)",
+      "unit": "%",
+      "source": "forest_features.oak_beech_share_pct",
+      "description": "Udział drzewostanów z panującym dębem (DB) lub bukiem (BK) wg BDL (NULL przy braku BDL)."
+    },
+    "spruce_share_pct": {
+      "type": "float64 (nullable)",
+      "unit": "%",
+      "source": "forest_features.spruce_share_pct",
+      "description": "Udział drzewostanów z panującym świerkiem (ŚW) wg BDL (NULL przy braku BDL)."
+    },
+    "mean_stand_age_years": {
+      "type": "float64 (nullable)",
+      "unit": "lata",
+      "source": "forest_features.mean_stand_age_years",
+      "description": "Średni ważony powierzchniowo wiek drzewostanów D-STAN w BDL (NULL przy braku BDL)."
+    },
+    "dominant_moisture_type": {
+      "type": "string (nullable)",
+      "unit": "kategoria BDL",
+      "source": "forest_features.dominant_moisture_type",
+      "description": "Dominujące uwilgotnienie siedliska (suche, swieze, wilgotne, bagienne lub NULL)."
+    },
+    "has_bdl_stand_data": {
+      "type": "bool",
+      "unit": "flaga",
+      "source": "forest_features.has_bdl_stand_data",
+      "description": "Czy powiat posiada szczegółowy profil taksacyjny drzewostanów BDL."
+    },
+    "spatial_precision": {
+      "type": "string",
+      "unit": "enum",
+      "source": "reports_spatial.spatial_precision",
+      "description": "Dokładność lokalizacji raportu (point_precise vs county_aggregate)."
+    },
+    "point_represents_specific_forest": {
+      "type": "bool",
+      "unit": "flaga",
+      "source": "reports_spatial.point_represents_specific_forest",
+      "description": "False dla zgłoszeń ogólnopowiatowych (ochrona przed pozorną dokładnością)."
+    },
+    "distance_to_county_centroid_km": {
+      "type": "float64 (nullable)",
+      "unit": "km",
+      "source": "reports_spatial.distance_to_county_centroid_km",
+      "description": "Odległość punktu zgłoszenia od środka ciężkości powiatu w EPSG:2180."
+    },
+    "month": {
+      "type": "int64",
+      "unit": "miesiąc (1-12)",
+      "source": "wyliczona z target_date",
+      "description": "Miesiąc kalendarzowy daty docelowej (np. 9, 10, 11)."
+    },
+    "day_of_year": {
+      "type": "int64",
+      "unit": "dzień roku (1-366)",
+      "source": "wyliczona z target_date",
+      "description": "Kolejny dzień w roku kalendarzowym (DOY)."
+    },
+    "week_of_year": {
+      "type": "int64",
+      "unit": "tydzień ISO (1-53)",
+      "source": "wyliczona z target_date",
+      "description": "Numer tygodnia roku wg standardu ISO 8601."
+    },
+    "day_of_week": {
+      "type": "int64",
+      "unit": "dzień tyg. (0=Pon..6=Nd)",
+      "source": "wyliczona z target_date",
+      "description": "Dzień tygodnia dla daty docelowej."
+    },
+    "is_weekend": {
+      "type": "bool",
+      "unit": "flaga",
+      "source": "wyliczona z target_date",
+      "description": "True dla soboty i niedzieli (uwzględnia efekt weekendowej aktywności grzybiarzy)."
+    },
+    "day_of_year_sin": {
+      "type": "float64",
+      "unit": "[-1, 1]",
+      "source": "wyliczona z target_date",
+      "description": "Cykliczna transformacja sinus dnia roku sin(2*pi*DOY/365.25)."
+    },
+    "day_of_year_cos": {
+      "type": "float64",
+      "unit": "[-1, 1]",
+      "source": "wyliczona z target_date",
+      "description": "Cykliczna transformacja cosinus dnia roku cos(2*pi*DOY/365.25)."
+    },
+    "season_phase": {
+      "type": "string",
+      "unit": "enum",
+      "source": "wyliczona z target_date",
+      "description": "Faza sezonu jesiennego (early_autumn_sep, peak_autumn_oct_early, late_autumn_oct_late_nov)."
+    },
+    "split_2way": {
+      "type": "string",
+      "unit": "enum (train, test)",
+      "source": "protokół [GRZ-13]",
+      "description": "Przynależność do podziału głównego Train (<=2025-10-12) / Test (>2025-10-12)."
+    },
+    "split_3way": {
+      "type": "string",
+      "unit": "enum (train, val, test)",
+      "source": "protokół [GRZ-13]",
+      "description": "Przynależność do podziału 3-częściowego Train / Val / Test."
+    },
+    "source_url": {
+      "type": "string",
+      "unit": "URL",
+      "source": "reports_spatial.source_url",
+      "description": "Adres źródłowy raportu na portalu grzyby.pl."
+    },
+    "is_valid_for_training": {
+      "type": "bool",
+      "unit": "flaga",
+      "source": "reports_spatial.is_valid_for_training",
+      "description": "Flaga ważności obserwacji do treningu i ewaluacji."
+    },
+    "is_demo": {
+      "type": "bool",
+      "unit": "flaga",
+      "source": "stała False",
+      "description": "Flaga bezpieczeństwa odróżniająca dane produkcyjne od próbki UI."
+    }
+  }
+}

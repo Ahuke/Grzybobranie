@@ -616,6 +616,101 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         cls_preds = m_cls.predict(2)
         self.assertEqual(list(cls_preds), ["SREDNIO", "SREDNIO"])
 
+    def test_eda_and_lag_analysis_grz11(self) -> None:
+        """
+        Weryfikuje eksploracyjną analizę danych i badanie opóźnienia opad -> zbiory [GRZ-11]:
+        1. Co najmniej 3 czytelne wykresy PNG z jednostkami, okresem i liczebnością próby (w katalogu docs/figures/).
+        2. Sprawdzenie wrażliwości wyniku na dominację pojedynczego regionu (0201, Top-3, Top-5) oraz sezonu (3 fazy jesieni).
+        3. Porównanie dostępnych okien opadów (1d, 7d, 14d, 21d, przedziały tygodniowe, krzywa k=1..21d) z odnotowaniem także słabych zależności.
+        4. Oddzielenie obfitości raportów (wolumen dzienny, 2.61x wyższy w weekendy) od obfitości grzybów (yield_pcs_per_h, mediana 15.0 vs 15.0 szt./h) oraz jawne zastrzeżenie korelacja != przyczynowość.
+        5. Zapisane rekomendacje do modelu (REC-01..REC-05) oraz ograniczenia filtrowania gatunków (55.17% mieszane/NULL).
+        """
+        import json
+
+        eda_json_path = PROCESSED_DIR / "eda_summary.json"
+        eda_doc_path = ROOT_DIR / "docs" / "eda_and_lag_analysis.md"
+        notebook_path = ROOT_DIR / "notebooks" / "01_eda_lag_effect.ipynb"
+        figures_dir = ROOT_DIR / "docs" / "figures"
+
+        self.assertTrue(eda_json_path.exists(), "Brak data/processed/eda_summary.json")
+        self.assertTrue(eda_doc_path.exists(), "Brak docs/eda_and_lag_analysis.md")
+        self.assertTrue(notebook_path.exists(), "Brak notebooks/01_eda_lag_effect.ipynb")
+
+        # 1. Weryfikacja co najmniej 3 wykresów PNG (wygenerowano 5)
+        expected_figs = [
+            "eda_01_yield_and_reports_distribution.png",
+            "eda_02_seasonality_and_volume_vs_yield.png",
+            "eda_03_precipitation_lag_comparison.png",
+            "eda_04_regional_and_seasonal_sensitivity.png",
+            "eda_05_missingness_and_species_constraints.png",
+        ]
+        self.assertGreaterEqual(len(expected_figs), 3)
+        for fname in expected_figs:
+            fpath = figures_dir / fname
+            self.assertTrue(fpath.exists(), f"Brak wykresu {fpath}")
+            self.assertGreater(fpath.stat().st_size, 25_000, f"Wykres {fname} jest zbyt mały/pusty")
+
+        summary = json.loads(eda_json_path.read_text(encoding="utf-8"))
+
+        # 2. Sprawdzenie wrażliwości na dominację regionu i sezonu
+        self.assertEqual(summary["yield_and_reports_distribution"]["n_valid_observations"], 513)
+        self.assertEqual(summary["regional_concentration"]["top_1_region_id"], "0201")
+        self.assertAlmostEqual(summary["regional_concentration"]["top_1_region_share_pct"], 19.69, places=2)
+
+        reg_sens = summary["regional_dominance_sensitivity"]
+        self.assertEqual(len(reg_sens), 4)
+        # Korelacja z rainy_days_lag_14d pozostaje dodatnia po odrzuceniu Top-1, Top-3 i Top-5 powiatów
+        for s in reg_sens:
+            self.assertGreater(s["corr_rainy_days_14d"]["pearson_r"], 0.20)
+            self.assertGreater(s["corr_precip_slice_15_21d"]["spearman_rho"], 0.14)
+
+        seas_sens = summary["seasonal_dominance_sensitivity"]
+        self.assertEqual(len(seas_sens), 3)
+        self.assertEqual(sum(s["n"] for s in seas_sens), 513)
+
+        # 3. Porównanie okien opadów i krzywej k=1..21 dni
+        corr_map = {c["feature"]: c for c in summary["weather_and_habitat_correlations"]}
+        self.assertIn("precip_cutoff_1d_mm", corr_map)
+        self.assertIn("precip_lag_7d_mm", corr_map)
+        self.assertIn("precip_lag_14d_mm", corr_map)
+        self.assertIn("precip_lag_21d_mm", corr_map)
+        self.assertIn("precip_slice_15_21d_mm", corr_map)
+        self.assertIn("rainy_days_lag_14d_count", corr_map)
+
+        # Odnotowanie słabej/ujemnej korelacji dla krótkiego okna 7d i silniejszej dodatniej dla 14-21d
+        self.assertLess(corr_map["precip_lag_7d_mm"]["pearson_r"], 0.0)
+        self.assertGreater(corr_map["precip_lag_21d_mm"]["pearson_r"], 0.0)
+        self.assertGreater(corr_map["precip_slice_15_21d_mm"]["spearman_rho"], 0.15)
+        self.assertGreater(corr_map["rainy_days_lag_14d_count"]["pearson_r"], 0.25)
+
+        lag_curve = summary["rolling_lag_curve_1_to_21_days"]
+        self.assertEqual(len(lag_curve), 21)
+
+        # 4. Oddzielenie obfitości raportów od obfitości grzybów oraz korelacja != przyczynowość
+        va = summary["report_volume_vs_mushroom_abundance"]
+        self.assertGreater(va["weekend_to_weekday_volume_ratio"], 2.5)
+        self.assertLess(va["report_volume_mannwhitney_p"], 0.001)
+        self.assertEqual(
+            va["mushroom_yield_weekday_median_pcs_per_h"],
+            va["mushroom_yield_weekend_median_pcs_per_h"],
+        )
+        self.assertGreater(va["mushroom_yield_mannwhitney_p"], 0.5)
+
+        doc_text = eda_doc_path.read_text(encoding="utf-8")
+        self.assertIn("przyczynowo", doc_text.lower())
+        self.assertIn("Obfitość raportów", doc_text)
+        self.assertIn("Obfitość grzybów", doc_text)
+
+        # 5. Rekomendacje do modelu i ograniczenia filtrowania gatunków
+        sp = summary["species_filtering_constraints"]
+        self.assertEqual(sp["mixed_or_null_species_count"], 283)
+        self.assertGreater(sp["mixed_or_null_species_pct"], 55.0)
+        self.assertGreaterEqual(len(summary["modeling_recommendations"]), 5)
+
+        nb_data = json.loads(notebook_path.read_text(encoding="utf-8"))
+        self.assertEqual(nb_data["nbformat"], 4)
+        self.assertGreaterEqual(len(nb_data["cells"]), 6)
+
 
 if __name__ == "__main__":
     unittest.main()

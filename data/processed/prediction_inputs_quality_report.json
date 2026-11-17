@@ -1,0 +1,43 @@
+{
+  "task": "GRZ-15",
+  "issued_at": "2025-10-18",
+  "horizons": [
+    1,
+    2,
+    3
+  ],
+  "rows_generated": 90,
+  "regions_count": 30,
+  "history_completeness_counts": {
+    "COMPLETE": 54,
+    "COMPLETE_WEATHER_NO_BDL_STAND": 36
+  },
+  "edge_case_checks": {
+    "schema_alignment": {
+      "model_input_feature_count": 42,
+      "all_features_present_in_training_dictionary": true
+    },
+    "no_bdl_county_0218": {
+      "history_completeness": "COMPLETE_WEATHER_NO_BDL_STAND",
+      "pine_share_pct_is_null": true,
+      "precip_lag_21d_mm": 37.7
+    },
+    "incomplete_history_2025_08_10": {
+      "history_completeness": "PARTIAL_HISTORY",
+      "missing_weather_days_21d": 11,
+      "precip_lag_7d_mm": 11.1,
+      "precip_lag_14d_mm_is_null": true,
+      "precip_lag_21d_mm_is_null": true
+    },
+    "out_of_coverage_9999": {
+      "strict_mode_raised_error": true,
+      "graceful_status": "OUT_OF_COVERAGE",
+      "is_region_covered": false
+    },
+    "future_weather_leakage_test": {
+      "issued_at": "2025-10-18",
+      "target_date_horizon_3": "2025-10-21",
+      "identical_features_without_future_weather": true
+    }
+  }
+}

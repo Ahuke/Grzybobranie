@@ -838,6 +838,152 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertIn("mieszane", OBSERVATION_SPECIES_FILTER_LABELS)
         self.assertIn("__NULL__", OBSERVATION_SPECIES_FILTER_LABELS)
 
+    def test_first_model_and_complete_pipeline_grz14(self) -> None:
+        """
+        Weryfikuje wszystkie 5 warunków ukończenia zadania [GRZ-14]:
+        1. Trening uruchamia się z udokumentowanego polecenia (`python scripts/train_model.py`).
+        2. Model porównano z baseline (oraz wariantami Gradient Boosting) na tym samym podziale czasowym
+           (`primary_split_train_test`: 386 Train / 127 Test).
+        3. Zapisany artefakt (`.joblib`) obejmuje potrzebne kodowanie kategorii i obsługę braków (`NULL != 0.0`).
+        4. Metadane (`models/model_metadata.json`, `models/feature_list.json`) podają wersję danych, daty treningu,
+           cechy, cel oraz jednostkę wyniku (`szt./h`).
+        5. Przykład predykcji (`python scripts/predict_example.py` / `predict_with_saved_pipelines`) daje się
+           wykonać bez uruchamiania całego treningu na danych z `models/example_input.json`.
+        """
+        import json
+        import joblib
+        import pandas as pd
+        from src.config import MODELS_DIR
+        from src.model_pipeline import (
+            DomainFeatureProcessor,
+            FORBIDDEN_LEAKAGE_COLS,
+            RAW_INPUT_FEATURES,
+            predict_with_saved_pipelines,
+        )
+
+        reg_joblib = MODELS_DIR / "rf_yield_pipeline.joblib"
+        clf_joblib = MODELS_DIR / "rf_abundance_pipeline.joblib"
+        meta_path = MODELS_DIR / "model_metadata.json"
+        feat_list_path = MODELS_DIR / "feature_list.json"
+        ex_in_json = MODELS_DIR / "example_input.json"
+        ex_in_csv = MODELS_DIR / "example_input.csv"
+        ex_out_json = MODELS_DIR / "example_output.json"
+        ex_out_csv = MODELS_DIR / "example_output.csv"
+        eval_json = PROCESSED_DIR / "model_evaluation.json"
+        doc_path = ROOT_DIR / "docs" / "model_training.md"
+        train_script = ROOT_DIR / "scripts" / "train_model.py"
+        pred_script = ROOT_DIR / "scripts" / "predict_example.py"
+
+        for p in (
+            reg_joblib,
+            clf_joblib,
+            meta_path,
+            feat_list_path,
+            ex_in_json,
+            ex_in_csv,
+            ex_out_json,
+            ex_out_csv,
+            eval_json,
+            doc_path,
+            train_script,
+            pred_script,
+        ):
+            self.assertTrue(p.exists(), f"Brak wymaganego pliku [GRZ-14]: {p}")
+
+        # 1 & 4. Weryfikacja metadanych: wersja danych, daty treningu, cechy, cel, jednostka wyniku
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        self.assertEqual(meta["training_command"], "python scripts/train_model.py")
+        self.assertEqual(meta["prediction_example_command"], "python scripts/predict_example.py")
+
+        data_ver = meta["data_version"]
+        self.assertEqual(data_ver["source_file"], "data/processed/features.parquet")
+        self.assertEqual(len(data_ver["source_sha256"]), 64)
+        self.assertEqual(data_ver["total_valid_observations"], 513)
+        self.assertEqual(data_ver["train_observations"], 386)
+        self.assertEqual(data_ver["test_observations"], 127)
+        self.assertFalse(data_ver["is_demo_records_present"])
+
+        t_dates = meta["training_dates"]
+        self.assertEqual(t_dates["split_cutoff_date"], "2025-10-12")
+        self.assertEqual(t_dates["train_date_min"], "2025-09-01")
+        self.assertEqual(t_dates["train_date_max"], "2025-10-12")
+        self.assertEqual(t_dates["test_date_min"], "2025-10-13")
+        self.assertEqual(t_dates["test_date_max"], "2025-11-02")
+        self.assertEqual(t_dates["anti_leakage_verified"]["report_id_overlap_train_test"], 0)
+        self.assertTrue(t_dates["anti_leakage_verified"]["temporal_gap_strictly_positive"])
+        self.assertTrue(t_dates["anti_leakage_verified"]["matches_grz13_split_metadata_1_to_1"])
+
+        target_info = meta["target"]
+        self.assertEqual(target_info["primary_regression_target"], "yield_pcs_per_h")
+        self.assertEqual(target_info["predicted_output_column"], "predicted_yield_pcs_per_h")
+        self.assertEqual(target_info["target_unit"], "szt./h")
+        self.assertEqual(target_info["secondary_classification_target"], "abundance_class")
+
+        feat_list = json.loads(feat_list_path.read_text(encoding="utf-8"))
+        self.assertEqual(feat_list["raw_input_features"], RAW_INPUT_FEATURES)
+        self.assertEqual(len(FORBIDDEN_LEAKAGE_COLS.intersection(set(RAW_INPUT_FEATURES))), 0)
+        self.assertGreaterEqual(len(feat_list["regression_top_15_feature_importances"]), 10)
+
+        # 2. Weryfikacja porównania z baseline na tym samym podziale
+        comp = meta["evaluation_and_baseline_comparison"]
+        reg_comp = comp["regression_comparison_on_test"]
+        cls_comp = comp["classification_comparison_on_test"]
+
+        rf_reg_test = reg_comp["random_forest_regressor_primary"]["test_metrics"]
+        base_mean_test = reg_comp["baseline_global_mean"]["test_metrics"]
+        base_pow_test = reg_comp["baseline_powiat_historical_mean"]["test_metrics"]
+
+        self.assertEqual(rf_reg_test["sample_count"], 127)
+        self.assertEqual(base_mean_test["sample_count"], 127)
+        self.assertLess(rf_reg_test["mae_pcs_per_h"], base_mean_test["mae_pcs_per_h"])
+        self.assertLess(rf_reg_test["mae_pcs_per_h"], base_pow_test["mae_pcs_per_h"])
+        self.assertLess(rf_reg_test["rmse_pcs_per_h"], base_pow_test["rmse_pcs_per_h"])
+        self.assertGreater(rf_reg_test["spearman_rho"], base_pow_test["spearman_rho"])
+        self.assertGreater(rf_reg_test["spearman_rho"], 0.30)
+
+        rf_cls_test = cls_comp["random_forest_classifier_primary"]["test_metrics"]
+        base_maj_test = cls_comp["baseline_majority_class"]["test_metrics"]
+        base_pow_maj_test = cls_comp["baseline_powiat_historical_majority"]["test_metrics"]
+
+        self.assertGreater(rf_cls_test["macro_f1"], base_maj_test["macro_f1"])
+        self.assertGreater(rf_cls_test["macro_f1"], base_pow_maj_test["macro_f1"])
+        self.assertGreater(rf_cls_test["macro_f1"], 0.45)
+
+        # 3 & 5. Weryfikacja artefaktów .joblib, kodowania kategorii, obsługi braków i predykcji bez treningu
+        reg_pipe = joblib.load(reg_joblib)
+        clf_pipe = joblib.load(clf_joblib)
+        self.assertIn("domain_fe", reg_pipe.named_steps)
+        self.assertIn("preprocessor", reg_pipe.named_steps)
+        self.assertIn("model", reg_pipe.named_steps)
+
+        # Sprawdzenie obecności missingindicator_ dla braków BDL w ColumnTransformer
+        encoded_names = list(reg_pipe.named_steps["preprocessor"].get_feature_names_out())
+        self.assertTrue(any("missingindicator_" in name for name in encoded_names))
+        self.assertTrue(any("dominant_moisture_type_" in name for name in encoded_names))
+
+        # Blokada bezpieczeństwa przed treningiem/predykcją na danych demonstracyjnych (is_demo=True)
+        with self.assertRaises(ValueError):
+            DomainFeatureProcessor().transform([{"area_id": "0201", "is_demo": True}])
+
+        # Wykonanie predykcji z zapisanego potoku bez uruchamiania treningu
+        ex_inputs = json.loads(ex_in_json.read_text(encoding="utf-8"))
+        self.assertEqual(len(ex_inputs), 5)
+        # Rekord #3 (0218) ma braki BDL = None, a rekord #4 (0217) to powiat nieobecny w treningu
+        self.assertIsNone(ex_inputs[2]["pine_share_pct"])
+        self.assertEqual(ex_inputs[3]["area_id"], "0217")
+
+        live_preds = predict_with_saved_pipelines(ex_inputs)
+        saved_preds = json.loads(ex_out_json.read_text(encoding="utf-8"))
+        self.assertEqual(len(live_preds), 5)
+        self.assertEqual(live_preds, saved_preds)
+
+        for pred in live_preds:
+            self.assertGreaterEqual(pred["predicted_yield_pcs_per_h"], 0.0)
+            self.assertEqual(pred["target_unit"], "szt./h")
+            self.assertIn(pred["abundance_class"], ("BRAK", "SREDNIO", "WYSYP"))
+            self.assertIn(pred["abundance_class_classifier"], ("BRAK", "SREDNIO", "WYSYP"))
+            self.assertFalse(pred["is_demo"])
+
 
 if __name__ == "__main__":
     unittest.main()

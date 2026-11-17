@@ -1,0 +1,122 @@
+[
+  {
+    "record_index": 0,
+    "area_id": "0201",
+    "region_name": "powiat bolesławiecki",
+    "target_date": "2025-10-14",
+    "generated_at": "2025-10-13",
+    "species_filter": "all",
+    "predicted_yield_pcs_per_h": 19.85,
+    "base_predicted_yield_pcs_per_h": 19.85,
+    "species_habitat_multiplier": 1.0,
+    "target_unit": "szt./h",
+    "abundance_class": "SREDNIO",
+    "abundance_class_classifier": "WYSYP",
+    "class_probabilities": {
+      "BRAK": 0.0472,
+      "SREDNIO": 0.422,
+      "WYSYP": 0.5308
+    },
+    "confidence_score": 0.62,
+    "has_bdl_stand_data": true,
+    "habitat_match_note": "Prognoza ogólna dla wszystkich gatunków leśnych (lesistość powiatu: 61.4%).",
+    "model_version": "rf_pipeline_v1.0",
+    "is_demo": false
+  },
+  {
+    "record_index": 1,
+    "area_id": "0208",
+    "region_name": "powiat kłodzki",
+    "target_date": "2025-10-18",
+    "generated_at": "2025-10-17",
+    "species_filter": "podgrzybek_brunatny",
+    "predicted_yield_pcs_per_h": 9.27,
+    "base_predicted_yield_pcs_per_h": 10.22,
+    "species_habitat_multiplier": 0.9068,
+    "target_unit": "szt./h",
+    "abundance_class": "SREDNIO",
+    "abundance_class_classifier": "BRAK",
+    "class_probabilities": {
+      "BRAK": 0.7346,
+      "SREDNIO": 0.1316,
+      "WYSYP": 0.1338
+    },
+    "confidence_score": 0.72,
+    "has_bdl_stand_data": true,
+    "habitat_match_note": "Podgrzybek brunatny: bory iglaste BDL (sosna 9.8%, świerk 58.0%), mnożnik siedliska 0.91x.",
+    "model_version": "rf_pipeline_v1.0",
+    "is_demo": false
+  },
+  {
+    "record_index": 2,
+    "area_id": "0218",
+    "region_name": "powiat średzki",
+    "target_date": "2025-10-18",
+    "generated_at": "2025-10-17",
+    "species_filter": "all",
+    "predicted_yield_pcs_per_h": 11.75,
+    "base_predicted_yield_pcs_per_h": 11.75,
+    "species_habitat_multiplier": 1.0,
+    "target_unit": "szt./h",
+    "abundance_class": "SREDNIO",
+    "abundance_class_classifier": "SREDNIO",
+    "class_probabilities": {
+      "BRAK": 0.3703,
+      "SREDNIO": 0.3921,
+      "WYSYP": 0.2376
+    },
+    "confidence_score": 0.4,
+    "has_bdl_stand_data": false,
+    "habitat_match_note": "Prognoza ogólna dla wszystkich gatunków leśnych (lesistość powiatu: 11.8%).",
+    "model_version": "rf_pipeline_v1.0",
+    "is_demo": false
+  },
+  {
+    "record_index": 3,
+    "area_id": "0217",
+    "region_name": "powiat strzeliński",
+    "target_date": "2025-10-18",
+    "generated_at": "2025-10-17",
+    "species_filter": "all",
+    "predicted_yield_pcs_per_h": 19.83,
+    "base_predicted_yield_pcs_per_h": 19.83,
+    "species_habitat_multiplier": 1.0,
+    "target_unit": "szt./h",
+    "abundance_class": "SREDNIO",
+    "abundance_class_classifier": "WYSYP",
+    "class_probabilities": {
+      "BRAK": 0.1498,
+      "SREDNIO": 0.3206,
+      "WYSYP": 0.5296
+    },
+    "confidence_score": 0.46,
+    "has_bdl_stand_data": false,
+    "habitat_match_note": "Prognoza ogólna dla wszystkich gatunków leśnych (lesistość powiatu: 14.9%).",
+    "model_version": "rf_pipeline_v1.0",
+    "is_demo": false
+  },
+  {
+    "record_index": 4,
+    "area_id": "0206",
+    "region_name": "powiat karkonoski",
+    "target_date": "2025-10-25",
+    "generated_at": "2025-10-24",
+    "species_filter": "borowik_szlachetny",
+    "predicted_yield_pcs_per_h": 32.27,
+    "base_predicted_yield_pcs_per_h": 27.39,
+    "species_habitat_multiplier": 1.1785,
+    "target_unit": "szt./h",
+    "abundance_class": "WYSYP",
+    "abundance_class_classifier": "WYSYP",
+    "class_probabilities": {
+      "BRAK": 0.1236,
+      "SREDNIO": 0.2821,
+      "WYSYP": 0.5943
+    },
+    "confidence_score": 0.65,
+    "has_bdl_stand_data": true,
+    "habitat_match_note": "Borowik szlachetny: dąb/buk (24.5%) i świerk (56.2%), mnożnik siedliska 1.18x.",
+    "model_version": "rf_pipeline_v1.0",
+    "is_demo": false
+  }
+]

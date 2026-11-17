@@ -1,0 +1,717 @@
+{
+  "model_version": "rf_pipeline_v1.0",
+  "target_primary": {
+    "column": "yield_pcs_per_h",
+    "predicted_column": "predicted_yield_pcs_per_h",
+    "unit": "szt./h",
+    "task_type": "regression"
+  },
+  "target_secondary": {
+    "column": "abundance_class",
+    "unit": "enum (BRAK <5.0, SREDNIO 5.0-20.0, WYSYP >20.0 szt./h)",
+    "classes": [
+      "BRAK",
+      "SREDNIO",
+      "WYSYP"
+    ],
+    "task_type": "classification"
+  },
+  "forbidden_leakage_columns_excluded": [
+    "abundance_class",
+    "dominant_species",
+    "harvest_duration_h",
+    "is_demo",
+    "is_valid_for_training",
+    "observation_id",
+    "publication_date",
+    "report_id",
+    "source_url",
+    "split_2way",
+    "split_3way",
+    "total_pieces",
+    "worminess_pct",
+    "yield_pcs_per_h"
+  ],
+  "raw_input_features_count": 40,
+  "raw_input_features": [
+    "area_id",
+    "dominant_moisture_type",
+    "season_phase",
+    "precip_lag_7d_mm",
+    "precip_lag_14d_mm",
+    "precip_lag_21d_mm",
+    "precip_cutoff_1d_mm",
+    "precip_hours_lag_7d_h",
+    "rainy_days_lag_7d_count",
+    "rainy_days_lag_14d_count",
+    "temp_min_night_c",
+    "temp_min_lag_3d_c",
+    "temp_min_lag_7d_c",
+    "frost_nights_lag_7d_count",
+    "temp_mean_cutoff_1d_c",
+    "temp_mean_7d_c",
+    "temp_mean_14d_c",
+    "temp_max_cutoff_1d_c",
+    "wind_speed_mean_7d_kmh",
+    "soil_moisture_0_7cm_m3m3",
+    "soil_moisture_mean_7d_m3m3",
+    "soil_moisture_mean_14d_m3m3",
+    "soil_temperature_0_7cm_c",
+    "soil_temp_mean_7d_c",
+    "grid_elevation_m",
+    "total_area_km2",
+    "forest_cover_pct",
+    "forest_area_km2",
+    "pine_share_pct",
+    "oak_beech_share_pct",
+    "spruce_share_pct",
+    "mean_stand_age_years",
+    "has_bdl_stand_data",
+    "month",
+    "day_of_year",
+    "week_of_year",
+    "day_of_week",
+    "is_weekend",
+    "day_of_year_sin",
+    "day_of_year_cos"
+  ],
+  "raw_categorical_features": [
+    "area_id",
+    "dominant_moisture_type",
+    "season_phase"
+  ],
+  "raw_numeric_features": [
+    "precip_lag_7d_mm",
+    "precip_lag_14d_mm",
+    "precip_lag_21d_mm",
+    "precip_cutoff_1d_mm",
+    "precip_hours_lag_7d_h",
+    "rainy_days_lag_7d_count",
+    "rainy_days_lag_14d_count",
+    "temp_min_night_c",
+    "temp_min_lag_3d_c",
+    "temp_min_lag_7d_c",
+    "frost_nights_lag_7d_count",
+    "temp_mean_cutoff_1d_c",
+    "temp_mean_7d_c",
+    "temp_mean_14d_c",
+    "temp_max_cutoff_1d_c",
+    "wind_speed_mean_7d_kmh",
+    "soil_moisture_0_7cm_m3m3",
+    "soil_moisture_mean_7d_m3m3",
+    "soil_moisture_mean_14d_m3m3",
+    "soil_temperature_0_7cm_c",
+    "soil_temp_mean_7d_c",
+    "grid_elevation_m",
+    "total_area_km2",
+    "forest_cover_pct",
+    "forest_area_km2",
+    "pine_share_pct",
+    "oak_beech_share_pct",
+    "spruce_share_pct",
+    "mean_stand_age_years",
+    "has_bdl_stand_data",
+    "month",
+    "day_of_year",
+    "week_of_year",
+    "day_of_week",
+    "is_weekend",
+    "day_of_year_sin",
+    "day_of_year_cos"
+  ],
+  "engineered_numeric_features": [
+    "county_hist_mean_smoothed",
+    "county_hist_median_smoothed",
+    "county_hist_wysyp_rate",
+    "county_hist_brak_rate",
+    "precip_lag_21d_mm",
+    "precip_slice_15_21d_mm",
+    "precip_lag_14d_mm",
+    "precip_lag_7d_mm",
+    "precip_cutoff_1d_mm",
+    "forest_x_precip_21d",
+    "temp_min_night_c",
+    "temp_min_lag_3d_c",
+    "frost_nights_lag_7d_count",
+    "wind_speed_mean_7d_kmh",
+    "soil_moisture_0_7cm_m3m3",
+    "soil_temperature_0_7cm_c",
+    "total_area_km2",
+    "forest_cover_pct",
+    "forest_area_km2",
+    "pine_share_pct",
+    "oak_beech_share_pct",
+    "spruce_share_pct",
+    "mean_stand_age_years",
+    "has_bdl_stand_data",
+    "is_weekend"
+  ],
+  "engineered_categorical_features": [
+    "dominant_moisture_type",
+    "county_hist_mode"
+  ],
+  "encoded_features_count": 35,
+  "encoded_feature_names": [
+    "num__county_hist_mean_smoothed",
+    "num__county_hist_median_smoothed",
+    "num__county_hist_wysyp_rate",
+    "num__county_hist_brak_rate",
+    "num__precip_lag_21d_mm",
+    "num__precip_slice_15_21d_mm",
+    "num__precip_lag_14d_mm",
+    "num__precip_lag_7d_mm",
+    "num__precip_cutoff_1d_mm",
+    "num__forest_x_precip_21d",
+    "num__temp_min_night_c",
+    "num__temp_min_lag_3d_c",
+    "num__frost_nights_lag_7d_count",
+    "num__wind_speed_mean_7d_kmh",
+    "num__soil_moisture_0_7cm_m3m3",
+    "num__soil_temperature_0_7cm_c",
+    "num__total_area_km2",
+    "num__forest_cover_pct",
+    "num__forest_area_km2",
+    "num__pine_share_pct",
+    "num__oak_beech_share_pct",
+    "num__spruce_share_pct",
+    "num__mean_stand_age_years",
+    "num__has_bdl_stand_data",
+    "num__is_weekend",
+    "num__missingindicator_pine_share_pct",
+    "num__missingindicator_oak_beech_share_pct",
+    "num__missingindicator_spruce_share_pct",
+    "num__missingindicator_mean_stand_age_years",
+    "cat__dominant_moisture_type___MISSING__",
+    "cat__dominant_moisture_type_swieze",
+    "cat__dominant_moisture_type_wilgotne",
+    "cat__county_hist_mode_BRAK",
+    "cat__county_hist_mode_SREDNIO",
+    "cat__county_hist_mode_WYSYP"
+  ],
+  "feature_catalog": [
+    {
+      "name": "area_id",
+      "role": "categorical_input",
+      "type": "string",
+      "unit": "TERYT (4 znaki)",
+      "source": "forest_features.area_id",
+      "description": "Alias klucza powiatu zgodny z docs/data_contract.md."
+    },
+    {
+      "name": "dominant_moisture_type",
+      "role": "categorical_input",
+      "type": "string (nullable)",
+      "unit": "kategoria BDL",
+      "source": "forest_features.dominant_moisture_type",
+      "description": "Dominujące uwilgotnienie siedliska (suche, swieze, wilgotne, bagienne lub NULL)."
+    },
+    {
+      "name": "season_phase",
+      "role": "categorical_input",
+      "type": "string",
+      "unit": "enum",
+      "source": "wyliczona z target_date",
+      "description": "Faza sezonu jesiennego (early_autumn_sep, peak_autumn_oct_early, late_autumn_oct_late_nov)."
+    },
+    {
+      "name": "precip_lag_7d_mm",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "mm",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Skumulowana suma opadów z pełnych 7 dni kończących się w dniu odcięcia."
+    },
+    {
+      "name": "precip_lag_14d_mm",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "mm",
+      "source": "weather_daily (okno 14d do feature_cutoff_date)",
+      "description": "Skumulowana suma opadów z pełnych 14 dni kończących się w dniu odcięcia."
+    },
+    {
+      "name": "precip_lag_21d_mm",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "mm",
+      "source": "weather_daily (okno 21d do feature_cutoff_date)",
+      "description": "Skumulowana suma opadów z pełnych 21 dni kończących się w dniu odcięcia."
+    },
+    {
+      "name": "precip_cutoff_1d_mm",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "mm",
+      "source": "weather_daily (w dniu feature_cutoff_date)",
+      "description": "Dobowa suma opadów w dniu odcięcia cech (ostatnia doba przed prognozą)."
+    },
+    {
+      "name": "precip_hours_lag_7d_h",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "h",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Suma godzin z opadem atmosferycznym w oknie 7 dni przed odcięciem."
+    },
+    {
+      "name": "rainy_days_lag_7d_count",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "dni (0-7)",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Liczba dni z opadem dobowym >= 1.0 mm w oknie 7 dni przed odcięciem."
+    },
+    {
+      "name": "rainy_days_lag_14d_count",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "dni (0-14)",
+      "source": "weather_daily (okno 14d do feature_cutoff_date)",
+      "description": "Liczba dni z opadem dobowym >= 1.0 mm w oknie 14 dni przed odcięciem."
+    },
+    {
+      "name": "temp_min_night_c",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (w dniu feature_cutoff_date)",
+      "description": "Minimalna temperatura nocna/poranna w dobie odcięcia cech."
+    },
+    {
+      "name": "temp_min_lag_3d_c",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (okno 3d do feature_cutoff_date)",
+      "description": "Najniższa temperatura minimalna z ostatnich 3 dób przed odcięciem."
+    },
+    {
+      "name": "temp_min_lag_7d_c",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Najniższa temperatura minimalna z ostatnich 7 dób przed odcięciem."
+    },
+    {
+      "name": "frost_nights_lag_7d_count",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "dni (0-7)",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Liczba dób z przymrozkiem (temp_min_night_c <= 0.0°C) w oknie 7 dni przed odcięciem."
+    },
+    {
+      "name": "temp_mean_cutoff_1d_c",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (w dniu feature_cutoff_date)",
+      "description": "Średnia temperatura dobowa na 2 m w dniu odcięcia cech."
+    },
+    {
+      "name": "temp_mean_7d_c",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Średnia temperatura dobowa z okna 7 dni kończącego się w dniu odcięcia."
+    },
+    {
+      "name": "temp_mean_14d_c",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (okno 14d do feature_cutoff_date)",
+      "description": "Średnia temperatura dobowa z okna 14 dni kończącego się w dniu odcięcia."
+    },
+    {
+      "name": "temp_max_cutoff_1d_c",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (w dniu feature_cutoff_date)",
+      "description": "Maksymalna temperatura dobowa w dniu odcięcia cech."
+    },
+    {
+      "name": "wind_speed_mean_7d_kmh",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "km/h",
+      "source": "weather_daily (okno 7d do feature_cutoff_date)",
+      "description": "Średnia z dobowych maksimów prędkości wiatru w oknie 7 dni przed odcięciem."
+    },
+    {
+      "name": "soil_moisture_0_7cm_m3m3",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "m³/m³",
+      "source": "weather_daily (ERA5-Land w dniu feature_cutoff_date)",
+      "description": "Modelowana objętościowa wilgotność gleby (0-7 cm) w dniu odcięcia cech."
+    },
+    {
+      "name": "soil_moisture_mean_7d_m3m3",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "m³/m³",
+      "source": "weather_daily (okno 7d ERA5-Land do feature_cutoff_date)",
+      "description": "Średnia modelowana wilgotność gleby (0-7 cm) z okna 7 dni przed odcięciem."
+    },
+    {
+      "name": "soil_moisture_mean_14d_m3m3",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "m³/m³",
+      "source": "weather_daily (okno 14d ERA5-Land do feature_cutoff_date)",
+      "description": "Średnia modelowana wilgotność gleby (0-7 cm) z okna 14 dni przed odcięciem."
+    },
+    {
+      "name": "soil_temperature_0_7cm_c",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (ERA5-Land w dniu feature_cutoff_date)",
+      "description": "Modelowana temperatura wierzchniej warstwy gleby (0-7 cm) w dniu odcięcia."
+    },
+    {
+      "name": "soil_temp_mean_7d_c",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "°C",
+      "source": "weather_daily (okno 7d ERA5-Land do feature_cutoff_date)",
+      "description": "Średnia modelowana temperatura gleby (0-7 cm) z okna 7 dni przed odcięciem."
+    },
+    {
+      "name": "grid_elevation_m",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "m n.p.m.",
+      "source": "weather_daily.grid_elevation_m",
+      "description": "Wysokość n.p.m. oczka siatki ERA5-Land reprezentującego powiat."
+    },
+    {
+      "name": "total_area_km2",
+      "role": "numeric_input",
+      "type": "float64",
+      "unit": "km²",
+      "source": "forest_features.total_area_km2",
+      "description": "Całkowita powierzchnia geometryczna powiatu w układzie EPSG:2180."
+    },
+    {
+      "name": "forest_cover_pct",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "%",
+      "source": "forest_features.forest_cover_pct",
+      "description": "Lesistość powiatu (udział lasów w powierzchni całkowitej)."
+    },
+    {
+      "name": "forest_area_km2",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "km²",
+      "source": "forest_features.forest_area_km2",
+      "description": "Szacowana powierzchnia lasów w powiecie."
+    },
+    {
+      "name": "pine_share_pct",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "%",
+      "source": "forest_features.pine_share_pct",
+      "description": "Udział drzewostanów z panującą sosną (SO) wg BDL (NULL przy braku danych BDL)."
+    },
+    {
+      "name": "oak_beech_share_pct",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "%",
+      "source": "forest_features.oak_beech_share_pct",
+      "description": "Udział drzewostanów z panującym dębem (DB) lub bukiem (BK) wg BDL (NULL przy braku BDL)."
+    },
+    {
+      "name": "spruce_share_pct",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "%",
+      "source": "forest_features.spruce_share_pct",
+      "description": "Udział drzewostanów z panującym świerkiem (ŚW) wg BDL (NULL przy braku BDL)."
+    },
+    {
+      "name": "mean_stand_age_years",
+      "role": "numeric_input",
+      "type": "float64 (nullable)",
+      "unit": "lata",
+      "source": "forest_features.mean_stand_age_years",
+      "description": "Średni ważony powierzchniowo wiek drzewostanów D-STAN w BDL (NULL przy braku BDL)."
+    },
+    {
+      "name": "has_bdl_stand_data",
+      "role": "numeric_input",
+      "type": "bool",
+      "unit": "flaga",
+      "source": "forest_features.has_bdl_stand_data",
+      "description": "Czy powiat posiada szczegółowy profil taksacyjny drzewostanów BDL."
+    },
+    {
+      "name": "month",
+      "role": "numeric_input",
+      "type": "int64",
+      "unit": "miesiąc (1-12)",
+      "source": "wyliczona z target_date",
+      "description": "Miesiąc kalendarzowy daty docelowej (np. 9, 10, 11)."
+    },
+    {
+      "name": "day_of_year",
+      "role": "numeric_input",
+      "type": "int64",
+      "unit": "dzień roku (1-366)",
+      "source": "wyliczona z target_date",
+      "description": "Kolejny dzień w roku kalendarzowym (DOY)."
+    },
+    {
+      "name": "week_of_year",
+      "role": "numeric_input",
+      "type": "int64",
+      "unit": "tydzień ISO (1-53)",
+      "source": "wyliczona z target_date",
+      "description": "Numer tygodnia roku wg standardu ISO 8601."
+    },
+    {
+      "name": "day_of_week",
+      "role": "numeric_input",
+      "type": "int64",
+      "unit": "dzień tyg. (0=Pon..6=Nd)",
+      "source": "wyliczona z target_date",
+      "description": "Dzień tygodnia dla daty docelowej."
+    },
+    {
+      "name": "is_weekend",
+      "role": "numeric_input",
+      "type": "bool",
+      "unit": "flaga",
+      "source": "wyliczona z target_date",
+      "description": "True dla soboty i niedzieli (uwzględnia efekt weekendowej aktywności grzybiarzy)."
+    },
+    {
+      "name": "day_of_year_sin",
+      "role": "numeric_input",
+      "type": "float64",
+      "unit": "[-1, 1]",
+      "source": "wyliczona z target_date",
+      "description": "Cykliczna transformacja sinus dnia roku sin(2*pi*DOY/365.25)."
+    },
+    {
+      "name": "day_of_year_cos",
+      "role": "numeric_input",
+      "type": "float64",
+      "unit": "[-1, 1]",
+      "source": "wyliczona z target_date",
+      "description": "Cykliczna transformacja cosinus dnia roku cos(2*pi*DOY/365.25)."
+    }
+  ],
+  "imputation_and_encoding": {
+    "numeric_imputation_strategy": "median_with_missing_indicator (fitted on train only, NULL != 0.0)",
+    "numeric_imputation_medians_from_train": {
+      "county_hist_mean_smoothed": 17.281,
+      "county_hist_median_smoothed": 14.9375,
+      "county_hist_wysyp_rate": 0.2434,
+      "county_hist_brak_rate": 0.2322,
+      "precip_lag_21d_mm": 57.7,
+      "precip_slice_15_21d_mm": 16.25,
+      "precip_lag_14d_mm": 35.5,
+      "precip_lag_7d_mm": 13.0,
+      "precip_cutoff_1d_mm": 0.2,
+      "forest_x_precip_21d": 19.3347,
+      "temp_min_night_c": 10.35,
+      "temp_min_lag_3d_c": 9.1,
+      "frost_nights_lag_7d_count": 0.0,
+      "wind_speed_mean_7d_kmh": 17.8,
+      "soil_moisture_0_7cm_m3m3": 0.263,
+      "soil_temperature_0_7cm_c": 13.67,
+      "total_area_km2": 839.9,
+      "forest_cover_pct": 34.1,
+      "forest_area_km2": 289.25,
+      "pine_share_pct": 69.5,
+      "oak_beech_share_pct": 21.8,
+      "spruce_share_pct": 4.1,
+      "mean_stand_age_years": 65.0,
+      "has_bdl_stand_data": 1.0,
+      "is_weekend": 0.0
+    },
+    "categorical_imputation_strategy": "constant '__MISSING__' + OneHotEncoder(handle_unknown='ignore')",
+    "categorical_encoded_categories": {
+      "dominant_moisture_type": [
+        "__MISSING__",
+        "swieze",
+        "wilgotne"
+      ],
+      "county_hist_mode": [
+        "BRAK",
+        "SREDNIO",
+        "WYSYP"
+      ]
+    },
+    "county_prior_global_fallbacks": {
+      "global_mean_pcs_per_h": 16.5544,
+      "global_median_pcs_per_h": 13.5,
+      "global_wysyp_rate": 0.2772,
+      "global_brak_rate": 0.2513,
+      "global_mode": "SREDNIO",
+      "covered_counties_in_train_count": 27,
+      "covered_counties_in_train": [
+        "0201",
+        "0202",
+        "0203",
+        "0204",
+        "0205",
+        "0206",
+        "0207",
+        "0208",
+        "0209",
+        "0210",
+        "0211",
+        "0213",
+        "0214",
+        "0215",
+        "0216",
+        "0218",
+        "0219",
+        "0220",
+        "0221",
+        "0222",
+        "0223",
+        "0224",
+        "0225",
+        "0226",
+        "0261",
+        "0264",
+        "0265"
+      ]
+    }
+  },
+  "regression_top_15_feature_importances": [
+    {
+      "encoded_feature": "num__wind_speed_mean_7d_kmh",
+      "importance": 0.171862
+    },
+    {
+      "encoded_feature": "num__county_hist_mean_smoothed",
+      "importance": 0.123957
+    },
+    {
+      "encoded_feature": "num__county_hist_wysyp_rate",
+      "importance": 0.083145
+    },
+    {
+      "encoded_feature": "num__county_hist_median_smoothed",
+      "importance": 0.078402
+    },
+    {
+      "encoded_feature": "num__precip_slice_15_21d_mm",
+      "importance": 0.071565
+    },
+    {
+      "encoded_feature": "num__precip_lag_14d_mm",
+      "importance": 0.069354
+    },
+    {
+      "encoded_feature": "num__temp_min_lag_3d_c",
+      "importance": 0.056974
+    },
+    {
+      "encoded_feature": "num__temp_min_night_c",
+      "importance": 0.052211
+    },
+    {
+      "encoded_feature": "num__soil_temperature_0_7cm_c",
+      "importance": 0.048094
+    },
+    {
+      "encoded_feature": "num__precip_cutoff_1d_mm",
+      "importance": 0.047482
+    },
+    {
+      "encoded_feature": "num__precip_lag_7d_mm",
+      "importance": 0.04316
+    },
+    {
+      "encoded_feature": "num__precip_lag_21d_mm",
+      "importance": 0.033292
+    },
+    {
+      "encoded_feature": "num__forest_x_precip_21d",
+      "importance": 0.03191
+    },
+    {
+      "encoded_feature": "num__soil_moisture_0_7cm_m3m3",
+      "importance": 0.027629
+    },
+    {
+      "encoded_feature": "num__county_hist_brak_rate",
+      "importance": 0.011451
+    }
+  ],
+  "classification_top_15_feature_importances": [
+    {
+      "encoded_feature": "num__wind_speed_mean_7d_kmh",
+      "importance": 0.259679
+    },
+    {
+      "encoded_feature": "num__county_hist_mean_smoothed",
+      "importance": 0.103395
+    },
+    {
+      "encoded_feature": "num__county_hist_wysyp_rate",
+      "importance": 0.099311
+    },
+    {
+      "encoded_feature": "num__precip_slice_15_21d_mm",
+      "importance": 0.08907
+    },
+    {
+      "encoded_feature": "num__temp_min_lag_3d_c",
+      "importance": 0.072131
+    },
+    {
+      "encoded_feature": "num__precip_lag_14d_mm",
+      "importance": 0.0682
+    },
+    {
+      "encoded_feature": "num__temp_min_night_c",
+      "importance": 0.059252
+    },
+    {
+      "encoded_feature": "num__county_hist_brak_rate",
+      "importance": 0.05197
+    },
+    {
+      "encoded_feature": "num__soil_temperature_0_7cm_c",
+      "importance": 0.041422
+    },
+    {
+      "encoded_feature": "num__precip_lag_7d_mm",
+      "importance": 0.035372
+    },
+    {
+      "encoded_feature": "num__precip_lag_21d_mm",
+      "importance": 0.025599
+    },
+    {
+      "encoded_feature": "num__precip_cutoff_1d_mm",
+      "importance": 0.018783
+    },
+    {
+      "encoded_feature": "num__forest_x_precip_21d",
+      "importance": 0.016723
+    },
+    {
+      "encoded_feature": "num__soil_moisture_0_7cm_m3m3",
+      "importance": 0.015162
+    },
+    {
+      "encoded_feature": "num__county_hist_median_smoothed",
+      "importance": 0.009355
+    }
+  ]
+}

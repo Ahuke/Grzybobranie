@@ -404,13 +404,23 @@ def run_training_pipeline(
     pd.DataFrame(flat_outputs).to_csv(example_out_csv_path, index=False, encoding="utf-8")
 
     # 10. Budowa kompletnego pliku metadanych modelu (models/model_metadata.json)
-    trained_at_iso = "2026-11-17T19:35:00+01:00"
+    import platform
+    import sklearn
+
+    trained_at_iso = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
     dataset_sha256 = _compute_file_sha256(feat_path)
 
     model_metadata: dict[str, Any] = {
         "task_id": "[GRZ-14] Wytrenować pierwszy model i zapisać kompletny pipeline (#14)",
         "model_version": MODEL_VERSION,
         "trained_at": trained_at_iso,
+        "environment": {
+            "python_version": platform.python_version(),
+            "scikit_learn_version": sklearn.__version__,
+            "pandas_version": pd.__version__,
+            "numpy_version": np.__version__,
+            "joblib_version": joblib.__version__,
+        },
         "training_command": "python scripts/train_model.py",
         "prediction_example_command": "python scripts/predict_example.py",
         "data_version": {
@@ -499,8 +509,8 @@ def run_training_pipeline(
                 "artifact_path": "models/rf_abundance_pipeline.joblib",
                 "estimator": "RandomForestClassifier",
                 "hyperparameters": {
-                    "n_estimators": 100,
-                    "class_weight": {"BRAK": 1.6, "SREDNIO": 0.7, "WYSYP": 2.1},
+                    "n_estimators": 300,
+                    "class_weight": {"BRAK": 1.5, "SREDNIO": 0.65, "WYSYP": 2.0},
                     "max_depth": 4,
                     "min_samples_leaf": 4,
                     "max_features": 0.6,
@@ -768,7 +778,7 @@ Zapisane artefakty (`models/rf_yield_pipeline.joblib` oraz `models/rf_abundance_
    - **Kodowanie zmiennych kategorycznych (`SimpleImputer(fill_value="__MISSING__")` + `OneHotEncoder(handle_unknown="ignore")`):** koduje typ uwilgotnienia siedliska BDL (`dominant_moisture_type`: `swieze`, `wilgotne`, `__MISSING__`) oraz historyczną dominantę powiatu (`county_hist_mode`), bezpiecznie obsługując nieznane kategorie w predykcji produkcyjnej.
 3. **Etap 3 — Estymator Random Forest dopasowany do celu:**
    - **Wariant główny (Regresja `yield_pcs_per_h` `[szt./h]`):** `RandomForestRegressor(n_estimators=200, criterion="squared_error", max_depth=5, min_samples_leaf=2, max_features=0.6, random_state=42)`.
-   - **Wariant pomocniczy (Klasyfikacja 3-klasowa `abundance_class`):** `RandomForestClassifier(n_estimators=100, class_weight={{"BRAK": 1.6, "SREDNIO": 0.7, "WYSYP": 2.1}}, max_depth=4, min_samples_leaf=4, max_features=0.6, random_state=42)` — wagi klas równoważą dominację klasy środkowej `SREDNIO` w zbiorze treningowym.
+   - **Wariant pomocniczy (Klasyfikacja 3-klasowa `abundance_class`):** `RandomForestClassifier(n_estimators=300, class_weight={{"BRAK": 1.5, "SREDNIO": 0.65, "WYSYP": 2.0}}, max_depth=4, min_samples_leaf=4, max_features=0.6, random_state=42)` — wagi klas równoważą dominację klasy środkowej `SREDNIO` w zbiorze treningowym.
 
 ---
 

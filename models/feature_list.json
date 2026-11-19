@@ -655,63 +655,63 @@
   "classification_top_15_feature_importances": [
     {
       "encoded_feature": "num__wind_speed_mean_7d_kmh",
-      "importance": 0.259679
+      "importance": 0.243306
     },
     {
       "encoded_feature": "num__county_hist_mean_smoothed",
-      "importance": 0.103395
+      "importance": 0.117517
     },
     {
       "encoded_feature": "num__county_hist_wysyp_rate",
-      "importance": 0.099311
+      "importance": 0.10086
     },
     {
       "encoded_feature": "num__precip_slice_15_21d_mm",
-      "importance": 0.08907
+      "importance": 0.087859
     },
     {
       "encoded_feature": "num__temp_min_lag_3d_c",
-      "importance": 0.072131
+      "importance": 0.082093
     },
     {
       "encoded_feature": "num__precip_lag_14d_mm",
-      "importance": 0.0682
+      "importance": 0.064726
     },
     {
       "encoded_feature": "num__temp_min_night_c",
-      "importance": 0.059252
+      "importance": 0.063118
     },
     {
       "encoded_feature": "num__county_hist_brak_rate",
-      "importance": 0.05197
+      "importance": 0.043221
     },
     {
       "encoded_feature": "num__soil_temperature_0_7cm_c",
-      "importance": 0.041422
+      "importance": 0.042798
     },
     {
       "encoded_feature": "num__precip_lag_7d_mm",
-      "importance": 0.035372
-    },
-    {
-      "encoded_feature": "num__precip_lag_21d_mm",
-      "importance": 0.025599
+      "importance": 0.040437
     },
     {
       "encoded_feature": "num__precip_cutoff_1d_mm",
-      "importance": 0.018783
+      "importance": 0.02032
     },
     {
-      "encoded_feature": "num__forest_x_precip_21d",
-      "importance": 0.016723
+      "encoded_feature": "num__precip_lag_21d_mm",
+      "importance": 0.019177
     },
     {
       "encoded_feature": "num__soil_moisture_0_7cm_m3m3",
-      "importance": 0.015162
+      "importance": 0.019111
     },
     {
-      "encoded_feature": "num__county_hist_median_smoothed",
-      "importance": 0.009355
+      "encoded_feature": "num__forest_x_precip_21d",
+      "importance": 0.014051
+    },
+    {
+      "encoded_feature": "num__total_area_km2",
+      "importance": 0.006593
     }
   ]
 }

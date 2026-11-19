@@ -1,7 +1,14 @@
 {
   "task_id": "[GRZ-14] Wytrenować pierwszy model i zapisać kompletny pipeline (#14)",
   "model_version": "rf_pipeline_v1.0",
-  "trained_at": "2026-11-17T19:35:00+01:00",
+  "trained_at": "2026-11-18T19:08:55+01:00",
+  "environment": {
+    "python_version": "3.12.14",
+    "scikit_learn_version": "1.9.1",
+    "pandas_version": "3.1.1",
+    "numpy_version": "2.5.4",
+    "joblib_version": "1.6.0"
+  },
   "training_command": "python scripts/train_model.py",
   "prediction_example_command": "python scripts/predict_example.py",
   "data_version": {
@@ -174,43 +181,43 @@
     "top_10_classification_features": [
       {
         "encoded_feature": "num__wind_speed_mean_7d_kmh",
-        "importance": 0.259679
+        "importance": 0.243306
       },
       {
         "encoded_feature": "num__county_hist_mean_smoothed",
-        "importance": 0.103395
+        "importance": 0.117517
       },
       {
         "encoded_feature": "num__county_hist_wysyp_rate",
-        "importance": 0.099311
+        "importance": 0.10086
       },
       {
         "encoded_feature": "num__precip_slice_15_21d_mm",
-        "importance": 0.08907
+        "importance": 0.087859
       },
       {
         "encoded_feature": "num__temp_min_lag_3d_c",
-        "importance": 0.072131
+        "importance": 0.082093
       },
       {
         "encoded_feature": "num__precip_lag_14d_mm",
-        "importance": 0.0682
+        "importance": 0.064726
       },
       {
         "encoded_feature": "num__temp_min_night_c",
-        "importance": 0.059252
+        "importance": 0.063118
       },
       {
         "encoded_feature": "num__county_hist_brak_rate",
-        "importance": 0.05197
+        "importance": 0.043221
       },
       {
         "encoded_feature": "num__soil_temperature_0_7cm_c",
-        "importance": 0.041422
+        "importance": 0.042798
       },
       {
         "encoded_feature": "num__precip_lag_7d_mm",
-        "importance": 0.035372
+        "importance": 0.040437
       }
     ]
   },
@@ -232,11 +239,11 @@
       "artifact_path": "models/rf_abundance_pipeline.joblib",
       "estimator": "RandomForestClassifier",
       "hyperparameters": {
-        "n_estimators": 100,
+        "n_estimators": 300,
         "class_weight": {
-          "BRAK": 1.6,
-          "SREDNIO": 0.7,
-          "WYSYP": 2.1
+          "BRAK": 1.5,
+          "SREDNIO": 0.65,
+          "WYSYP": 2.0
         },
         "max_depth": 4,
         "min_samples_leaf": 4,
@@ -379,23 +386,23 @@
         "label": "RandomForestClassifier (Pipeline v1.0 — klasyfikacja obfitości)",
         "train_metrics": {
           "sample_count": 386,
-          "macro_f1": 0.6541,
-          "weighted_f1": 0.6387,
+          "macro_f1": 0.6597,
+          "weighted_f1": 0.6443,
           "confusion_matrix": [
             [
-              79,
+              77,
               5,
-              13
+              15
             ],
             [
-              36,
-              79,
-              67
+              34,
+              80,
+              68
             ],
             [
-              9,
+              6,
               5,
-              93
+              96
             ]
           ],
           "labels": [
@@ -405,44 +412,44 @@
           ],
           "per_class": {
             "BRAK": {
-              "precision": 0.6371,
-              "recall": 0.8144,
-              "f1_score": 0.7149,
+              "precision": 0.6581,
+              "recall": 0.7938,
+              "f1_score": 0.7196,
               "support": 97
             },
             "SREDNIO": {
-              "precision": 0.8876,
-              "recall": 0.4341,
-              "f1_score": 0.583,
+              "precision": 0.8889,
+              "recall": 0.4396,
+              "f1_score": 0.5882,
               "support": 182
             },
             "WYSYP": {
-              "precision": 0.5376,
-              "recall": 0.8692,
-              "f1_score": 0.6643,
+              "precision": 0.5363,
+              "recall": 0.8972,
+              "f1_score": 0.6713,
               "support": 107
             }
           }
         },
         "test_metrics": {
           "sample_count": 127,
-          "macro_f1": 0.4739,
-          "weighted_f1": 0.4877,
+          "macro_f1": 0.4596,
+          "weighted_f1": 0.4725,
           "confusion_matrix": [
             [
-              9,
-              1,
-              5
+              8,
+              3,
+              4
             ],
             [
-              13,
-              22,
+              11,
+              30,
+              16
+            ],
+            [
+              4,
+              29,
               22
-            ],
-            [
-              5,
-              19,
-              31
             ]
           ],
           "labels": [
@@ -452,29 +459,29 @@
           ],
           "per_class": {
             "BRAK": {
-              "precision": 0.3333,
-              "recall": 0.6,
-              "f1_score": 0.4286,
+              "precision": 0.3478,
+              "recall": 0.5333,
+              "f1_score": 0.4211,
               "support": 15
             },
             "SREDNIO": {
-              "precision": 0.5238,
-              "recall": 0.386,
-              "f1_score": 0.4444,
+              "precision": 0.4839,
+              "recall": 0.5263,
+              "f1_score": 0.5042,
               "support": 57
             },
             "WYSYP": {
-              "precision": 0.5345,
-              "recall": 0.5636,
-              "f1_score": 0.5487,
+              "precision": 0.5238,
+              "recall": 0.4,
+              "f1_score": 0.4536,
               "support": 55
             }
           }
         },
         "beats_majority_class_macro_f1": true,
         "beats_powiat_majority_macro_f1": true,
-        "macro_f1_improvement_vs_majority": 0.2674,
-        "macro_f1_improvement_vs_powiat_majority": 0.0821
+        "macro_f1_improvement_vs_majority": 0.2531,
+        "macro_f1_improvement_vs_powiat_majority": 0.0678
       },
       "random_forest_regressor_thresholded": {
         "label": "RandomForestRegressor -> dyskretyzacja progowa (<5, 5-20, >20 szt./h)",

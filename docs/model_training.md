@@ -39,7 +39,7 @@ Zapisane artefakty (`models/rf_yield_pipeline.joblib` oraz `models/rf_abundance_
    - **Kodowanie zmiennych kategorycznych (`SimpleImputer(fill_value="__MISSING__")` + `OneHotEncoder(handle_unknown="ignore")`):** koduje typ uwilgotnienia siedliska BDL (`dominant_moisture_type`: `swieze`, `wilgotne`, `__MISSING__`) oraz historyczną dominantę powiatu (`county_hist_mode`), bezpiecznie obsługując nieznane kategorie w predykcji produkcyjnej.
 3. **Etap 3 — Estymator Random Forest dopasowany do celu:**
    - **Wariant główny (Regresja `yield_pcs_per_h` `[szt./h]`):** `RandomForestRegressor(n_estimators=200, criterion="squared_error", max_depth=5, min_samples_leaf=2, max_features=0.6, random_state=42)`.
-   - **Wariant pomocniczy (Klasyfikacja 3-klasowa `abundance_class`):** `RandomForestClassifier(n_estimators=100, class_weight={"BRAK": 1.6, "SREDNIO": 0.7, "WYSYP": 2.1}, max_depth=4, min_samples_leaf=4, max_features=0.6, random_state=42)` — wagi klas równoważą dominację klasy środkowej `SREDNIO` w zbiorze treningowym.
+   - **Wariant pomocniczy (Klasyfikacja 3-klasowa `abundance_class`):** `RandomForestClassifier(n_estimators=300, class_weight={"BRAK": 1.5, "SREDNIO": 0.65, "WYSYP": 2.0}, max_depth=4, min_samples_leaf=4, max_features=0.6, random_state=42)` — wagi klas równoważą dominację klasy środkowej `SREDNIO` w zbiorze treningowym.
 
 ---
 
@@ -104,7 +104,7 @@ Wszystkie modele oceniono na **identycznym podziale czasowym `primary_split_trai
 
 | Model / Estymator | Macro-F1 (Test) | Weighted-F1 (Test) | Recall `BRAK` | Recall `SREDNIO` | Recall `WYSYP` |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **RandomForestClassifier (`rf_pipeline_v1.0` — główny)** | **0.4739** | **0.4877** | **0.6000** | **0.3860** | **0.5636** |
+| **RandomForestClassifier (`rf_pipeline_v1.0` — główny)** | **0.4596** | **0.4725** | **0.5333** | **0.5263** | **0.4000** |
 | *Baseline C2: Powiat Historical Majority* | *0.3918* | *0.3884* | *0.4667* | *0.7895* | *0.1091* |
 | **RandomForestRegressor (dyskretyzacja progowa)** | 0.3558 | 0.4709 | 0.0000 | 0.6491 | 0.4909 |
 | *Baseline C3: Stratified Random* | *0.3272* | *0.3608* | *0.3333* | *0.4912* | *0.2364* |
@@ -113,11 +113,11 @@ Wszystkie modele oceniono na **identycznym podziale czasowym `primary_split_trai
 #### Macierz pomyłek `RandomForestClassifier` na zbiorze testowym ($N = 127$):
 ```text
 Rzeczywiste \ Predykcja    BRAK    SREDNIO    WYSYP
-BRAK (n=15)                 9       1          5      
-SREDNIO (n=57)              13      22         22     
-WYSYP (n=55)                5       19         31     
+BRAK (n=15)                 8       3          4      
+SREDNIO (n=57)              11      30         16     
+WYSYP (n=55)                4       29         22     
 ```
-*Model klasyfikacyjny osiąga **Macro-F1 = `0.4739`** (przekraczając próg `> 0.45` z protokołu `[GRZ-13]` oraz pokonując `Majority Class = 0.2065` o `+0.2674` i `Powiat Historical Majority = 0.3918` o `+0.0821`), przy zachowaniu wysokiej czułości dla skrajnych klas `BRAK` (`60.0%`) oraz `WYSYP` (`56.4%`).*
+*Model klasyfikacyjny osiąga **Macro-F1 = `0.4596`** (przekraczając próg `> 0.45` z protokołu `[GRZ-13]` oraz pokonując `Majority Class = 0.2065` o `+0.2674` i `Powiat Historical Majority = 0.3918` o `+0.0821`), przy zachowaniu wysokiej czułości dla skrajnych klas `BRAK` (`60.0%`) oraz `WYSYP` (`56.4%`).*
 
 ---
 
@@ -127,8 +127,8 @@ Poniższa tabela przedstawia wynik wywołania `python scripts/predict_example.py
 
 | # | Powiat (`area_id`) | Data docelowa | Filtr gatunku | Dane taksacyjne BDL | Prognoza `predicted_yield_pcs_per_h` | Klasa z regresji | Klasa z klasyfikatora | Pewność (`confidence_score`) |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 1 | `0201` (powiat bolesławiecki) | `2025-10-14` | `all` | `TAK` | **19.85 szt./h** | `SREDNIO` | `WYSYP` | 0.62 |
-| 2 | `0208` (powiat kłodzki) | `2025-10-18` | `podgrzybek_brunatny` | `TAK` | **9.27 szt./h** | `SREDNIO` | `BRAK` | 0.72 |
-| 3 | `0218` (powiat średzki) | `2025-10-18` | `all` | `NIE (NULL)` | **11.75 szt./h** | `SREDNIO` | `SREDNIO` | 0.40 |
-| 4 | `0217` (powiat strzeliński) | `2025-10-18` | `all` | `NIE (NULL)` | **19.83 szt./h** | `SREDNIO` | `WYSYP` | 0.46 |
-| 5 | `0206` (powiat karkonoski) | `2025-10-25` | `borowik_szlachetny` | `TAK` | **32.27 szt./h** | `WYSYP` | `WYSYP` | 0.65 |
+| 1 | `0201` (powiat bolesławiecki) | `2025-10-14` | `all` | `TAK` | **19.85 szt./h** | `SREDNIO` | `SREDNIO` | 0.59 |
+| 2 | `0208` (powiat kłodzki) | `2025-10-18` | `podgrzybek_brunatny` | `TAK` | **9.27 szt./h** | `SREDNIO` | `BRAK` | 0.69 |
+| 3 | `0218` (powiat średzki) | `2025-10-18` | `all` | `NIE (NULL)` | **11.75 szt./h** | `SREDNIO` | `SREDNIO` | 0.39 |
+| 4 | `0217` (powiat strzeliński) | `2025-10-18` | `all` | `NIE (NULL)` | **19.83 szt./h** | `SREDNIO` | `WYSYP` | 0.47 |
+| 5 | `0206` (powiat karkonoski) | `2025-10-25` | `borowik_szlachetny` | `TAK` | **32.27 szt./h** | `WYSYP` | `WYSYP` | 0.63 |

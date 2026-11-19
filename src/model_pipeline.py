@@ -387,7 +387,7 @@ def build_random_forest_regression_pipeline(
 
 def build_random_forest_classification_pipeline(
     smoothing: float = 1.0,
-    n_estimators: int = 100,
+    n_estimators: int = 300,
     max_depth: int | None = 4,
     min_samples_leaf: int = 4,
     max_features: float | str = 0.6,
@@ -400,7 +400,7 @@ def build_random_forest_classification_pipeline(
     Domyślne wagi klas kompensują nadreprezentację klasy środkowej `SREDNIO` w zbiorze treningowym.
     """
     if class_weight is None:
-        class_weight = {"BRAK": 1.6, "SREDNIO": 0.7, "WYSYP": 2.1}
+        class_weight = {"BRAK": 1.5, "SREDNIO": 0.65, "WYSYP": 2.0}
 
     return Pipeline(
         steps=[

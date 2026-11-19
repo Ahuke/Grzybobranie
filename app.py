@@ -1,5 +1,5 @@
 """
-Punkt wejścia aplikacji Streamlit: "Gdzie na grzyby?" ([GRZ-02], [GRZ-05], [GRZ-12]).
+Punkt wejścia aplikacji Streamlit: "Gdzie na grzyby?" ([GRZ-02], [GRZ-05], [GRZ-12], [GRZ-16]).
 
 Uruchomienie:
     streamlit run app.py
@@ -8,6 +8,7 @@ Uruchomienie:
 from __future__ import annotations
 
 import datetime
+import json
 import os
 from typing import Any
 
@@ -18,11 +19,14 @@ import streamlit as st
 from src.config import (
     ABUNDANCE_CLASSES,
     ACADEMIC_ATTRIBUTION,
+    MODELS_DIR,
     OBSERVATION_SPECIES_FILTER_LABELS,
     PILOT_REGION,
+    PREDICTION_SOURCE_METADATA,
     REFERENCE_CITIES,
     SPECIES_HABITAT_HINTS,
     SPECIES_LABELS,
+    YIELD_COLOR_SCALE_BINS,
 )
 from src.data_loader import (
     DatasetBundle,
@@ -39,6 +43,16 @@ from src.geo_utils import (
     enrich_geojson_with_predictions,
     enrich_geojson_with_real_observations,
     haversine_km,
+)
+from src.prediction_service import (
+    APP_FORECAST_DEFAULT_DATE,
+    APP_FORECAST_MAX_DATE,
+    APP_FORECAST_MIN_DATE,
+    PRECOMPUTED_END_DATE,
+    PRECOMPUTED_START_DATE,
+    generate_predictions_for_date,
+    load_precomputed_predictions_df,
+    verify_map_predictions_against_direct_model,
 )
 
 
@@ -78,6 +92,16 @@ CUSTOM_CSS = """
     .status-banner-warn {
         border-left-color: #C98E2A;
         background-color: #F7EFE0;
+    }
+    .source-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        margin-right: 6px;
+        vertical-align: middle;
     }
     .context-strip {
         padding: 0.6rem 1rem;
@@ -248,8 +272,24 @@ def render_legend(
                 f"<span>{label}</span>"
                 f"</div>"
             )
+    elif color_mode == "yield_scale":
+        for b in YIELD_COLOR_SCALE_BINS:
+            items_html.append(
+                f"<div class='legend-item'>"
+                f"<span class='legend-swatch' style='background:{b['hex']};'></span>"
+                f"<span>{b['label']}</span>"
+                f"</div>"
+            )
+        unavail = ABUNDANCE_CLASSES["NIEDOSTEPNY"]
+        items_html.append(
+            f"<div class='legend-item'>"
+            f"<span class='legend-swatch' style='background:{unavail['hex']};'></span>"
+            f"<span>{unavail['label']}</span>"
+            f"</div>"
+        )
     else:
-        for key in ["WYSYP", "SREDNIO", "BRAK", "BRAK_DANYCH"]:
+        keys = ["WYSYP", "SREDNIO", "BRAK", "NIEDOSTEPNY"] if color_mode == "predictions" else ["WYSYP", "SREDNIO", "BRAK", "BRAK_DANYCH"]
+        for key in keys:
             info = ABUNDANCE_CLASSES[key]
             items_html.append(
                 f"<div class='legend-item'>"
@@ -914,9 +954,12 @@ def render_demo_predictions_view(
             help="Odległość w linii prostej (Haversine) do centroidu powiatu.",
         )
 
-    banner_cls = "status-banner status-banner-warn" if bundle.is_fallback_to_demo else "status-banner"
     st.markdown(
-        f"<div class='{banner_cls}'><b>Status danych:</b> {bundle.status_message}</div>",
+        f"<div class='status-banner status-banner-warn'>"
+        f"<span class='source-badge' style='background:{PREDICTION_SOURCE_METADATA['DEMO_MOCK']['bg']};"
+        f"color:{PREDICTION_SOURCE_METADATA['DEMO_MOCK']['color']};border:1px solid {PREDICTION_SOURCE_METADATA['DEMO_MOCK']['color']};'>"
+        f"{PREDICTION_SOURCE_METADATA['DEMO_MOCK']['badge']}</span>"
+        f"<b>Uwaga — dane demonstracyjne (`DEMO_MOCK_v0`, `is_demo = True`):</b> {bundle.status_message}</div>",
         unsafe_allow_html=True,
     )
 
@@ -1010,6 +1053,509 @@ def render_demo_predictions_view(
         st.dataframe(pd.DataFrame(in_radius_records), use_container_width=True, hide_index=True)
 
 
+def render_forecast_map_view(
+    real_bundle: RealObservationsBundle,
+    audit_samples: dict[str, Any],
+    prediction_engine: str = "ML_MODEL",
+) -> None:
+    """
+    Główny widok mapy prognoz zasilanej wytrenowanym potokiem ML (`RandomForestRegressor` /
+    `RandomForestClassifier`, [GRZ-14] + [GRZ-15] + [GRZ-16]) lub jawnym wskaźnikiem regułowym
+    (`RULE_SUITABILITY_INDEX_v1.0`), z wyraźnym rozróżnieniem źródeł i obsługą obszarów niedostępnych.
+    """
+    source_meta = PREDICTION_SOURCE_METADATA[prediction_engine]
+    precomputed_df = load_precomputed_predictions_df()
+
+    min_d = datetime.date.fromisoformat(APP_FORECAST_MIN_DATE)
+    max_d = datetime.date.fromisoformat(APP_FORECAST_MAX_DATE)
+    default_d = datetime.date.fromisoformat(APP_FORECAST_DEFAULT_DATE)
+
+    with st.sidebar:
+        st.divider()
+        st.subheader("1. Data docelowa i horyzont prognozy")
+
+        scenario_presets = {
+            "custom": "Dowolna data z kalendarza",
+            "2025-10-19": "Szczyt października (2025-10-19 — pełne dane, prekomputowane CSV)",
+            "2025-10-25": "Późny październik (2025-10-25 — pełne dane, wysyp jesienny)",
+            "2025-10-05": "Wczesny październik (2025-10-05 — przeliczenie na żywo z potoku)",
+            "2025-08-11": "Niepełna historia 21d (2025-08-11 — test obszarów NIEDOSTĘPNYCH)",
+            "2025-11-08": "Poza archiwum pogody (2025-11-08, H=1 — test braku danych)",
+        }
+        selected_preset = st.selectbox(
+            "Szybki wybór scenariusza",
+            options=list(scenario_presets.keys()),
+            format_func=lambda k: scenario_presets[k],
+            index=1,
+            help="Pozwala szybko przełączyć datę między pełnym zakresem a przypadkami niepełnej historii pogodowej.",
+        )
+
+        picker_default = (
+            datetime.date.fromisoformat(selected_preset)
+            if selected_preset != "custom"
+            else default_d
+        )
+        picked_target_date = st.date_input(
+            "Data docelowa prognozy (`target_date`)",
+            value=picker_default,
+            min_value=min_d,
+            max_value=max_d,
+            key=f"forecast_date_{prediction_engine}_{selected_preset}",
+            help=(
+                f"Pełna 21-dniowa historia pogodowa dostępna jest dla dat 2025-08-22 .. 2025-11-06 (dla H=1). "
+                f"Dla wcześniejszych lub późniejszych dat obszary bez pełnego okna 21d są oznaczane jako NIEDOSTĘPNE."
+            ),
+        )
+        target_date_str = picked_target_date.isoformat()
+
+        horizon_days = st.radio(
+            "Horyzont wyprzedzenia prognozy (`horizon_days`)",
+            options=[1, 2, 3],
+            format_func=lambda h: f"+{h} {'dzień' if h == 1 else 'dni'} (odcięcie pogody: t - {h})",
+            horizontal=True,
+        )
+
+        force_live = st.checkbox(
+            "Wymuś przeliczenie na żywo z `.joblib`",
+            value=False,
+            disabled=(prediction_engine != "ML_MODEL"),
+            help=(
+                f"Domyślnie dla H=1 i zakresu {PRECOMPUTED_START_DATE}..{PRECOMPUTED_END_DATE} "
+                f"wybierany jest przygotowany wynik z data/processed/predictions.csv; dla pozostałych dat "
+                f"lub horyzontów H=2,3 potok ML uruchamia się automatycznie na żywo."
+            ),
+        )
+
+        st.divider()
+        st.subheader("2. Filtr gatunku (mnożnik siedliskowy BDL)")
+        selected_species = st.selectbox(
+            "Gatunek grzyba (`species_filter`)",
+            options=list(SPECIES_LABELS.keys()),
+            format_func=lambda k: SPECIES_LABELS.get(k, k),
+            index=0,
+            help=(
+                "Główny model przewiduje ogólną wydajność zbioru (`all`, szt./h), a dla konkretnego gatunku "
+                "stosowany jest jawny mnożnik siedliskowy BDL (zob. docs/data_audit.md)."
+            ),
+        )
+        st.caption(f"Preferowane siedlisko BDL: {SPECIES_HABITAT_HINTS.get(selected_species, '—')}")
+
+        st.divider()
+        st.subheader("3. Obszar i promień odległości")
+        county_options = {"ALL": "Wszystkie powiaty (30 jednostek TERYT 02)"}
+        for aid, aprops in sorted(
+            real_bundle.areas_by_id.items(), key=lambda kv: kv[1].get("area_name", kv[0])
+        ):
+            county_options[aid] = f"{aprops.get('area_name', aid)} (TERYT {aid})"
+
+        selected_county = st.selectbox(
+            "Filtr jednostki przestrzennej (powiat)",
+            options=list(county_options.keys()),
+            format_func=lambda k: county_options[k],
+            index=0,
+        )
+
+        selected_city = st.selectbox(
+            "Punkt odniesienia odległości",
+            options=list(REFERENCE_CITIES.keys()),
+            index=0,
+        )
+        origin_lat, origin_lon = REFERENCE_CITIES[selected_city]
+
+        radius_km = st.slider(
+            "Promień od punktu [km]",
+            min_value=20,
+            max_value=160,
+            value=160,
+            step=10,
+            help="Odległość w linii prostej (Haversine) do centroidu powiatu.",
+        )
+
+    # --- URUCHOMIENIE PREDYKCJI / WYBÓR GOTOWEGO WYNIKU ([GRZ-16] Warunek #1) ---
+    pred_result = generate_predictions_for_date(
+        target_date=target_date_str,
+        horizon_days=int(horizon_days),
+        species_filter=selected_species,
+        prediction_engine=prediction_engine,
+        areas_by_id=real_bundle.areas_by_id,
+        origin_lat=origin_lat,
+        origin_lon=origin_lon,
+        radius_km=float(radius_km),
+        region_filter=selected_county,
+        precomputed_df=precomputed_df,
+        force_live=bool(force_live),
+    )
+
+    records = pred_result["records"]
+    records_by_area = pred_result["records_by_area"]
+    in_filter_records = [r for r in records if r["in_radius"]]
+    available_records = [r for r in in_filter_records if r["is_available"]]
+    unavailable_records = [r for r in in_filter_records if not r["is_available"]]
+
+    # Dołącz historyczne raporty z wybranego dnia (wyłącznie kontrolnie w tabeli)
+    day_obs_df = real_bundle.features_df[
+        real_bundle.features_df["observation_date"].astype(str) == target_date_str
+    ]
+    obs_mean_by_area: dict[str, tuple[float, int]] = {}
+    if not day_obs_df.empty:
+        for aid, grp in day_obs_df.groupby("region_id"):
+            obs_mean_by_area[str(aid).zfill(4)] = (
+                round(float(grp["yield_pcs_per_h"].mean()), 1),
+                int(len(grp)),
+            )
+
+    # --- BANER ŹRÓDŁA (WYRAŹNE ROZDZIELENIE ML vs REGUŁOWY vs DEMO — Warunek #4) ---
+    st.markdown(
+        f"<div class='status-banner' style='border-left-color:{source_meta['color']};background-color:{source_meta['bg']};'>"
+        f"<span class='source-badge' style='background:{source_meta['color']};color:#FFFFFF;'>{source_meta['badge']}</span>"
+        f"<b>{source_meta['label']}</b> &nbsp;|&nbsp; "
+        f"Tryb wykonania: <code>{pred_result['execution_summary']}</code> &nbsp;|&nbsp; "
+        f"<code>is_demo = False</code>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+
+    # --- PASEK KONTEKSTOWY (DATA DOCELOWA, ODCIĘCIE, JEDNOSTKA, OBSZAR — Warunek #2) ---
+    st.markdown(
+        f"<div class='context-strip'>"
+        f"<b>Data docelowa prognozy (<code>target_date</code>):</b> <code>{pred_result['target_date']}</code> "
+        f"&nbsp;|&nbsp; <b>Odcięcie pogody (<code>issued_at = t - {pred_result['horizon_days']}d</code>):</b> <code>{pred_result['issued_at']}</code> "
+        f"&nbsp;|&nbsp; <b>Jednostka wyniku:</b> <code>{pred_result['target_unit']}</code> "
+        f"&nbsp;|&nbsp; <b>Jednostka przestrzenna:</b> <code>powiat (TERYT 0201–0265)</code> "
+        f"&nbsp;|&nbsp; <b>Gatunek:</b> <code>{SPECIES_LABELS.get(selected_species, selected_species)}</code>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+
+    if unavailable_records:
+        st.warning(
+            f"**Obszary niedostępne ({len(unavailable_records)} z {len(in_filter_records)} powiatów w filtrze):** "
+            f"Dla daty docelowej `{pred_result['target_date']}` (odcięcie pogody `{pred_result['issued_at']}`) "
+            f"brakuje pełnej 21-dniowej historii pogodowej ERA5-Land (`PARTIAL_HISTORY` / `NO_WEATHER_HISTORY`). "
+            f"Zgodnie z kontraktem danych obszary bez wystarczających danych zostały jawnie oznaczone jako **NIEDOSTĘPNE** "
+            f"(`predicted_yield_pcs_per_h = NULL`) zamiast generować fałszywą prognozę."
+        )
+
+    # --- KARTY KPI ---
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    kpi1.metric(
+        "Dostępność prognozy w filtrze",
+        f"{len(available_records)} z {len(in_filter_records)} pow.",
+        delta=f"Niedostępne (brak danych): {len(unavailable_records)} pow.",
+        delta_color="off",
+    )
+    if available_records:
+        best_rec = max(available_records, key=lambda r: float(r["predicted_yield_pcs_per_h"]))
+        mean_pred = sum(float(r["predicted_yield_pcs_per_h"]) for r in available_records) / len(available_records)
+        wysyp_cnt = sum(1 for r in available_records if r["abundance_class"] == "WYSYP")
+        kpi2.metric(
+            f"Najwyższa prognoza ({source_meta['badge']})",
+            f"{best_rec['predicted_yield_pcs_per_h']:.2f} {pred_result['target_unit']}",
+            delta=f"{best_rec['area_name']} ({best_rec['area_id']})",
+            delta_color="off",
+        )
+        kpi3.metric(
+            "Średnia prognoza w filtrze",
+            f"{mean_pred:.2f} {pred_result['target_unit']}",
+            delta=f"Powiaty w klasie WYSYP (>20 szt./h): {wysyp_cnt}",
+            delta_color="off",
+        )
+        kpi4.metric(
+            "Wersja i jednostka wyniku",
+            pred_result["target_unit"],
+            delta=f"{pred_result['model_version']}",
+            delta_color="off",
+        )
+    else:
+        kpi2.metric("Najwyższa prognoza", "NIEDOSTĘPNA", delta="Brak wystarczających danych", delta_color="off")
+        kpi3.metric("Średnia prognoza w filtrze", "NULL", delta="Wymagane pełne okno 21d", delta_color="off")
+        kpi4.metric("Wersja i jednostka wyniku", pred_result["target_unit"], delta=pred_result["model_version"], delta_color="off")
+
+    # --- ZAKŁADKI WIDOKU PROGNOZ ([GRZ-16]) ---
+    tab_map, tab_audit, tab_compare = st.tabs(
+        [
+            f"Mapa prognoz ({source_meta['badge']}) i ranking powiatów",
+            "Weryfikacja zgodności mapy z bezpośrednim wywołaniem modelu (1:1)",
+            "Rozdzielenie źródeł (ML vs Regułowy vs Demo) i metadane",
+        ]
+    )
+
+    with tab_map:
+        c1, c2 = st.columns([5, 2])
+        with c1:
+            color_mode = st.radio(
+                "Skala kolorów na mapie",
+                options=["yield_scale", "predictions", "region_bdl"],
+                format_func=lambda m: {
+                    "yield_scale": "Skala ciągła wyniku [szt./h] (5 przedziałów + Niedostępny)",
+                    "predictions": "3 klasy obfitości (BRAK <5 / ŚREDNIO 5–20 / WYSYP >20 szt./h)",
+                    "region_bdl": "Tło siedliskowe: lesistość BDL [%]",
+                }[m],
+                horizontal=True,
+            )
+        with c2:
+            bdl_available = bool(audit_samples.get("bdl_stands_geojson"))
+            show_bdl_stands = st.checkbox(
+                "Nałóż wydzielenia BDL (N=105)",
+                value=False,
+                help="Warstwa wektorowa 105 wydzieleń leśnych BDL w 7 klastrach na Dolnym Śląsku.",
+            )
+
+        st.markdown(
+            f"#### Mapa prognoz wysypu grzybów (`{pred_result['target_unit']}`) — "
+            f"data docelowa: `{pred_result['target_date']}` "
+            f"(odcięcie pogody: `{pred_result['issued_at']}`, źródło: `{source_meta['badge']}`)"
+        )
+
+        render_legend(
+            color_mode=color_mode,
+            show_bdl_stands=(show_bdl_stands and bdl_available),
+            show_report_points=False,
+        )
+
+        enriched_geojson = enrich_geojson_with_predictions(
+            real_bundle.areas_geojson,
+            records_by_area,
+            color_mode=color_mode,
+        )
+
+        polygon_layer = pdk.Layer(
+            "GeoJsonLayer",
+            data=enriched_geojson,
+            opacity=0.78,
+            stroked=True,
+            filled=True,
+            extruded=False,
+            wireframe=True,
+            get_fill_color="properties.fill_color",
+            get_line_color="properties.line_color",
+            get_line_width=140,
+            line_width_min_pixels=1.5,
+            pickable=True,
+            auto_highlight=True,
+        )
+        deck_layers = [polygon_layer]
+
+        if show_bdl_stands and bdl_available:
+            enriched_bdl = enrich_bdl_stands_geojson(audit_samples.get("bdl_stands_geojson"))
+            if enriched_bdl:
+                deck_layers.append(
+                    pdk.Layer(
+                        "GeoJsonLayer",
+                        data=enriched_bdl,
+                        opacity=0.88,
+                        stroked=True,
+                        filled=True,
+                        extruded=False,
+                        get_fill_color="properties.fill_color",
+                        get_line_color="properties.line_color",
+                        get_line_width=35,
+                        line_width_min_pixels=1.2,
+                        pickable=True,
+                        auto_highlight=True,
+                    )
+                )
+
+        deck_layers.append(
+            pdk.Layer(
+                "ScatterplotLayer",
+                data=[
+                    {
+                        "tooltip_header": f"Punkt odniesienia odległości: {selected_city}",
+                        "tooltip_sub": f"Promień filtra: <b>{radius_km} km</b>",
+                        "tooltip_bdl": f"Współrzędne WGS84: <code>{origin_lat:.4f}, {origin_lon:.4f}</code>",
+                        "lat": origin_lat,
+                        "lon": origin_lon,
+                    }
+                ],
+                get_position="[lon, lat]",
+                get_fill_color=[35, 78, 112, 235],
+                get_line_color=[255, 255, 255, 255],
+                line_width_min_pixels=2,
+                get_radius=4000,
+                pickable=True,
+            )
+        )
+
+        view_state = pdk.ViewState(
+            latitude=PILOT_REGION.center_lat,
+            longitude=PILOT_REGION.center_lon,
+            zoom=PILOT_REGION.default_zoom,
+            pitch=0,
+        )
+        tooltip = {
+            "html": (
+                "<b>{tooltip_header}</b><br/>"
+                "{tooltip_sub}<hr style='margin:4px 0;'/>"
+                "{tooltip_bdl}"
+            ),
+            "style": {
+                "backgroundColor": "#1F2421",
+                "color": "#F7F6F2",
+                "fontSize": "12px",
+                "padding": "10px",
+                "borderRadius": "4px",
+            },
+        }
+        st.pydeck_chart(
+            pdk.Deck(
+                layers=deck_layers,
+                initial_view_state=view_state,
+                tooltip=tooltip,
+                map_style="light",
+            ),
+            use_container_width=True,
+        )
+
+        st.caption(
+            f"Źródło prognozy: {source_meta['badge']} ({pred_result['model_version']}) | "
+            f"Data docelowa: {pred_result['target_date']} | Odcięcie cech pogodowych: {pred_result['issued_at']} | "
+            f"Jednostka wyniku: {pred_result['target_unit']} | "
+            f"Jednostka przestrzenna: powiat (GUGiK PRG, 30 powiatów woj. dolnośląskiego, EPSG:4326)."
+        )
+
+        st.markdown(
+            f"#### Ranking powiatów na dzień `{pred_result['target_date']}` "
+            f"({len(available_records)} dostępnych, {len(unavailable_records)} niedostępnych)"
+        )
+        if not in_filter_records:
+            st.warning("Żaden powiat nie mieści się w aktywnym filtrze odległości/powiatu.")
+        else:
+            table_rows = []
+            for r in in_filter_records:
+                obs_info = obs_mean_by_area.get(r["area_id"])
+                table_rows.append(
+                    {
+                        "TERYT": r["area_id"],
+                        "Powiat": r["area_name"],
+                        "Odległość [km]": r["distance_km"],
+                        "Dostępność": "DOSTĘPNY" if r["is_available"] else "NIEDOSTĘPNY",
+                        "Prognoza ML [szt./h]": r["ml_yield_pcs_per_h"],
+                        "Wskaźnik regułowy [szt./h]": r["rule_based_yield_pcs_per_h"],
+                        "Klasa (aktywne źródło)": r["abundance_class"],
+                        "Klasyfikator ML": r["abundance_class_classifier"],
+                        "Pewność": r["confidence_score"],
+                        "Status historii [GRZ-15]": r["history_completeness"],
+                        "Opad 21d [mm]": r["precip_lag_21d_mm"],
+                        "Temp. min [°C]": r["temp_min_night_c"],
+                        "Lesistość [%]": r["forest_cover_pct"],
+                        "Raport grzyby.pl z tego dnia [szt./h]": (
+                            f"{obs_info[0]:.1f} (n={obs_info[1]})" if obs_info else "brak wpisu"
+                        ),
+                    }
+                )
+            st.dataframe(pd.DataFrame(table_rows), use_container_width=True, hide_index=True)
+
+    with tab_audit:
+        st.markdown("#### Audyt zgodności 1:1 wartości na mapie z bezpośrednim wywołaniem modelu `.joblib`")
+        st.caption(
+            "Dla 6 wybranych powiatów (w tym powiatu bez profilu BDL `0218` oraz powiatu bez raportów w treningu `0217`) "
+            "porównujemy wartość przekazaną do poligonu na mapie PyDeck (`enriched_geojson`) z niezależnym, "
+            "bezpośrednim wywołaniem `joblib.load('models/rf_yield_pipeline.joblib').predict(...)`."
+        )
+        if prediction_engine != "ML_MODEL":
+            st.info(
+                "Obecnie wybrany jest tryb **Wskaźnika Regułowego (`RULE_BASED_INDEX`)**. "
+                "Przełącz w panelu bocznym tryb na **`[ML] Mapa prognoz modelu`** — poniższy audyt "
+                "weryfikuje zgodność warstwy mapy ML dla bieżącej daty i gatunku."
+            )
+            ml_for_audit = generate_predictions_for_date(
+                target_date=target_date_str,
+                horizon_days=int(horizon_days),
+                species_filter=selected_species,
+                prediction_engine="ML_MODEL",
+                areas_by_id=real_bundle.areas_by_id,
+                precomputed_df=precomputed_df,
+                force_live=bool(force_live),
+            )
+            geo_for_audit = enrich_geojson_with_predictions(
+                real_bundle.areas_geojson,
+                ml_for_audit["records_by_area"],
+                color_mode="yield_scale",
+            )
+        else:
+            geo_for_audit = enriched_geojson
+
+        in_filter_ids = {r["area_id"] for r in in_filter_records}
+        default_audit_ids = ["0201", "0206", "0208", "0213", "0218", "0217"]
+        if prediction_engine == "ML_MODEL" and in_filter_ids:
+            audit_sample_ids = [aid for aid in default_audit_ids if aid in in_filter_ids]
+            if not audit_sample_ids:
+                audit_sample_ids = sorted(in_filter_ids)[:6]
+        else:
+            audit_sample_ids = default_audit_ids
+
+        ver_res = verify_map_predictions_against_direct_model(
+            enriched_geojson=geo_for_audit,
+            target_date=target_date_str,
+            horizon_days=int(horizon_days),
+            species_filter=selected_species,
+            sample_area_ids=audit_sample_ids,
+        )
+        if ver_res["all_match"]:
+            st.success(
+                f"ZGODNOŚĆ 1:1 POTWIERDZONA dla wszystkich {ver_res['checked_counties_count']} sprawdzonych powiatów "
+                f"(data: `{ver_res['target_date']}`, gatunek: `{ver_res['species_filter']}`, model: `{ver_res['model_version']}`)."
+            )
+        else:
+            st.error("Wykryto rozbieżność pomiędzy warstwą mapy a bezpośrednim wywołaniem modelu!")
+
+        st.dataframe(pd.DataFrame(ver_res["checks"]), use_container_width=True, hide_index=True)
+
+    with tab_compare:
+        st.markdown("#### Jawne rozdzielenie źródeł danych i wyników w aplikacji (`[GRZ-16] Warunek #4`)")
+        sources_table = [
+            {
+                "Odznaka w UI": PREDICTION_SOURCE_METADATA["ML_MODEL"]["badge"],
+                "Wersja / Identyfikator": "rf_pipeline_v1.0",
+                "Flaga is_demo": False,
+                "Źródło obliczeń": "models/rf_yield_pipeline.joblib + data/processed/predictions.csv",
+                "Opis": "Wytrenowany model RandomForestRegressor + RandomForestClassifier z potokiem imputacji i kodowania ([GRZ-14]).",
+            },
+            {
+                "Odznaka w UI": PREDICTION_SOURCE_METADATA["RULE_BASED_INDEX"]["badge"],
+                "Wersja / Identyfikator": "RULE_SUITABILITY_INDEX_v1.0",
+                "Flaga is_demo": False,
+                "Źródło obliczeń": "compute_rule_based_suitability_yield() w src/prediction_service.py",
+                "Opis": "Deterministyczny Jawny Wskaźnik Warunków (opad 21d, wilg. gleby, przymrozki, lesistość BDL — Tor A z docs/data_audit.md).",
+            },
+            {
+                "Odznaka w UI": PREDICTION_SOURCE_METADATA["REAL_OBSERVATIONS"]["badge"],
+                "Wersja / Identyfikator": "reports.parquet / features.parquet (N=513)",
+                "Flaga is_demo": False,
+                "Źródło obliczeń": "data/processed/ (grzyby.pl + ERA5-Land + BDL)",
+                "Opis": "Rzeczywiste, historyczne raporty grzybiarzy bez predykcji modelowej ([GRZ-12]).",
+            },
+            {
+                "Odznaka w UI": PREDICTION_SOURCE_METADATA["DEMO_MOCK"]["badge"],
+                "Wersja / Identyfikator": "DEMO_MOCK_v0",
+                "Flaga is_demo": True,
+                "Źródło obliczeń": "data/demo/predictions_demo.csv",
+                "Opis": "Wyłącznie syntetyczna próbka interfejsu ze Sprintu 1 — nigdy nie mieszana z danymi produkcyjnymi.",
+            },
+        ]
+        st.dataframe(pd.DataFrame(sources_table), use_container_width=True, hide_index=True)
+
+        meta_path = MODELS_DIR / "model_metadata.json"
+        if meta_path.exists():
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            st.markdown("#### Metadane aktywnego potoku ML (`models/model_metadata.json`)")
+            reg_m = meta["evaluation_and_baseline_comparison"]["regression_comparison_on_test"][
+                "random_forest_regressor_primary"
+            ]["test_metrics"]
+            clf_m = meta["evaluation_and_baseline_comparison"]["classification_comparison_on_test"][
+                "random_forest_classifier_primary"
+            ]["test_metrics"]
+            st.markdown(
+                f"- **Wersja modelu:** `{meta['model_version']}` (`trained_at`: `{meta['trained_at']}`)\n"
+                f"- **Okres treningu (`Train`, N=386):** `{meta['training_dates']['train_date_min']}` – `{meta['training_dates']['train_date_max']}`\n"
+                f"- **Okres testu Out-of-Time (`Test`, N=127):** `{meta['training_dates']['test_date_min']}` – `{meta['training_dates']['test_date_max']}`\n"
+                f"- **Cel i jednostka:** `{meta['target']['primary_regression_target']}` $\\rightarrow$ **`{meta['target']['target_unit']}`**\n"
+                f"- **Wynik testowy regresji:** MAE = **`{reg_m['mae_pcs_per_h']} szt./h`**, RMSE = `{reg_m['rmse_pcs_per_h']} szt./h`, Spearman $\\rho$ = **`{reg_m['spearman_rho']:+.4f}`**\n"
+                f"- **Wynik testowy klasyfikacji:** Macro-F1 = **`{clf_m['macro_f1']:.4f}`**, Weighted-F1 = `{clf_m['weighted_f1']:.4f}`"
+            )
+
+
 def main() -> None:
     st.set_page_config(
         page_title="Gdzie na grzyby — Dolny Śląsk",
@@ -1019,7 +1565,7 @@ def main() -> None:
 
     st.markdown(
         f"<div class='app-header'>"
-        f"<p class='app-title'>Gdzie na grzyby — przestrzenna eksploracja raportów i analiza wysypu</p>"
+        f"<p class='app-title'>Gdzie na grzyby — mapa prognoz wysypu (Model ML) i eksploracja raportów</p>"
         f"<p class='app-subtitle'>"
         f"Obszar pilotażowy: <b>{PILOT_REGION.voivodeship_name} (TERYT {PILOT_REGION.voivodeship_id}, 30 powiatów)</b> "
         f"&nbsp;|&nbsp; Jednostka przestrzenna: <b>{PILOT_REGION.spatial_unit_name}</b> "
@@ -1029,26 +1575,45 @@ def main() -> None:
     )
 
     with st.sidebar:
-        st.subheader("Źródło danych aplikacji")
-        default_mode = os.getenv("GRZYBY_DATA_ENV", "real").lower()
+        st.subheader("Tryb i źródło danych aplikacji")
+        default_mode = os.getenv("GRZYBY_DATA_ENV", "ml_forecast").lower()
         mode_options = {
-            "real": "Rzeczywiste raporty i pokrycie (data/processed/, [GRZ-12])",
-            "demo": "Próbka demonstracyjna UI (data/demo/, [GRZ-02])",
+            "ml_forecast": "[ML] Mapa prognoz modelu Random Forest ([GRZ-16])",
+            "rule_forecast": "[REGUŁA] Jawny Wskaźnik Warunków (model regułowy)",
+            "real": "[OBSERWACJE] Rzeczywiste raporty i pokrycie ([GRZ-12])",
+            "demo": "[DEMO] Próbka demonstracyjna UI (is_demo=True, [GRZ-02])",
         }
+        mode_keys = list(mode_options.keys())
+        default_idx = mode_keys.index(default_mode) if default_mode in mode_keys else 0
         selected_mode = st.selectbox(
-            "Tryb danych",
-            options=list(mode_options.keys()),
-            index=0 if default_mode != "demo" else 1,
+            "Wybierz tryb widoku",
+            options=mode_keys,
+            index=default_idx,
             format_func=lambda k: mode_options[k],
             help=(
-                "Domyślny tryb [GRZ-12] wczytuje rzeczywiste dane obserwacyjne z data/processed/ "
-                "(reports.parquet, features.parquet, forest_features.parquet, areas.geojson)."
+                "Ścisłe rozdzielenie źródeł: [ML] uruchamia wytrenowany potok Random Forest (rf_pipeline_v1.0), "
+                "[REGUŁA] liczy deterministyczny wskaźnik pogodowo-leśny, [OBSERWACJE] pokazuje historyczne "
+                "raporty z grzyby.pl, a [DEMO] syntetyczną próbkę UI."
             ),
         )
 
     audit_samples = load_sprint1_audit_samples()
 
-    if selected_mode == "real":
+    if selected_mode == "ml_forecast":
+        real_bundle = load_real_observations_bundle()
+        render_forecast_map_view(
+            real_bundle=real_bundle,
+            audit_samples=audit_samples,
+            prediction_engine="ML_MODEL",
+        )
+    elif selected_mode == "rule_forecast":
+        real_bundle = load_real_observations_bundle()
+        render_forecast_map_view(
+            real_bundle=real_bundle,
+            audit_samples=audit_samples,
+            prediction_engine="RULE_BASED_INDEX",
+        )
+    elif selected_mode == "real":
         real_bundle = load_real_observations_bundle()
         render_real_observations_view(real_bundle=real_bundle, audit_samples=audit_samples)
     else:

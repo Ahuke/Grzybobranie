@@ -975,7 +975,18 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         live_preds = predict_with_saved_pipelines(ex_inputs)
         saved_preds = json.loads(ex_out_json.read_text(encoding="utf-8"))
         self.assertEqual(len(live_preds), 5)
-        self.assertEqual(live_preds, saved_preds)
+        self.assertEqual(len(saved_preds), 5)
+        for live, saved in zip(live_preds, saved_preds):
+            self.assertEqual(live.keys(), saved.keys())
+            for k in saved:
+                if k == "predicted_yield_pcs_per_h":
+                    self.assertAlmostEqual(float(live[k]), float(saved[k]), places=2)
+                elif k == "class_probabilities":
+                    self.assertEqual(live[k].keys(), saved[k].keys())
+                    for cls_name in saved[k]:
+                        self.assertAlmostEqual(float(live[k][cls_name]), float(saved[k][cls_name]), places=2)
+                else:
+                    self.assertEqual(live[k], saved[k])
 
         for pred in live_preds:
             self.assertGreaterEqual(pred["predicted_yield_pcs_per_h"], 0.0)

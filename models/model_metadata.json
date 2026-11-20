@@ -1,0 +1,700 @@
+{
+  "task_id": "[GRZ-14] Wytrenować pierwszy model i zapisać kompletny pipeline (#14)",
+  "model_version": "rf_pipeline_v1.0",
+  "trained_at": "2026-11-18T19:08:55+01:00",
+  "environment": {
+    "python_version": "3.12.14",
+    "scikit_learn_version": "1.9.1",
+    "pandas_version": "3.1.1",
+    "numpy_version": "2.5.4",
+    "joblib_version": "1.6.0"
+  },
+  "training_command": "python scripts/train_model.py",
+  "prediction_example_command": "python scripts/predict_example.py",
+  "data_version": {
+    "dataset_name": "grzybobranie_features_point_in_time_v1.0",
+    "source_file": "data/processed/features.parquet",
+    "source_sha256": "78e83a3079191f8057042dfbd5ef477bbf5162788ccec9d54979c898f1e19558",
+    "total_valid_observations": 513,
+    "train_observations": 386,
+    "test_observations": 127,
+    "pilot_region": "Województwo dolnośląskie (TERYT 02, 30 powiatów)",
+    "spatial_unit": "powiat (4-znakowy kod TERYT area_id)",
+    "horizon_days": 1,
+    "point_in_time_cutoff_rule": "issued_at = feature_cutoff_date = target_date - 1 dzień (brak wycieku z dnia zbioru)",
+    "is_demo_records_present": false
+  },
+  "training_dates": {
+    "split_mode": "temporal_out_of_time (primary_split_train_test)",
+    "split_cutoff_date": "2025-10-12",
+    "train_date_min": "2025-09-01",
+    "train_date_max": "2025-10-12",
+    "test_date_min": "2025-10-13",
+    "test_date_max": "2025-11-02",
+    "secondary_3way_split": {
+      "train_cutoff": "2025-10-05",
+      "val_cutoff": "2025-10-19",
+      "train_count": 333,
+      "val_count": 111,
+      "test_count": 69
+    },
+    "anti_leakage_verified": {
+      "report_id_overlap_train_test": 0,
+      "temporal_gap_strictly_positive": true,
+      "matches_grz13_split_metadata_1_to_1": true
+    }
+  },
+  "target": {
+    "primary_regression_target": "yield_pcs_per_h",
+    "predicted_output_column": "predicted_yield_pcs_per_h",
+    "target_unit": "szt./h",
+    "secondary_classification_target": "abundance_class",
+    "classification_unit": "kategoria obfitości wysypu (BRAK < 5.0 szt./h, SREDNIO 5.0-20.0 szt./h, WYSYP > 20.0 szt./h)",
+    "abundance_thresholds_pcs_per_h": {
+      "BRAK": "< 5.0",
+      "SREDNIO": "5.0 - 20.0",
+      "WYSYP": "> 20.0"
+    }
+  },
+  "features": {
+    "raw_input_features_count": 40,
+    "raw_categorical_features": [
+      "area_id",
+      "dominant_moisture_type",
+      "season_phase"
+    ],
+    "raw_numeric_features": [
+      "precip_lag_7d_mm",
+      "precip_lag_14d_mm",
+      "precip_lag_21d_mm",
+      "precip_cutoff_1d_mm",
+      "precip_hours_lag_7d_h",
+      "rainy_days_lag_7d_count",
+      "rainy_days_lag_14d_count",
+      "temp_min_night_c",
+      "temp_min_lag_3d_c",
+      "temp_min_lag_7d_c",
+      "frost_nights_lag_7d_count",
+      "temp_mean_cutoff_1d_c",
+      "temp_mean_7d_c",
+      "temp_mean_14d_c",
+      "temp_max_cutoff_1d_c",
+      "wind_speed_mean_7d_kmh",
+      "soil_moisture_0_7cm_m3m3",
+      "soil_moisture_mean_7d_m3m3",
+      "soil_moisture_mean_14d_m3m3",
+      "soil_temperature_0_7cm_c",
+      "soil_temp_mean_7d_c",
+      "grid_elevation_m",
+      "total_area_km2",
+      "forest_cover_pct",
+      "forest_area_km2",
+      "pine_share_pct",
+      "oak_beech_share_pct",
+      "spruce_share_pct",
+      "mean_stand_age_years",
+      "has_bdl_stand_data",
+      "month",
+      "day_of_year",
+      "week_of_year",
+      "day_of_week",
+      "is_weekend",
+      "day_of_year_sin",
+      "day_of_year_cos"
+    ],
+    "engineered_numeric_features": [
+      "county_hist_mean_smoothed",
+      "county_hist_median_smoothed",
+      "county_hist_wysyp_rate",
+      "county_hist_brak_rate",
+      "precip_lag_21d_mm",
+      "precip_slice_15_21d_mm",
+      "precip_lag_14d_mm",
+      "precip_lag_7d_mm",
+      "precip_cutoff_1d_mm",
+      "forest_x_precip_21d",
+      "temp_min_night_c",
+      "temp_min_lag_3d_c",
+      "frost_nights_lag_7d_count",
+      "wind_speed_mean_7d_kmh",
+      "soil_moisture_0_7cm_m3m3",
+      "soil_temperature_0_7cm_c",
+      "total_area_km2",
+      "forest_cover_pct",
+      "forest_area_km2",
+      "pine_share_pct",
+      "oak_beech_share_pct",
+      "spruce_share_pct",
+      "mean_stand_age_years",
+      "has_bdl_stand_data",
+      "is_weekend"
+    ],
+    "engineered_categorical_features": [
+      "dominant_moisture_type",
+      "county_hist_mode"
+    ],
+    "encoded_features_count": 35,
+    "missing_values_handling": "Liczbowe: SimpleImputer(strategy='median', add_indicator=True) dopasowany wyłącznie na Train (z zachowaniem flag braków dla 11 powiatów bez taksacji BDL; NULL != 0.0). Kategoryczne: SimpleImputer(strategy='constant', fill_value='__MISSING__') + OneHotEncoder(handle_unknown='ignore'). Klucz powiatu area_id: wygładzone kodowanie statystyk z treningu (Empirical Bayes) z bezpiecznym fallbackiem do średniej/mediany treningowej dla nowych powiatów.",
+    "feature_list_file": "models/feature_list.json",
+    "top_10_regression_features": [
+      {
+        "encoded_feature": "num__wind_speed_mean_7d_kmh",
+        "importance": 0.171862
+      },
+      {
+        "encoded_feature": "num__county_hist_mean_smoothed",
+        "importance": 0.123957
+      },
+      {
+        "encoded_feature": "num__county_hist_wysyp_rate",
+        "importance": 0.083145
+      },
+      {
+        "encoded_feature": "num__county_hist_median_smoothed",
+        "importance": 0.078402
+      },
+      {
+        "encoded_feature": "num__precip_slice_15_21d_mm",
+        "importance": 0.071565
+      },
+      {
+        "encoded_feature": "num__precip_lag_14d_mm",
+        "importance": 0.069354
+      },
+      {
+        "encoded_feature": "num__temp_min_lag_3d_c",
+        "importance": 0.056974
+      },
+      {
+        "encoded_feature": "num__temp_min_night_c",
+        "importance": 0.052211
+      },
+      {
+        "encoded_feature": "num__soil_temperature_0_7cm_c",
+        "importance": 0.048094
+      },
+      {
+        "encoded_feature": "num__precip_cutoff_1d_mm",
+        "importance": 0.047482
+      }
+    ],
+    "top_10_classification_features": [
+      {
+        "encoded_feature": "num__wind_speed_mean_7d_kmh",
+        "importance": 0.243306
+      },
+      {
+        "encoded_feature": "num__county_hist_mean_smoothed",
+        "importance": 0.117517
+      },
+      {
+        "encoded_feature": "num__county_hist_wysyp_rate",
+        "importance": 0.10086
+      },
+      {
+        "encoded_feature": "num__precip_slice_15_21d_mm",
+        "importance": 0.087859
+      },
+      {
+        "encoded_feature": "num__temp_min_lag_3d_c",
+        "importance": 0.082093
+      },
+      {
+        "encoded_feature": "num__precip_lag_14d_mm",
+        "importance": 0.064726
+      },
+      {
+        "encoded_feature": "num__temp_min_night_c",
+        "importance": 0.063118
+      },
+      {
+        "encoded_feature": "num__county_hist_brak_rate",
+        "importance": 0.043221
+      },
+      {
+        "encoded_feature": "num__soil_temperature_0_7cm_c",
+        "importance": 0.042798
+      },
+      {
+        "encoded_feature": "num__precip_lag_7d_mm",
+        "importance": 0.040437
+      }
+    ]
+  },
+  "models_configuration": {
+    "primary_regression_pipeline": {
+      "artifact_path": "models/rf_yield_pipeline.joblib",
+      "estimator": "RandomForestRegressor",
+      "hyperparameters": {
+        "n_estimators": 200,
+        "criterion": "squared_error",
+        "max_depth": 5,
+        "min_samples_leaf": 2,
+        "max_features": 0.6,
+        "random_state": 42,
+        "domain_smoothing": 1.0
+      }
+    },
+    "secondary_classification_pipeline": {
+      "artifact_path": "models/rf_abundance_pipeline.joblib",
+      "estimator": "RandomForestClassifier",
+      "hyperparameters": {
+        "n_estimators": 300,
+        "class_weight": {
+          "BRAK": 1.5,
+          "SREDNIO": 0.65,
+          "WYSYP": 2.0
+        },
+        "max_depth": 4,
+        "min_samples_leaf": 4,
+        "max_features": 0.6,
+        "random_state": 42,
+        "domain_smoothing": 1.0
+      }
+    }
+  },
+  "evaluation_and_baseline_comparison": {
+    "split_used": "primary_split_train_test (Train N=386, Test N=127)",
+    "regression_comparison_on_test": {
+      "random_forest_regressor_primary": {
+        "label": "RandomForestRegressor (Pipeline v1.0 — główny model)",
+        "train_metrics": {
+          "sample_count": 386,
+          "mae_pcs_per_h": 7.57,
+          "rmse_pcs_per_h": 10.592,
+          "pearson_r": 0.7674,
+          "spearman_rho": 0.7857,
+          "r2_score": 0.5511,
+          "r2_interpretable": true
+        },
+        "test_metrics": {
+          "sample_count": 127,
+          "mae_pcs_per_h": 14.67,
+          "rmse_pcs_per_h": 22.293,
+          "pearson_r": 0.3345,
+          "spearman_rho": 0.3662,
+          "r2_score": -0.0009,
+          "r2_interpretable": true
+        },
+        "val_3way_metrics": {
+          "sample_count": 111,
+          "mae_pcs_per_h": 13.259,
+          "rmse_pcs_per_h": 19.573,
+          "pearson_r": 0.2164,
+          "spearman_rho": 0.2476,
+          "r2_score": -0.1729,
+          "r2_interpretable": false
+        },
+        "test_3way_metrics": {
+          "sample_count": 69,
+          "mae_pcs_per_h": 15.401,
+          "rmse_pcs_per_h": 23.878,
+          "pearson_r": 0.4306,
+          "spearman_rho": 0.4943,
+          "r2_score": -0.1234,
+          "r2_interpretable": false
+        },
+        "beats_global_mean_mae": true,
+        "beats_powiat_mean_mae": true,
+        "mae_improvement_vs_global_mean_pcs_per_h": 1.056,
+        "mae_improvement_vs_powiat_mean_pcs_per_h": 0.616
+      },
+      "random_forest_regressor_mae_criterion": {
+        "label": "RandomForestRegressor (criterion='absolute_error')",
+        "test_metrics": {
+          "sample_count": 127,
+          "mae_pcs_per_h": 15.111,
+          "rmse_pcs_per_h": 23.118,
+          "pearson_r": 0.3317,
+          "spearman_rho": 0.3599,
+          "r2_score": -0.0764,
+          "r2_interpretable": false
+        }
+      },
+      "gradient_boosting_regressor_comparison": {
+        "label": "GradientBoostingRegressor (porównawczy boosting drzewiasty)",
+        "train_metrics": {
+          "sample_count": 386,
+          "mae_pcs_per_h": 7.848,
+          "rmse_pcs_per_h": 10.768,
+          "pearson_r": 0.7598,
+          "spearman_rho": 0.7744,
+          "r2_score": 0.5361,
+          "r2_interpretable": true
+        },
+        "test_metrics": {
+          "sample_count": 127,
+          "mae_pcs_per_h": 14.793,
+          "rmse_pcs_per_h": 22.536,
+          "pearson_r": 0.3057,
+          "spearman_rho": 0.35,
+          "r2_score": -0.0228,
+          "r2_interpretable": true
+        }
+      },
+      "hist_gradient_boosting_regressor_comparison": {
+        "label": "HistGradientBoostingRegressor (porównawczy boosting histogramowy)",
+        "test_metrics": {
+          "sample_count": 127,
+          "mae_pcs_per_h": 15.179,
+          "rmse_pcs_per_h": 22.857,
+          "pearson_r": 0.2326,
+          "spearman_rho": 0.2451,
+          "r2_score": -0.0522,
+          "r2_interpretable": false
+        }
+      },
+      "baseline_global_mean": {
+        "label": "Baseline R1: Globalna Średnia Treningowa (16.55 szt./h)",
+        "test_metrics": {
+          "sample_count": 127,
+          "mae_pcs_per_h": 15.726,
+          "rmse_pcs_per_h": 23.746,
+          "pearson_r": 0.0,
+          "spearman_rho": 0.0,
+          "r2_score": -0.1356,
+          "r2_interpretable": false
+        }
+      },
+      "baseline_global_median": {
+        "label": "Baseline R2: Globalna Mediana Treningowa (13.50 szt./h)",
+        "test_metrics": {
+          "sample_count": 127,
+          "mae_pcs_per_h": 16.433,
+          "rmse_pcs_per_h": 24.966,
+          "pearson_r": 0.0,
+          "spearman_rho": 0.0,
+          "r2_score": -0.2553,
+          "r2_interpretable": false
+        }
+      },
+      "baseline_powiat_historical_mean": {
+        "label": "Baseline R3: Średnia Historyczna Powiatu z Treningu",
+        "test_metrics": {
+          "sample_count": 127,
+          "mae_pcs_per_h": 15.286,
+          "rmse_pcs_per_h": 23.348,
+          "pearson_r": 0.2745,
+          "spearman_rho": 0.3156,
+          "r2_score": -0.0979,
+          "r2_interpretable": false
+        }
+      }
+    },
+    "classification_comparison_on_test": {
+      "random_forest_classifier_primary": {
+        "label": "RandomForestClassifier (Pipeline v1.0 — klasyfikacja obfitości)",
+        "train_metrics": {
+          "sample_count": 386,
+          "macro_f1": 0.6597,
+          "weighted_f1": 0.6443,
+          "confusion_matrix": [
+            [
+              77,
+              5,
+              15
+            ],
+            [
+              34,
+              80,
+              68
+            ],
+            [
+              6,
+              5,
+              96
+            ]
+          ],
+          "labels": [
+            "BRAK",
+            "SREDNIO",
+            "WYSYP"
+          ],
+          "per_class": {
+            "BRAK": {
+              "precision": 0.6581,
+              "recall": 0.7938,
+              "f1_score": 0.7196,
+              "support": 97
+            },
+            "SREDNIO": {
+              "precision": 0.8889,
+              "recall": 0.4396,
+              "f1_score": 0.5882,
+              "support": 182
+            },
+            "WYSYP": {
+              "precision": 0.5363,
+              "recall": 0.8972,
+              "f1_score": 0.6713,
+              "support": 107
+            }
+          }
+        },
+        "test_metrics": {
+          "sample_count": 127,
+          "macro_f1": 0.4596,
+          "weighted_f1": 0.4725,
+          "confusion_matrix": [
+            [
+              8,
+              3,
+              4
+            ],
+            [
+              11,
+              30,
+              16
+            ],
+            [
+              4,
+              29,
+              22
+            ]
+          ],
+          "labels": [
+            "BRAK",
+            "SREDNIO",
+            "WYSYP"
+          ],
+          "per_class": {
+            "BRAK": {
+              "precision": 0.3478,
+              "recall": 0.5333,
+              "f1_score": 0.4211,
+              "support": 15
+            },
+            "SREDNIO": {
+              "precision": 0.4839,
+              "recall": 0.5263,
+              "f1_score": 0.5042,
+              "support": 57
+            },
+            "WYSYP": {
+              "precision": 0.5238,
+              "recall": 0.4,
+              "f1_score": 0.4536,
+              "support": 55
+            }
+          }
+        },
+        "beats_majority_class_macro_f1": true,
+        "beats_powiat_majority_macro_f1": true,
+        "macro_f1_improvement_vs_majority": 0.2531,
+        "macro_f1_improvement_vs_powiat_majority": 0.0678
+      },
+      "random_forest_regressor_thresholded": {
+        "label": "RandomForestRegressor -> dyskretyzacja progowa (<5, 5-20, >20 szt./h)",
+        "test_metrics": {
+          "sample_count": 127,
+          "macro_f1": 0.3558,
+          "weighted_f1": 0.4709,
+          "confusion_matrix": [
+            [
+              0,
+              13,
+              2
+            ],
+            [
+              0,
+              37,
+              20
+            ],
+            [
+              0,
+              28,
+              27
+            ]
+          ],
+          "labels": [
+            "BRAK",
+            "SREDNIO",
+            "WYSYP"
+          ],
+          "per_class": {
+            "BRAK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1_score": 0.0,
+              "support": 15
+            },
+            "SREDNIO": {
+              "precision": 0.4744,
+              "recall": 0.6491,
+              "f1_score": 0.5481,
+              "support": 57
+            },
+            "WYSYP": {
+              "precision": 0.551,
+              "recall": 0.4909,
+              "f1_score": 0.5192,
+              "support": 55
+            }
+          }
+        }
+      },
+      "baseline_majority_class": {
+        "label": "Baseline C1: Klasa Dominująca (zawsze SREDNIO)",
+        "test_metrics": {
+          "sample_count": 127,
+          "macro_f1": 0.2065,
+          "weighted_f1": 0.2781,
+          "confusion_matrix": [
+            [
+              0,
+              15,
+              0
+            ],
+            [
+              0,
+              57,
+              0
+            ],
+            [
+              0,
+              55,
+              0
+            ]
+          ],
+          "labels": [
+            "BRAK",
+            "SREDNIO",
+            "WYSYP"
+          ],
+          "per_class": {
+            "BRAK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1_score": 0.0,
+              "support": 15
+            },
+            "SREDNIO": {
+              "precision": 0.4488,
+              "recall": 1.0,
+              "f1_score": 0.6196,
+              "support": 57
+            },
+            "WYSYP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1_score": 0.0,
+              "support": 55
+            }
+          }
+        }
+      },
+      "baseline_powiat_historical_majority": {
+        "label": "Baseline C2: Dominanta Historyczna Powiatu z Treningu",
+        "test_metrics": {
+          "sample_count": 127,
+          "macro_f1": 0.3918,
+          "weighted_f1": 0.3884,
+          "confusion_matrix": [
+            [
+              7,
+              8,
+              0
+            ],
+            [
+              10,
+              45,
+              2
+            ],
+            [
+              2,
+              47,
+              6
+            ]
+          ],
+          "labels": [
+            "BRAK",
+            "SREDNIO",
+            "WYSYP"
+          ],
+          "per_class": {
+            "BRAK": {
+              "precision": 0.3684,
+              "recall": 0.4667,
+              "f1_score": 0.4118,
+              "support": 15
+            },
+            "SREDNIO": {
+              "precision": 0.45,
+              "recall": 0.7895,
+              "f1_score": 0.5732,
+              "support": 57
+            },
+            "WYSYP": {
+              "precision": 0.75,
+              "recall": 0.1091,
+              "f1_score": 0.1905,
+              "support": 55
+            }
+          }
+        }
+      },
+      "baseline_stratified_random": {
+        "label": "Baseline C3: Losowy Stratyfikowany",
+        "test_metrics": {
+          "sample_count": 127,
+          "macro_f1": 0.3272,
+          "weighted_f1": 0.3608,
+          "confusion_matrix": [
+            [
+              5,
+              7,
+              3
+            ],
+            [
+              12,
+              28,
+              17
+            ],
+            [
+              12,
+              30,
+              13
+            ]
+          ],
+          "labels": [
+            "BRAK",
+            "SREDNIO",
+            "WYSYP"
+          ],
+          "per_class": {
+            "BRAK": {
+              "precision": 0.1724,
+              "recall": 0.3333,
+              "f1_score": 0.2273,
+              "support": 15
+            },
+            "SREDNIO": {
+              "precision": 0.4308,
+              "recall": 0.4912,
+              "f1_score": 0.459,
+              "support": 57
+            },
+            "WYSYP": {
+              "precision": 0.3939,
+              "recall": 0.2364,
+              "f1_score": 0.2955,
+              "support": 55
+            }
+          }
+        }
+      }
+    }
+  },
+  "artifacts": {
+    "regression_pipeline_joblib": "models/rf_yield_pipeline.joblib",
+    "classification_pipeline_joblib": "models/rf_abundance_pipeline.joblib",
+    "feature_list_json": "models/feature_list.json",
+    "model_metadata_json": "models/model_metadata.json",
+    "evaluation_report_json": "data/processed/model_evaluation.json",
+    "example_input_json": "models/example_input.json",
+    "example_input_csv": "models/example_input.csv",
+    "example_output_json": "models/example_output.json",
+    "example_output_csv": "models/example_output.csv",
+    "documentation_md": "docs/model_training.md"
+  }
+}

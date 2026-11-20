@@ -48,6 +48,7 @@ data/processed/*
 !data/processed/features.csv
 !data/processed/features_quality_report.json
 !data/processed/eda_summary.json
+!data/processed/model_evaluation.json
 *.shp
 *.shx
 *.dbf
@@ -58,8 +59,15 @@ data/processed/*
 models/*
 !models/.gitkeep
 !models/README.md
+!models/model_metadata.json
+!models/feature_list.json
+!models/example_input.json
+!models/example_input.csv
+!models/example_output.json
+!models/example_output.csv
 *.pkl
 *.joblib
+!models/*.joblib
 
 # Zawsze śledź próbkę demonstracyjną do budowy UI oraz próbkę audytową!
 !data/demo/

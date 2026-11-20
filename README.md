@@ -37,7 +37,17 @@ streamlit run app.py
 ```
 Po uruchomieniu aplikacja jest dostępna w przeglądarce pod adresem **`http://localhost:8501`**.
 
-### Krok 4: Weryfikacja działania (testy dymne)
+### Krok 4: Trening modelu ML i predykcja poza notatnikiem (`[GRZ-14]`)
+Odtworzenie pełnego treningu potoku Random Forest (`models/rf_yield_pipeline.joblib` oraz `models/rf_abundance_pipeline.joblib`) i zapis metadanych:
+```bash
+python scripts/train_model.py
+```
+Wykonanie przykładowej predykcji z gotowego artefaktu bez uruchamiania całego treningu (`models/example_input.json` $\rightarrow$ `models/example_output.json`):
+```bash
+python scripts/predict_example.py
+```
+
+### Krok 5: Weryfikacja działania (testy dymne)
 ```bash
 pytest -v
 ```
@@ -83,8 +93,9 @@ Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w 
 │   ├── features.py                           # Budowa zbioru cech Point-in-Time i słownika kolumn ([GRZ-10])
 │   ├── eda.py                                # Analiza eksploracyjna (EDA), opóźnienia 7/14/21d i wykresy ([GRZ-11])
 │   ├── evaluation.py                         # Protokół ewaluacji, podział czasowy i metryki ([GRZ-13])
-│   └── baseline.py                           # Modele bazowe (GlobalMean, PowiatMean, MajorityClass, Seasonal) ([GRZ-13])
-├── scripts/                                  # Skrypty potoku danych, scrapingu, pogody i GIS/BDL
+│   ├── baseline.py                           # Modele bazowe (GlobalMean, PowiatMean, MajorityClass, Seasonal) ([GRZ-13])
+│   └── model_pipeline.py                     # Kompletny potok scikit-learn (Random Forest, kodowanie, obsługa braków) ([GRZ-14])
+├── scripts/                                  # Skrypty potoku danych, scrapingu, pogody, GIS/BDL i modelowania ML
 │   ├── audit_grzyby_reports.py               # Skrypt audytowy raportów grzyby.pl ([GRZ-03])
 │   ├── fetch_weather_sample.py               # Skrypt pobierania próbki pogody z Open-Meteo z cache'em ([GRZ-04])
 │   ├── prepare_region_and_bdl_sample.py      # Skrypt przygotowania granic 30 powiatów i próbki wektorowej BDL ([GRZ-05])
@@ -93,7 +104,9 @@ Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w 
 │   ├── build_weather_dataset.py              # Budowa historii pogodowej i okien 7/14/21d dla 30 powiatów ([GRZ-09])
 │   ├── build_features_dataset.py             # Łączenie raportów, lasów i pogody w features.parquet Point-in-Time ([GRZ-10])
 │   ├── run_eda_and_lag_analysis.py           # Odtwarzanie EDA, 5 wykresów PNG i notatnika Jupyter ([GRZ-11])
-│   └── build_split_and_baseline.py           # Podział czasowy train/val/test i benchmarki bazowe ([GRZ-13])
+│   ├── evaluate_baseline.py                  # Podział czasowy train/val/test i benchmarki bazowe ([GRZ-13])
+│   ├── train_model.py                        # Trening potoku Random Forest, porównanie z baseline i zapis artefaktów ([GRZ-14])
+│   └── predict_example.py                    # Przykładowa predykcja z gotowego potoku bez uruchamiania treningu ([GRZ-14])
 ├── notebooks/                                # Notatniki Jupyter i analizy eksploracyjne (EDA, Lag Effect)
 │   ├── 01_eda_lag_effect.ipynb               # Notatnik EDA i analizy opóźnienia opad -> zbiory ([GRZ-11])
 │   └── README.md
@@ -114,7 +127,8 @@ Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w 
 │   ├── weather_pipeline.md                   # Dokumentacja potoku pogodowego Open-Meteo dla 30 powiatów ([GRZ-09])
 │   ├── features_engineering.md               # Dokumentacja zbioru cech features.parquet i weryfikacji Point-in-Time ([GRZ-10])
 │   ├── eda_and_lag_analysis.md               # Raport EDA, efektu opóźnienia opad -> zbiory i rekomendacji ML ([GRZ-11])
-│   └── evaluation_protocol.md                # Dokumentacja podziału czasowego i modeli bazowych ([GRZ-13])
+│   ├── evaluation_protocol.md                # Dokumentacja podziału czasowego i modeli bazowych ([GRZ-13])
+│   └── model_training.md                     # Dokumentacja potoku Random Forest, metadanych i predykcji ([GRZ-14])
 └── data/                                     # Katalog danych
     ├── demo/                                 # Próbka demonstracyjna do budowy UI (is_demo = True, 30 powiatów)
     ├── sample/                               # Rzeczywiste próbki audytowe ze Sprintu 1 ([GRZ-03], [GRZ-04], [GRZ-05])
@@ -126,6 +140,7 @@ Aplikacja działa w oparciu o zatwierdzony po audycie kontrakt danych opisany w 
 
 ## 4. Dokumentacja projektu
 
+- [**Pierwszy Model ML (Random Forest) i Kompletny Potok Predykcyjny (`docs/model_training.md`)**](docs/model_training.md) *(`[GRZ-14]`)*
 - [**Eksploracyjna Analiza Danych (EDA) i Opóźnienie Opad → Zbiory (`docs/eda_and_lag_analysis.md`)**](docs/eda_and_lag_analysis.md) *(`[GRZ-11]`)*
 - [**Inżynieria Cech i Zbiór Analityczny Point-in-Time (`docs/features_engineering.md`)**](docs/features_engineering.md) *(`[GRZ-10]`)*
 - [**Protokół Ewaluacji, Podział Czasowy i Modele Bazowe (`docs/evaluation_protocol.md`)**](docs/evaluation_protocol.md) *(`[GRZ-13]`)*

@@ -59,7 +59,7 @@ from src.prediction_service import (
 CUSTOM_CSS = """
 <style>
     .block-container {
-        padding-top: 1.8rem;
+        padding-top: 4rem;
         padding-bottom: 2.5rem;
         max-width: 1380px;
     }

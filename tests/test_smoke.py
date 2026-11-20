@@ -1257,6 +1257,58 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertTrue(saved_report["verification_map_vs_direct_model_live_h2_2025_10_25_borowik"]["all_match"])
         self.assertTrue(saved_report["source_separation_check"]["sources_strictly_separated"])
 
+    def test_heldout_evaluation_and_error_analysis_grz17(self) -> None:
+        """
+        Weryfikuje końcową ocenę modelu i analizę błędów [GRZ-17]:
+        - obecność `data/processed/heldout_error_analysis.json` i `docs/model_evaluation_and_errors.md`,
+        - brak dostrajania do zbioru testowego (`retuned_on_test == False`),
+        - pełne zestawienie wyników modelu z baseline'ami (N=127, 2025-10-13 .. 2025-11-02),
+        - rozbicie błędów po horyzontach (H=1, 2, 3), regionach (30 powiatów) i klasach,
+        - jawną informację o nieskalibrowanym charakterze regresji/indeksu oraz ograniczeniach w UI.
+        """
+        import json
+
+        analysis_path = PROCESSED_DIR / "heldout_error_analysis.json"
+        doc_path = ROOT_DIR / "docs" / "model_evaluation_and_errors.md"
+        app_path = ROOT_DIR / "app.py"
+
+        self.assertTrue(analysis_path.exists(), "Brak heldout_error_analysis.json")
+        self.assertTrue(doc_path.exists(), "Brak docs/model_evaluation_and_errors.md")
+
+        data = json.loads(analysis_path.read_text(encoding="utf-8"))
+        scope = data["evaluation_scope"]
+        self.assertFalse(scope["retuned_on_test"])
+        self.assertEqual(scope["train_count"], 386)
+        self.assertEqual(scope["test_count"], 127)
+        self.assertEqual(scope["test_covered_counties"] + scope["test_uncovered_counties"], 30)
+
+        # Porównanie ogólne z baseline'em
+        ov_reg = data["overall_vs_baseline"]["regression"]
+        self.assertLess(ov_reg["rf_model"]["mae_pcs_per_h"], ov_reg["baseline_powiat_mean"]["mae_pcs_per_h"])
+
+        ov_cls = data["overall_vs_baseline"]["classification"]
+        self.assertGreater(ov_cls["rf_model"]["macro_f1"], ov_cls["baseline_powiat_majority"]["macro_f1"])
+
+        # Analiza po horyzontach H = 1, 2, 3
+        horizons = data["error_by_horizon"]
+        self.assertEqual([h["horizon_days"] for h in horizons], [1, 2, 3])
+        self.assertTrue(horizons[0]["beats_powiat_cls_baseline_f1"])
+        self.assertFalse(horizons[1]["beats_powiat_cls_baseline_f1"])
+
+        # Analiza po regionach (wszystkie 30 powiatów) i najgorsze błędy
+        self.assertEqual(len(data["error_by_region"]), 30)
+        self.assertEqual(len(data["worst_error_cases_top10"]), 10)
+
+        # Jawne zastrzeżenie o nieskalibrowanych prawdopodobieństwach
+        cal = data["calibration_and_uncertainty_notes"]
+        self.assertFalse(cal["raw_regression_is_calibrated_probability"])
+        self.assertFalse(cal["confidence_score_is_calibrated_probability"])
+
+        # Weryfikacja komunikatu uczciwości w aplikacji Streamlit
+        app_text = app_path.read_text(encoding="utf-8")
+        self.assertIn("skalibrowanego prawdopodobieństwa", app_text)
+        self.assertIn("N = 127", app_text)
+
 
 if __name__ == "__main__":
     unittest.main()

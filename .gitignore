@@ -51,6 +51,7 @@ data/processed/*
 !data/processed/model_evaluation.json
 !data/processed/predictions.csv
 !data/processed/predictions_verification_report.json
+!data/processed/heldout_error_analysis.json
 *.shp
 *.shx
 *.dbf

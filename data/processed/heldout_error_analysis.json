@@ -1,0 +1,785 @@
+{
+  "task_id": "GRZ-17",
+  "evaluation_scope": {
+    "model_version": "rf_pipeline_v1.0",
+    "train_period": "2025-09-01 .. 2025-10-12",
+    "train_count": 386,
+    "test_period": "2025-10-13 .. 2025-11-02",
+    "test_count": 127,
+    "test_covered_counties": 21,
+    "test_uncovered_counties": 9,
+    "retuned_on_test": false
+  },
+  "overall_vs_baseline": {
+    "regression": {
+      "baseline_global_mean": {
+        "sample_count": 127,
+        "mae_pcs_per_h": 15.726,
+        "rmse_pcs_per_h": 23.746,
+        "pearson_r": 0.0,
+        "spearman_rho": 0.0,
+        "r2_score": -0.1356,
+        "r2_interpretable": false
+      },
+      "baseline_powiat_mean": {
+        "sample_count": 127,
+        "mae_pcs_per_h": 15.286,
+        "rmse_pcs_per_h": 23.348,
+        "pearson_r": 0.2745,
+        "spearman_rho": 0.3156,
+        "r2_score": -0.0979,
+        "r2_interpretable": false
+      },
+      "rf_model": {
+        "sample_count": 127,
+        "mae_pcs_per_h": 14.669,
+        "rmse_pcs_per_h": 22.292,
+        "pearson_r": 0.3349,
+        "spearman_rho": 0.3662,
+        "r2_score": -0.0008,
+        "r2_interpretable": true
+      }
+    },
+    "classification": {
+      "baseline_majority_class": {
+        "sample_count": 127,
+        "macro_f1": 0.2065,
+        "weighted_f1": 0.2781,
+        "confusion_matrix": [
+          [
+            0,
+            15,
+            0
+          ],
+          [
+            0,
+            57,
+            0
+          ],
+          [
+            0,
+            55,
+            0
+          ]
+        ],
+        "labels": [
+          "BRAK",
+          "SREDNIO",
+          "WYSYP"
+        ],
+        "per_class": {
+          "BRAK": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0.0,
+            "support": 15
+          },
+          "SREDNIO": {
+            "precision": 0.4488,
+            "recall": 1.0,
+            "f1_score": 0.6196,
+            "support": 57
+          },
+          "WYSYP": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0.0,
+            "support": 55
+          }
+        }
+      },
+      "baseline_powiat_majority": {
+        "sample_count": 127,
+        "macro_f1": 0.3918,
+        "weighted_f1": 0.3884,
+        "confusion_matrix": [
+          [
+            7,
+            8,
+            0
+          ],
+          [
+            10,
+            45,
+            2
+          ],
+          [
+            2,
+            47,
+            6
+          ]
+        ],
+        "labels": [
+          "BRAK",
+          "SREDNIO",
+          "WYSYP"
+        ],
+        "per_class": {
+          "BRAK": {
+            "precision": 0.3684,
+            "recall": 0.4667,
+            "f1_score": 0.4118,
+            "support": 15
+          },
+          "SREDNIO": {
+            "precision": 0.45,
+            "recall": 0.7895,
+            "f1_score": 0.5732,
+            "support": 57
+          },
+          "WYSYP": {
+            "precision": 0.75,
+            "recall": 0.1091,
+            "f1_score": 0.1905,
+            "support": 55
+          }
+        }
+      },
+      "rf_model": {
+        "sample_count": 127,
+        "macro_f1": 0.4518,
+        "weighted_f1": 0.4655,
+        "confusion_matrix": [
+          [
+            8,
+            3,
+            4
+          ],
+          [
+            12,
+            29,
+            16
+          ],
+          [
+            4,
+            29,
+            22
+          ]
+        ],
+        "labels": [
+          "BRAK",
+          "SREDNIO",
+          "WYSYP"
+        ],
+        "per_class": {
+          "BRAK": {
+            "precision": 0.3333,
+            "recall": 0.5333,
+            "f1_score": 0.4103,
+            "support": 15
+          },
+          "SREDNIO": {
+            "precision": 0.4754,
+            "recall": 0.5088,
+            "f1_score": 0.4915,
+            "support": 57
+          },
+          "WYSYP": {
+            "precision": 0.5238,
+            "recall": 0.4,
+            "f1_score": 0.4536,
+            "support": 55
+          }
+        }
+      }
+    }
+  },
+  "error_by_horizon": [
+    {
+      "horizon_days": 1,
+      "count": 127,
+      "mae_pcs_per_h": 14.669,
+      "rmse_pcs_per_h": 22.292,
+      "spearman_rho": 0.3662,
+      "macro_f1": 0.4518,
+      "weighted_f1": 0.4655,
+      "beats_powiat_reg_baseline_mae": true,
+      "beats_powiat_cls_baseline_f1": true
+    },
+    {
+      "horizon_days": 2,
+      "count": 127,
+      "mae_pcs_per_h": 14.707,
+      "rmse_pcs_per_h": 22.222,
+      "spearman_rho": 0.3567,
+      "macro_f1": 0.3686,
+      "weighted_f1": 0.4109,
+      "beats_powiat_reg_baseline_mae": true,
+      "beats_powiat_cls_baseline_f1": false
+    },
+    {
+      "horizon_days": 3,
+      "count": 127,
+      "mae_pcs_per_h": 15.161,
+      "rmse_pcs_per_h": 22.541,
+      "spearman_rho": 0.2993,
+      "macro_f1": 0.3809,
+      "weighted_f1": 0.3928,
+      "beats_powiat_reg_baseline_mae": true,
+      "beats_powiat_cls_baseline_f1": false
+    }
+  ],
+  "error_by_region": [
+    {
+      "region_id": "0201",
+      "region_name": "powiat bolesławiecki",
+      "train_count": 85,
+      "test_count": 16,
+      "mae_pcs_per_h": 13.778,
+      "rmse_pcs_per_h": 19.864,
+      "mean_true_pcs_per_h": 24.5,
+      "mean_pred_pcs_per_h": 21.08,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0202",
+      "region_name": "powiat dzierżoniowski",
+      "train_count": 13,
+      "test_count": 6,
+      "mae_pcs_per_h": 6.021,
+      "rmse_pcs_per_h": 6.34,
+      "mean_true_pcs_per_h": 6.17,
+      "mean_pred_pcs_per_h": 10.79,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0203",
+      "region_name": "powiat głogowski",
+      "train_count": 5,
+      "test_count": 0,
+      "mae_pcs_per_h": null,
+      "rmse_pcs_per_h": null,
+      "mean_true_pcs_per_h": null,
+      "mean_pred_pcs_per_h": null,
+      "coverage_status": "BRAK_OBSERWACJI_W_TESCIE"
+    },
+    {
+      "region_id": "0204",
+      "region_name": "powiat górowski",
+      "train_count": 9,
+      "test_count": 3,
+      "mae_pcs_per_h": 10.894,
+      "rmse_pcs_per_h": 15.31,
+      "mean_true_pcs_per_h": 29.67,
+      "mean_pred_pcs_per_h": 23.38,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0205",
+      "region_name": "powiat jaworski",
+      "train_count": 10,
+      "test_count": 3,
+      "mae_pcs_per_h": 15.262,
+      "rmse_pcs_per_h": 16.954,
+      "mean_true_pcs_per_h": 30.0,
+      "mean_pred_pcs_per_h": 27.29,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0206",
+      "region_name": "powiat karkonoski",
+      "train_count": 13,
+      "test_count": 5,
+      "mae_pcs_per_h": 12.149,
+      "rmse_pcs_per_h": 16.506,
+      "mean_true_pcs_per_h": 38.0,
+      "mean_pred_pcs_per_h": 29.15,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0207",
+      "region_name": "powiat kamiennogórski",
+      "train_count": 6,
+      "test_count": 3,
+      "mae_pcs_per_h": 10.057,
+      "rmse_pcs_per_h": 11.634,
+      "mean_true_pcs_per_h": 5.17,
+      "mean_pred_pcs_per_h": 13.14,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0208",
+      "region_name": "powiat kłodzki",
+      "train_count": 23,
+      "test_count": 1,
+      "mae_pcs_per_h": 9.781,
+      "rmse_pcs_per_h": 9.781,
+      "mean_true_pcs_per_h": 20.0,
+      "mean_pred_pcs_per_h": 10.22,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0209",
+      "region_name": "powiat legnicki",
+      "train_count": 6,
+      "test_count": 0,
+      "mae_pcs_per_h": null,
+      "rmse_pcs_per_h": null,
+      "mean_true_pcs_per_h": null,
+      "mean_pred_pcs_per_h": null,
+      "coverage_status": "BRAK_OBSERWACJI_W_TESCIE"
+    },
+    {
+      "region_id": "0210",
+      "region_name": "powiat lubański",
+      "train_count": 6,
+      "test_count": 1,
+      "mae_pcs_per_h": 38.82,
+      "rmse_pcs_per_h": 38.82,
+      "mean_true_pcs_per_h": 60.0,
+      "mean_pred_pcs_per_h": 21.18,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0211",
+      "region_name": "powiat lubiński",
+      "train_count": 7,
+      "test_count": 1,
+      "mae_pcs_per_h": 10.474,
+      "rmse_pcs_per_h": 10.474,
+      "mean_true_pcs_per_h": 0.0,
+      "mean_pred_pcs_per_h": 10.47,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0212",
+      "region_name": "powiat lwówecki",
+      "train_count": 0,
+      "test_count": 1,
+      "mae_pcs_per_h": 0.455,
+      "rmse_pcs_per_h": 0.455,
+      "mean_true_pcs_per_h": 20.0,
+      "mean_pred_pcs_per_h": 20.46,
+      "coverage_status": "TYLKO_W_TESCIE"
+    },
+    {
+      "region_id": "0213",
+      "region_name": "powiat milicki",
+      "train_count": 33,
+      "test_count": 25,
+      "mae_pcs_per_h": 27.209,
+      "rmse_pcs_per_h": 39.064,
+      "mean_true_pcs_per_h": 38.68,
+      "mean_pred_pcs_per_h": 20.37,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0214",
+      "region_name": "powiat oleśnicki",
+      "train_count": 39,
+      "test_count": 20,
+      "mae_pcs_per_h": 12.293,
+      "rmse_pcs_per_h": 15.095,
+      "mean_true_pcs_per_h": 20.7,
+      "mean_pred_pcs_per_h": 13.87,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0215",
+      "region_name": "powiat oławski",
+      "train_count": 6,
+      "test_count": 9,
+      "mae_pcs_per_h": 6.871,
+      "rmse_pcs_per_h": 7.565,
+      "mean_true_pcs_per_h": 20.56,
+      "mean_pred_pcs_per_h": 22.86,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0216",
+      "region_name": "powiat polkowicki",
+      "train_count": 12,
+      "test_count": 3,
+      "mae_pcs_per_h": 11.292,
+      "rmse_pcs_per_h": 17.619,
+      "mean_true_pcs_per_h": 33.33,
+      "mean_pred_pcs_per_h": 22.04,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0217",
+      "region_name": "powiat strzeliński",
+      "train_count": 0,
+      "test_count": 0,
+      "mae_pcs_per_h": null,
+      "rmse_pcs_per_h": null,
+      "mean_true_pcs_per_h": null,
+      "mean_pred_pcs_per_h": null,
+      "coverage_status": "BRAK_OBSERWACJI_W_TESCIE"
+    },
+    {
+      "region_id": "0218",
+      "region_name": "powiat średzki",
+      "train_count": 13,
+      "test_count": 4,
+      "mae_pcs_per_h": 12.795,
+      "rmse_pcs_per_h": 14.848,
+      "mean_true_pcs_per_h": 24.5,
+      "mean_pred_pcs_per_h": 12.89,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0219",
+      "region_name": "powiat świdnicki",
+      "train_count": 11,
+      "test_count": 3,
+      "mae_pcs_per_h": 13.044,
+      "rmse_pcs_per_h": 14.039,
+      "mean_true_pcs_per_h": 10.33,
+      "mean_pred_pcs_per_h": 9.79,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0220",
+      "region_name": "powiat trzebnicki",
+      "train_count": 28,
+      "test_count": 10,
+      "mae_pcs_per_h": 10.583,
+      "rmse_pcs_per_h": 14.247,
+      "mean_true_pcs_per_h": 16.1,
+      "mean_pred_pcs_per_h": 12.97,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0221",
+      "region_name": "powiat wałbrzyski",
+      "train_count": 10,
+      "test_count": 3,
+      "mae_pcs_per_h": 5.446,
+      "rmse_pcs_per_h": 6.456,
+      "mean_true_pcs_per_h": 10.0,
+      "mean_pred_pcs_per_h": 10.3,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0222",
+      "region_name": "powiat wołowski",
+      "train_count": 12,
+      "test_count": 7,
+      "mae_pcs_per_h": 16.662,
+      "rmse_pcs_per_h": 22.217,
+      "mean_true_pcs_per_h": 27.86,
+      "mean_pred_pcs_per_h": 11.2,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0223",
+      "region_name": "powiat wrocławski",
+      "train_count": 14,
+      "test_count": 2,
+      "mae_pcs_per_h": 11.15,
+      "rmse_pcs_per_h": 11.303,
+      "mean_true_pcs_per_h": 15.0,
+      "mean_pred_pcs_per_h": 13.15,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0224",
+      "region_name": "powiat ząbkowicki",
+      "train_count": 2,
+      "test_count": 0,
+      "mae_pcs_per_h": null,
+      "rmse_pcs_per_h": null,
+      "mean_true_pcs_per_h": null,
+      "mean_pred_pcs_per_h": null,
+      "coverage_status": "BRAK_OBSERWACJI_W_TESCIE"
+    },
+    {
+      "region_id": "0225",
+      "region_name": "powiat zgorzelecki",
+      "train_count": 5,
+      "test_count": 0,
+      "mae_pcs_per_h": null,
+      "rmse_pcs_per_h": null,
+      "mean_true_pcs_per_h": null,
+      "mean_pred_pcs_per_h": null,
+      "coverage_status": "BRAK_OBSERWACJI_W_TESCIE"
+    },
+    {
+      "region_id": "0226",
+      "region_name": "powiat złotoryjski",
+      "train_count": 3,
+      "test_count": 0,
+      "mae_pcs_per_h": null,
+      "rmse_pcs_per_h": null,
+      "mean_true_pcs_per_h": null,
+      "mean_pred_pcs_per_h": null,
+      "coverage_status": "BRAK_OBSERWACJI_W_TESCIE"
+    },
+    {
+      "region_id": "0261",
+      "region_name": "powiat m. Jelenia Góra",
+      "train_count": 6,
+      "test_count": 0,
+      "mae_pcs_per_h": null,
+      "rmse_pcs_per_h": null,
+      "mean_true_pcs_per_h": null,
+      "mean_pred_pcs_per_h": null,
+      "coverage_status": "BRAK_OBSERWACJI_W_TESCIE"
+    },
+    {
+      "region_id": "0262",
+      "region_name": "powiat m. Legnica",
+      "train_count": 0,
+      "test_count": 0,
+      "mae_pcs_per_h": null,
+      "rmse_pcs_per_h": null,
+      "mean_true_pcs_per_h": null,
+      "mean_pred_pcs_per_h": null,
+      "coverage_status": "BRAK_OBSERWACJI_W_TESCIE"
+    },
+    {
+      "region_id": "0264",
+      "region_name": "powiat m. Wrocław",
+      "train_count": 6,
+      "test_count": 1,
+      "mae_pcs_per_h": 4.191,
+      "rmse_pcs_per_h": 4.191,
+      "mean_true_pcs_per_h": 20.0,
+      "mean_pred_pcs_per_h": 15.81,
+      "coverage_status": "POKRYTY"
+    },
+    {
+      "region_id": "0265",
+      "region_name": "powiat m. Wałbrzych",
+      "train_count": 3,
+      "test_count": 0,
+      "mae_pcs_per_h": null,
+      "rmse_pcs_per_h": null,
+      "mean_true_pcs_per_h": null,
+      "mean_pred_pcs_per_h": null,
+      "coverage_status": "BRAK_OBSERWACJI_W_TESCIE"
+    }
+  ],
+  "error_by_true_class": [
+    {
+      "group": "BRAK",
+      "count": 15,
+      "mae_pcs_per_h": 12.37,
+      "rmse_pcs_per_h": 13.206,
+      "mean_true_pcs_per_h": 1.77,
+      "mean_pred_pcs_per_h": 14.14,
+      "bias_pred_minus_true": 12.37
+    },
+    {
+      "group": "SREDNIO",
+      "count": 57,
+      "mae_pcs_per_h": 6.193,
+      "rmse_pcs_per_h": 7.528,
+      "mean_true_pcs_per_h": 13.04,
+      "mean_pred_pcs_per_h": 16.79,
+      "bias_pred_minus_true": 3.76
+    },
+    {
+      "group": "WYSYP",
+      "count": 55,
+      "mae_pcs_per_h": 24.079,
+      "rmse_pcs_per_h": 32.267,
+      "mean_true_pcs_per_h": 43.18,
+      "mean_pred_pcs_per_h": 19.14,
+      "bias_pred_minus_true": -24.04
+    }
+  ],
+  "error_by_bdl_availability": [
+    {
+      "group": "False",
+      "count": 13,
+      "mae_pcs_per_h": 12.011,
+      "rmse_pcs_per_h": 14.466,
+      "mean_true_pcs_per_h": 25.15,
+      "mean_pred_pcs_per_h": 18.9,
+      "bias_pred_minus_true": -6.26
+    },
+    {
+      "group": "True",
+      "count": 114,
+      "mae_pcs_per_h": 14.972,
+      "rmse_pcs_per_h": 23.016,
+      "mean_true_pcs_per_h": 24.71,
+      "mean_pred_pcs_per_h": 17.34,
+      "bias_pred_minus_true": -7.38
+    }
+  ],
+  "error_by_spatial_precision": [
+    {
+      "group": "county_aggregate",
+      "count": 9,
+      "mae_pcs_per_h": 7.988,
+      "rmse_pcs_per_h": 9.844,
+      "mean_true_pcs_per_h": 7.33,
+      "mean_pred_pcs_per_h": 15.32,
+      "bias_pred_minus_true": 7.99
+    },
+    {
+      "group": "point_precise",
+      "count": 118,
+      "mae_pcs_per_h": 15.178,
+      "rmse_pcs_per_h": 22.966,
+      "mean_true_pcs_per_h": 26.09,
+      "mean_pred_pcs_per_h": 17.66,
+      "bias_pred_minus_true": -8.43
+    }
+  ],
+  "error_by_weekend": [
+    {
+      "group": "False",
+      "count": 53,
+      "mae_pcs_per_h": 12.725,
+      "rmse_pcs_per_h": 16.598,
+      "mean_true_pcs_per_h": 20.92,
+      "mean_pred_pcs_per_h": 17.06,
+      "bias_pred_minus_true": -3.87
+    },
+    {
+      "group": "True",
+      "count": 74,
+      "mae_pcs_per_h": 16.061,
+      "rmse_pcs_per_h": 25.603,
+      "mean_true_pcs_per_h": 27.51,
+      "mean_pred_pcs_per_h": 17.81,
+      "bias_pred_minus_true": -9.7
+    }
+  ],
+  "worst_error_cases_top10": [
+    {
+      "report_id": "DG176065",
+      "region_id": "0213",
+      "region_name": "powiat milicki",
+      "target_date": "2025-10-18",
+      "true_yield_pcs_per_h": 100.0,
+      "pred_yield_pcs_per_h": 17.93,
+      "abs_error_pcs_per_h": 82.07,
+      "true_class": "WYSYP",
+      "pred_class": "WYSYP",
+      "spatial_precision": "point_precise",
+      "is_weekend": true
+    },
+    {
+      "report_id": "DG176742",
+      "region_id": "0213",
+      "region_name": "powiat milicki",
+      "target_date": "2025-10-26",
+      "true_yield_pcs_per_h": 100.0,
+      "pred_yield_pcs_per_h": 17.96,
+      "abs_error_pcs_per_h": 82.04,
+      "true_class": "WYSYP",
+      "pred_class": "SREDNIO",
+      "spatial_precision": "point_precise",
+      "is_weekend": true
+    },
+    {
+      "report_id": "DG176193",
+      "region_id": "0213",
+      "region_name": "powiat milicki",
+      "target_date": "2025-10-19",
+      "true_yield_pcs_per_h": 100.0,
+      "pred_yield_pcs_per_h": 20.03,
+      "abs_error_pcs_per_h": 79.97,
+      "true_class": "WYSYP",
+      "pred_class": "SREDNIO",
+      "spatial_precision": "point_precise",
+      "is_weekend": true
+    },
+    {
+      "report_id": "DG177137",
+      "region_id": "0213",
+      "region_name": "powiat milicki",
+      "target_date": "2025-11-02",
+      "true_yield_pcs_per_h": 100.0,
+      "pred_yield_pcs_per_h": 21.86,
+      "abs_error_pcs_per_h": 78.14,
+      "true_class": "WYSYP",
+      "pred_class": "SREDNIO",
+      "spatial_precision": "point_precise",
+      "is_weekend": true
+    },
+    {
+      "report_id": "DG176595",
+      "region_id": "0213",
+      "region_name": "powiat milicki",
+      "target_date": "2025-10-25",
+      "true_yield_pcs_per_h": 100.0,
+      "pred_yield_pcs_per_h": 21.95,
+      "abs_error_pcs_per_h": 78.05,
+      "true_class": "WYSYP",
+      "pred_class": "SREDNIO",
+      "spatial_precision": "point_precise",
+      "is_weekend": true
+    },
+    {
+      "report_id": "DG177253",
+      "region_id": "0201",
+      "region_name": "powiat bolesławiecki",
+      "target_date": "2025-11-01",
+      "true_yield_pcs_per_h": 80.0,
+      "pred_yield_pcs_per_h": 28.77,
+      "abs_error_pcs_per_h": 51.23,
+      "true_class": "WYSYP",
+      "pred_class": "WYSYP",
+      "spatial_precision": "point_precise",
+      "is_weekend": true
+    },
+    {
+      "report_id": "DG175989",
+      "region_id": "0222",
+      "region_name": "powiat wołowski",
+      "target_date": "2025-10-16",
+      "true_yield_pcs_per_h": 60.0,
+      "pred_yield_pcs_per_h": 10.8,
+      "abs_error_pcs_per_h": 49.2,
+      "true_class": "WYSYP",
+      "pred_class": "SREDNIO",
+      "spatial_precision": "point_precise",
+      "is_weekend": false
+    },
+    {
+      "report_id": "DG177082",
+      "region_id": "0213",
+      "region_name": "powiat milicki",
+      "target_date": "2025-11-01",
+      "true_yield_pcs_per_h": 70.0,
+      "pred_yield_pcs_per_h": 22.33,
+      "abs_error_pcs_per_h": 47.67,
+      "true_class": "WYSYP",
+      "pred_class": "SREDNIO",
+      "spatial_precision": "point_precise",
+      "is_weekend": true
+    },
+    {
+      "report_id": "DG176080",
+      "region_id": "0201",
+      "region_name": "powiat bolesławiecki",
+      "target_date": "2025-10-18",
+      "true_yield_pcs_per_h": 60.0,
+      "pred_yield_pcs_per_h": 21.1,
+      "abs_error_pcs_per_h": 38.9,
+      "true_class": "WYSYP",
+      "pred_class": "WYSYP",
+      "spatial_precision": "point_precise",
+      "is_weekend": true
+    },
+    {
+      "report_id": "DG175673",
+      "region_id": "0210",
+      "region_name": "powiat lubański",
+      "target_date": "2025-10-13",
+      "true_yield_pcs_per_h": 60.0,
+      "pred_yield_pcs_per_h": 21.18,
+      "abs_error_pcs_per_h": 38.82,
+      "true_class": "WYSYP",
+      "pred_class": "WYSYP",
+      "spatial_precision": "point_precise",
+      "is_weekend": false
+    }
+  ],
+  "calibration_and_uncertainty_notes": {
+    "brier_score_per_class_uncalibrated": {
+      "BRAK": 0.1116,
+      "SREDNIO": 0.2558,
+      "WYSYP": 0.2367
+    },
+    "raw_regression_is_calibrated_probability": false,
+    "confidence_score_is_calibrated_probability": false,
+    "explanation": "Zarówno wynik regresji (predicted_yield_pcs_per_h [szt./h]), jak i heurystyczny wskaźnik pewności/dopasowania siedliska (confidence_score 0.0-1.0) czy surowe udziały głosów drzew (predict_proba) NIE są skalibrowanym prawdopodobieństwem zdarzenia."
+  }
+}

@@ -1554,6 +1554,14 @@ def render_forecast_map_view(
                 f"- **Wynik testowy regresji:** MAE = **`{reg_m['mae_pcs_per_h']} szt./h`**, RMSE = `{reg_m['rmse_pcs_per_h']} szt./h`, Spearman $\\rho$ = **`{reg_m['spearman_rho']:+.4f}`**\n"
                 f"- **Wynik testowy klasyfikacji:** Macro-F1 = **`{clf_m['macro_f1']:.4f}`**, Weighted-F1 = `{clf_m['weighted_f1']:.4f}`"
             )
+            st.info(
+                "**Zakres zaufania i ograniczenia modelu (`[GRZ-17]`):** "
+                "Ocena pochodzi z niewielkiej próby testowej (**N = 127**, **21/30** powiatów; dla 9 powiatów brak danych testowych). "
+                "Klasyfikator pokonuje baseline powiatowy (`0.3918`) wyłącznie dla horyzontu **H = 1 dzień** (`0.4518`), "
+                "natomiast dla **H = 2–3 dni** spada poniżej baseline'u (`0.369–0.381`), a skrajne wysypy (`> 40 szt./h`) są zaniżane. "
+                "Wskaźnik `Pewność` (`confidence_score`) i głosy klas są miarą heurystyczną / nieskalibrowanym wynikiem — "
+                "nie stanowią skalibrowanego prawdopodobieństwa znalezienia grzybów."
+            )
 
 
 def main() -> None:

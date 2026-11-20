@@ -90,11 +90,15 @@ def _normalize_area_id(raw_id: Any) -> str:
     return text.zfill(4) if text else ""
 
 
-def resolve_environment_paths(requested_mode: str = "demo") -> tuple[str, bool, dict[str, Path]]:
+def resolve_environment_paths(
+    requested_mode: str = "demo",
+    processed_dir: Path | None = None,
+) -> tuple[str, bool, dict[str, Path]]:
     """
     Zwraca faktyczny tryb ('demo' lub 'prod'), flagę fallbacku oraz słownik ścieżek
     do 4 plików kontraktu danych (`areas`, `reports`, `weather`, `predictions`).
     """
+    target_processed_dir = processed_dir or PROCESSED_DIR
     demo_paths = {
         "areas": DEMO_DIR / "areas_demo.geojson",
         "reports": DEMO_DIR / "reports_demo.csv",
@@ -102,10 +106,10 @@ def resolve_environment_paths(requested_mode: str = "demo") -> tuple[str, bool, 
         "predictions": DEMO_DIR / "predictions_demo.csv",
     }
     prod_paths = {
-        "areas": PROCESSED_DIR / "areas.geojson",
-        "reports": PROCESSED_DIR / "reports.csv",
-        "weather": PROCESSED_DIR / "weather.csv",
-        "predictions": PROCESSED_DIR / "predictions.csv",
+        "areas": target_processed_dir / "areas.geojson",
+        "reports": target_processed_dir / "reports.csv",
+        "weather": target_processed_dir / "weather.csv",
+        "predictions": target_processed_dir / "predictions.csv",
     }
 
     if requested_mode == "prod":
@@ -242,9 +246,14 @@ def load_weather_csv(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def load_dataset_bundle(requested_mode: str = "demo") -> DatasetBundle:
+def load_dataset_bundle(
+    requested_mode: str = "demo",
+    processed_dir: Path | None = None,
+) -> DatasetBundle:
     """Wczytuje pełny pakiet danych dla wybranego trybu ('demo' lub 'prod')."""
-    actual_mode, is_fallback, paths = resolve_environment_paths(requested_mode)
+    actual_mode, is_fallback, paths = resolve_environment_paths(
+        requested_mode, processed_dir=processed_dir
+    )
     areas_geojson, areas_by_id = load_areas_geojson(paths["areas"])
     predictions = load_predictions_csv(paths["predictions"])
     reports = load_reports_csv(paths["reports"])

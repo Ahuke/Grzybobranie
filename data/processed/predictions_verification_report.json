@@ -1,0 +1,271 @@
+{
+  "task": "[GRZ-16] Połączyć model z mapą prognoz",
+  "predictions_csv_path": "data/processed/predictions.csv",
+  "predictions_summary": {
+    "total_rows": 4500,
+    "date_min": "2025-10-13",
+    "date_max": "2025-11-06",
+    "unique_dates_count": 25,
+    "unique_areas_count": 30,
+    "species_filters": [
+      "all",
+      "borowik_szlachetny",
+      "kania",
+      "kurka",
+      "maslak_zwyczajny",
+      "podgrzybek_brunatny"
+    ],
+    "model_version": "rf_pipeline_v1.0",
+    "target_unit": "szt./h",
+    "is_demo_any": false,
+    "yield_min_pcs_per_h": 4.0,
+    "yield_mean_pcs_per_h": 18.19,
+    "yield_max_pcs_per_h": 44.74,
+    "abundance_class_counts": {
+      "SREDNIO": 2721,
+      "WYSYP": 1771,
+      "BRAK": 8
+    }
+  },
+  "verification_map_vs_direct_model_precomputed_2025_10_19_all": {
+    "target_date": "2025-10-19",
+    "issued_at": "2025-10-18",
+    "horizon_days": 1,
+    "species_filter": "all",
+    "model_version": "rf_pipeline_v1.0",
+    "checked_counties_count": 6,
+    "all_match": true,
+    "checks": [
+      {
+        "area_id": "0201",
+        "area_name": "powiat bolesławiecki",
+        "history_completeness": "COMPLETE",
+        "has_bdl_stand_data": true,
+        "map_yield_pcs_per_h": 17.3,
+        "direct_model_yield_pcs_per_h": 17.3,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "SREDNIO",
+        "direct_abundance_class": "SREDNIO",
+        "direct_classifier_class": "SREDNIO",
+        "matches_1_to_1": true
+      },
+      {
+        "area_id": "0206",
+        "area_name": "powiat karkonoski",
+        "history_completeness": "COMPLETE",
+        "has_bdl_stand_data": true,
+        "map_yield_pcs_per_h": 22.96,
+        "direct_model_yield_pcs_per_h": 22.96,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "WYSYP",
+        "direct_abundance_class": "WYSYP",
+        "direct_classifier_class": "WYSYP",
+        "matches_1_to_1": true
+      },
+      {
+        "area_id": "0208",
+        "area_name": "powiat kłodzki",
+        "history_completeness": "COMPLETE",
+        "has_bdl_stand_data": true,
+        "map_yield_pcs_per_h": 9.48,
+        "direct_model_yield_pcs_per_h": 9.48,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "SREDNIO",
+        "direct_abundance_class": "SREDNIO",
+        "direct_classifier_class": "BRAK",
+        "matches_1_to_1": true
+      },
+      {
+        "area_id": "0213",
+        "area_name": "powiat milicki",
+        "history_completeness": "COMPLETE",
+        "has_bdl_stand_data": true,
+        "map_yield_pcs_per_h": 20.03,
+        "direct_model_yield_pcs_per_h": 20.03,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "WYSYP",
+        "direct_abundance_class": "WYSYP",
+        "direct_classifier_class": "SREDNIO",
+        "matches_1_to_1": true
+      },
+      {
+        "area_id": "0218",
+        "area_name": "powiat średzki",
+        "history_completeness": "COMPLETE_WEATHER_NO_BDL_STAND",
+        "has_bdl_stand_data": false,
+        "map_yield_pcs_per_h": 12.76,
+        "direct_model_yield_pcs_per_h": 12.76,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "SREDNIO",
+        "direct_abundance_class": "SREDNIO",
+        "direct_classifier_class": "SREDNIO",
+        "matches_1_to_1": true
+      },
+      {
+        "area_id": "0217",
+        "area_name": "powiat strzeliński",
+        "history_completeness": "COMPLETE_WEATHER_NO_BDL_STAND",
+        "has_bdl_stand_data": false,
+        "map_yield_pcs_per_h": 19.63,
+        "direct_model_yield_pcs_per_h": 19.63,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "SREDNIO",
+        "direct_abundance_class": "SREDNIO",
+        "direct_classifier_class": "WYSYP",
+        "matches_1_to_1": true
+      }
+    ]
+  },
+  "verification_map_vs_direct_model_live_h2_2025_10_25_borowik": {
+    "target_date": "2025-10-25",
+    "issued_at": "2025-10-23",
+    "horizon_days": 2,
+    "species_filter": "borowik_szlachetny",
+    "model_version": "rf_pipeline_v1.0",
+    "checked_counties_count": 6,
+    "all_match": true,
+    "checks": [
+      {
+        "area_id": "0201",
+        "area_name": "powiat bolesławiecki",
+        "history_completeness": "COMPLETE",
+        "has_bdl_stand_data": true,
+        "map_yield_pcs_per_h": 16.65,
+        "direct_model_yield_pcs_per_h": 16.65,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "SREDNIO",
+        "direct_abundance_class": "SREDNIO",
+        "direct_classifier_class": "SREDNIO",
+        "matches_1_to_1": true
+      },
+      {
+        "area_id": "0206",
+        "area_name": "powiat karkonoski",
+        "history_completeness": "COMPLETE",
+        "has_bdl_stand_data": true,
+        "map_yield_pcs_per_h": 35.11,
+        "direct_model_yield_pcs_per_h": 35.11,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "WYSYP",
+        "direct_abundance_class": "WYSYP",
+        "direct_classifier_class": "WYSYP",
+        "matches_1_to_1": true
+      },
+      {
+        "area_id": "0208",
+        "area_name": "powiat kłodzki",
+        "history_completeness": "COMPLETE",
+        "has_bdl_stand_data": true,
+        "map_yield_pcs_per_h": 27.54,
+        "direct_model_yield_pcs_per_h": 27.54,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "WYSYP",
+        "direct_abundance_class": "WYSYP",
+        "direct_classifier_class": "WYSYP",
+        "matches_1_to_1": true
+      },
+      {
+        "area_id": "0213",
+        "area_name": "powiat milicki",
+        "history_completeness": "COMPLETE",
+        "has_bdl_stand_data": true,
+        "map_yield_pcs_per_h": 17.29,
+        "direct_model_yield_pcs_per_h": 17.29,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "SREDNIO",
+        "direct_abundance_class": "SREDNIO",
+        "direct_classifier_class": "SREDNIO",
+        "matches_1_to_1": true
+      },
+      {
+        "area_id": "0218",
+        "area_name": "powiat średzki",
+        "history_completeness": "COMPLETE_WEATHER_NO_BDL_STAND",
+        "has_bdl_stand_data": false,
+        "map_yield_pcs_per_h": 12.75,
+        "direct_model_yield_pcs_per_h": 12.75,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "SREDNIO",
+        "direct_abundance_class": "SREDNIO",
+        "direct_classifier_class": "SREDNIO",
+        "matches_1_to_1": true
+      },
+      {
+        "area_id": "0217",
+        "area_name": "powiat strzeliński",
+        "history_completeness": "COMPLETE_WEATHER_NO_BDL_STAND",
+        "has_bdl_stand_data": false,
+        "map_yield_pcs_per_h": 18.56,
+        "direct_model_yield_pcs_per_h": 18.56,
+        "abs_diff_pcs_per_h": 0.0,
+        "map_abundance_class": "SREDNIO",
+        "direct_abundance_class": "SREDNIO",
+        "direct_classifier_class": "WYSYP",
+        "matches_1_to_1": true
+      }
+    ]
+  },
+  "verification_insufficient_history_2025_08_11": {
+    "target_date": "2025-08-11",
+    "issued_at": "2025-08-10",
+    "available_count": 0,
+    "unavailable_count": 30,
+    "verification": {
+      "target_date": "2025-08-11",
+      "issued_at": "2025-08-10",
+      "horizon_days": 1,
+      "species_filter": "all",
+      "model_version": "rf_pipeline_v1.0",
+      "checked_counties_count": 3,
+      "all_match": true,
+      "checks": [
+        {
+          "area_id": "0201",
+          "area_name": "powiat bolesławiecki",
+          "history_completeness": "PARTIAL_HISTORY",
+          "has_bdl_stand_data": true,
+          "map_yield_pcs_per_h": null,
+          "direct_model_yield_pcs_per_h": null,
+          "abs_diff_pcs_per_h": 0.0,
+          "map_abundance_class": "NIEDOSTEPNY",
+          "direct_abundance_class": "NIEDOSTEPNY",
+          "direct_classifier_class": "NIEDOSTEPNY",
+          "matches_1_to_1": true
+        },
+        {
+          "area_id": "0208",
+          "area_name": "powiat kłodzki",
+          "history_completeness": "PARTIAL_HISTORY",
+          "has_bdl_stand_data": true,
+          "map_yield_pcs_per_h": null,
+          "direct_model_yield_pcs_per_h": null,
+          "abs_diff_pcs_per_h": 0.0,
+          "map_abundance_class": "NIEDOSTEPNY",
+          "direct_abundance_class": "NIEDOSTEPNY",
+          "direct_classifier_class": "NIEDOSTEPNY",
+          "matches_1_to_1": true
+        },
+        {
+          "area_id": "0218",
+          "area_name": "powiat średzki",
+          "history_completeness": "PARTIAL_HISTORY",
+          "has_bdl_stand_data": false,
+          "map_yield_pcs_per_h": null,
+          "direct_model_yield_pcs_per_h": null,
+          "abs_diff_pcs_per_h": 0.0,
+          "map_abundance_class": "NIEDOSTEPNY",
+          "direct_abundance_class": "NIEDOSTEPNY",
+          "direct_classifier_class": "NIEDOSTEPNY",
+          "matches_1_to_1": true
+        }
+      ]
+    }
+  },
+  "source_separation_check": {
+    "ml_model_version": "rf_pipeline_v1.0",
+    "rule_index_version": "RULE_SUITABILITY_INDEX_v1.0",
+    "ml_0201_yield_pcs_per_h": 17.3,
+    "rule_0201_yield_pcs_per_h": 33.88,
+    "sources_strictly_separated": true
+  }
+}

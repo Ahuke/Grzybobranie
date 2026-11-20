@@ -124,6 +124,85 @@ ABUNDANCE_CLASSES: dict[str, dict[str, object]] = {
         "rgba": [150, 150, 144, 115],
         "hex": "#969690",
     },
+    "NIEDOSTEPNY": {
+        "label": "Niedostępny (brak wystarczających danych)",
+        "description": "Obszar bez pełnej 21-dniowej historii pogodowej lub spoza obszaru pokrycia",
+        "rgba": [180, 180, 176, 145],
+        "hex": "#B4B4B0",
+    },
+}
+
+# Ciągło-przedziałowa skala kolorów zgodna z jednostką wyniku modelu: szt./h ([GRZ-16])
+# Progi 5.0 i 20.0 szt./h są w 100% zgodne z granicami klas BRAK / SREDNIO / WYSYP.
+YIELD_COLOR_SCALE_BINS: list[dict[str, object]] = [
+    {
+        "key": "VERY_HIGH",
+        "min_val": 30.0,
+        "max_val": None,
+        "label": "> 30 szt./h (silny WYSYP)",
+        "rgba": [20, 83, 45, 220],
+        "hex": "#14532D",
+    },
+    {
+        "key": "HIGH",
+        "min_val": 20.0,
+        "max_val": 30.0,
+        "label": "20 – 30 szt./h (WYSYP)",
+        "rgba": [46, 125, 50, 205],
+        "hex": "#2E7D32",
+    },
+    {
+        "key": "MEDIUM_HIGH",
+        "min_val": 12.0,
+        "max_val": 20.0,
+        "label": "12 – 20 szt./h (ŚREDNIO+)",
+        "rgba": [138, 184, 78, 200],
+        "hex": "#8AB84E",
+    },
+    {
+        "key": "MEDIUM_LOW",
+        "min_val": 5.0,
+        "max_val": 12.0,
+        "label": "5 – 12 szt./h (ŚREDNIO)",
+        "rgba": [217, 155, 42, 195],
+        "hex": "#D99B2A",
+    },
+    {
+        "key": "LOW",
+        "min_val": 0.0,
+        "max_val": 5.0,
+        "label": "< 5 szt./h (BRAK)",
+        "rgba": [176, 70, 54, 190],
+        "hex": "#B04636",
+    },
+]
+
+# Etykiety źródeł wyników — wyraźne rozróżnienie ML vs regułowy vs obserwacje vs demo ([GRZ-16])
+PREDICTION_SOURCE_METADATA: dict[str, dict[str, str]] = {
+    "ML_MODEL": {
+        "badge": "WYNIK ML",
+        "label": "Model uczenia maszynowego (Random Forest, rf_pipeline_v1.0)",
+        "color": "#1E5631",
+        "bg": "#E9F3EC",
+    },
+    "RULE_BASED_INDEX": {
+        "badge": "WYNIK REGUŁOWY",
+        "label": "Jawny Wskaźnik Warunków Grzybobrania (model regułowy, RULE_SUITABILITY_INDEX_v1.0)",
+        "color": "#1D4E89",
+        "bg": "#EAF1F8",
+    },
+    "REAL_OBSERVATIONS": {
+        "badge": "OBSERWACJE TERENOWE",
+        "label": "Rzeczywiste raporty grzybiarzy (grzyby.pl, data/processed/)",
+        "color": "#5C472A",
+        "bg": "#F4EFE6",
+    },
+    "DEMO_MOCK": {
+        "badge": "DANE DEMONSTRACYJNE (MOCK)",
+        "label": "Syntetyczna próbka demonstracyjna interfejsu (data/demo/, is_demo=True)",
+        "color": "#9A4E0F",
+        "bg": "#FBF0E4",
+    },
 }
 
 # Wymagana klauzula atrybucji i charakteru akademickiego ([GRZ-03] / zgoda autora grzyby.pl)

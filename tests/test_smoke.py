@@ -87,9 +87,19 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertIsNone(w_0264["soil_moisture_0_7cm_m3m3"])
 
     def test_prod_fallback_to_demo_when_processed_incomplete(self) -> None:
-        bundle = load_dataset_bundle("prod")
-        self.assertEqual(bundle.env_mode, "demo")
-        self.assertTrue(bundle.is_fallback_to_demo)
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as empty_dir:
+            bundle = load_dataset_bundle("prod", processed_dir=Path(empty_dir))
+            self.assertEqual(bundle.env_mode, "demo")
+            self.assertTrue(bundle.is_fallback_to_demo)
+
+        # Po wygenerowaniu data/processed/predictions.csv ([GRZ-16]) tryb prod działa w pełni bez fallbacku
+        prod_bundle = load_dataset_bundle("prod")
+        self.assertEqual(prod_bundle.env_mode, "prod")
+        self.assertFalse(prod_bundle.is_fallback_to_demo)
+        self.assertGreater(len(prod_bundle.predictions), 1000)
+        self.assertTrue(all(not p["is_demo"] for p in prod_bundle.predictions))
 
     def test_real_region_boundaries_and_crs_grz05(self) -> None:
         """Weryfikuje rzeczywiste granice 30 powiatów w EPSG:4326 ([GRZ-05])."""
@@ -1105,6 +1115,147 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         rep = json.loads(report_json.read_text(encoding="utf-8"))
         self.assertEqual(rep["rows_generated"], 90)
         self.assertTrue(rep["edge_case_checks"]["future_weather_leakage_test"]["identical_features_without_future_weather"])
+
+    def test_model_predictions_map_integration_grz16(self) -> None:
+        """
+        Weryfikuje wszystkie 5 warunków ukończenia zadania [GRZ-16] (Połączenie modelu z mapą prognoz):
+        1. Zmiana daty lub obszaru uruchamia właściwą predykcję (na żywo z `.joblib`) albo wybiera
+           przygotowany wynik z `data/processed/predictions.csv`.
+        2. Mapa (GeoJSON) zawiera skalę kolorów zgodną z jednostką wyniku (`szt./h`), datę docelową,
+           datę odcięcia, jednostkę i źródło.
+        3. Obszary bez wystarczających danych (np. niepełna 21-dniowa historia pogodowa dla `2025-08-11`)
+           są jawnie oznaczane jako `NIEDOSTEPNY` (`predicted_yield_pcs_per_h = None`).
+        4. Dane demonstracyjne (`DEMO_MOCK`), wynik regułowy (`RULE_BASED_INDEX`) i wynik ML (`ML_MODEL`)
+           są ściśle rozdzielone i nie są mylone.
+        5. Wartości na mapie (`enriched_geojson`) są w 100% zgodne 1:1 z bezpośrednim wywołaniem
+           zapisanego potoku `.joblib` dla wielu powiatów (w tym bez BDL `0218` i bez raportów `0217`).
+        """
+        import json
+        from src.config import ABUNDANCE_CLASSES, PREDICTION_SOURCE_METADATA, YIELD_COLOR_SCALE_BINS
+        from src.geo_utils import yield_pcs_per_h_to_rgba
+        from src.prediction_service import (
+            generate_predictions_for_date,
+            load_precomputed_predictions_df,
+            verify_map_predictions_against_direct_model,
+        )
+
+        preds_csv = PROCESSED_DIR / "predictions.csv"
+        ver_report_path = PROCESSED_DIR / "predictions_verification_report.json"
+        doc_path = ROOT_DIR / "docs" / "map_predictions_integration.md"
+
+        self.assertTrue(preds_csv.exists(), "Brak data/processed/predictions.csv")
+        self.assertTrue(ver_report_path.exists(), "Brak data/processed/predictions_verification_report.json")
+        self.assertTrue(doc_path.exists(), "Brak docs/map_predictions_integration.md")
+
+        areas_geojson, areas_by_id = load_areas_geojson(PROCESSED_DIR / "areas.geojson")
+        precomputed_df = load_precomputed_predictions_df(preds_csv)
+        self.assertIsNotNone(precomputed_df)
+        self.assertEqual(len(precomputed_df), 4500)
+        self.assertFalse(precomputed_df["is_demo"].any())
+
+        # 1a. Data z zakresu prekomputowanego (2025-10-19, H=1) wybiera gotowy wynik z predictions.csv
+        res_oct19 = generate_predictions_for_date(
+            target_date="2025-10-19",
+            horizon_days=1,
+            species_filter="all",
+            prediction_engine="ML_MODEL",
+            areas_by_id=areas_by_id,
+            precomputed_df=precomputed_df,
+        )
+        self.assertTrue(res_oct19["used_precomputed_csv"])
+        self.assertEqual(res_oct19["available_count"], 30)
+        self.assertEqual(res_oct19["unavailable_count"], 0)
+        self.assertEqual(res_oct19["target_unit"], "szt./h")
+        self.assertEqual(res_oct19["target_date"], "2025-10-19")
+        self.assertEqual(res_oct19["issued_at"], "2025-10-18")
+        self.assertFalse(res_oct19["is_demo"])
+
+        # 1b. Zmiana daty (2025-10-05) i gatunku (borowik_szlachetny) uruchamia predykcję na żywo z .joblib
+        res_oct05 = generate_predictions_for_date(
+            target_date="2025-10-05",
+            horizon_days=2,
+            species_filter="borowik_szlachetny",
+            prediction_engine="ML_MODEL",
+            areas_by_id=areas_by_id,
+            precomputed_df=precomputed_df,
+            region_filter="0206",
+        )
+        self.assertFalse(res_oct05["used_precomputed_csv"])
+        self.assertEqual(res_oct05["in_filter_count"], 1)
+        self.assertEqual(res_oct05["available_count"], 1)
+        self.assertNotEqual(
+            res_oct19["records_by_area"]["0206"]["predicted_yield_pcs_per_h"],
+            res_oct05["records_by_area"]["0206"]["predicted_yield_pcs_per_h"],
+        )
+
+        # 2. Skala kolorów zgodna z jednostką szt./h i poprawne atrybuty GeoJSON
+        self.assertEqual(len(YIELD_COLOR_SCALE_BINS), 5)
+        rgba_high, lbl_high = yield_pcs_per_h_to_rgba(32.5)
+        self.assertIn("szt./h", lbl_high)
+        self.assertEqual(rgba_high, [20, 83, 45, 220])
+        rgba_none, lbl_none = yield_pcs_per_h_to_rgba(None)
+        self.assertEqual(rgba_none, ABUNDANCE_CLASSES["NIEDOSTEPNY"]["rgba"])
+
+        geo_oct19 = enrich_geojson_with_predictions(
+            areas_geojson, res_oct19["records_by_area"], color_mode="yield_scale"
+        )
+        feat_0201 = [f for f in geo_oct19["features"] if f["properties"]["area_id"] == "0201"][0]["properties"]
+        self.assertEqual(feat_0201["target_date"], "2025-10-19")
+        self.assertEqual(feat_0201["prediction_source"], "ML_MODEL")
+        self.assertEqual(feat_0201["prediction_source_badge"], "WYNIK ML")
+        self.assertIn("szt./h", feat_0201["predicted_yield_label"])
+        self.assertIn("2025-10-19", feat_0201["tooltip_sub"])
+
+        # 3. Obszary bez wystarczających danych (niepełna 21d historia dla 2025-08-11) są NIEDOSTĘPNE
+        res_unavail = generate_predictions_for_date(
+            target_date="2025-08-11",
+            horizon_days=1,
+            species_filter="all",
+            prediction_engine="ML_MODEL",
+            areas_by_id=areas_by_id,
+            precomputed_df=precomputed_df,
+        )
+        self.assertEqual(res_unavail["available_count"], 0)
+        self.assertEqual(res_unavail["unavailable_count"], 30)
+        geo_unavail = enrich_geojson_with_predictions(
+            areas_geojson, res_unavail["records_by_area"], color_mode="yield_scale"
+        )
+        feat_unavail_0201 = [f for f in geo_unavail["features"] if f["properties"]["area_id"] == "0201"][0]["properties"]
+        self.assertIsNone(feat_unavail_0201["predicted_yield_pcs_per_h"])
+        self.assertEqual(feat_unavail_0201["abundance_class"], "NIEDOSTEPNY")
+        self.assertFalse(feat_unavail_0201["is_available"])
+        self.assertEqual(feat_unavail_0201["fill_color"], ABUNDANCE_CLASSES["NIEDOSTEPNY"]["rgba"])
+
+        # 4. Rozdzielenie: ML_MODEL vs RULE_BASED_INDEX vs DEMO_MOCK
+        res_rule = generate_predictions_for_date(
+            target_date="2025-10-19",
+            horizon_days=1,
+            species_filter="all",
+            prediction_engine="RULE_BASED_INDEX",
+            areas_by_id=areas_by_id,
+        )
+        self.assertEqual(res_rule["prediction_engine"], "RULE_BASED_INDEX")
+        self.assertEqual(res_rule["model_version"], "RULE_SUITABILITY_INDEX_v1.0")
+        self.assertNotEqual(res_rule["model_version"], res_oct19["model_version"])
+        self.assertIn("ML_MODEL", PREDICTION_SOURCE_METADATA)
+        self.assertIn("RULE_BASED_INDEX", PREDICTION_SOURCE_METADATA)
+        self.assertIn("DEMO_MOCK", PREDICTION_SOURCE_METADATA)
+
+        # 5. Bezpośrednia weryfikacja 1:1 wartości na mapie z wywołaniem .joblib (6 powiatów w tym 0218 i 0217)
+        ver_map = verify_map_predictions_against_direct_model(
+            enriched_geojson=geo_oct19,
+            target_date="2025-10-19",
+            horizon_days=1,
+            species_filter="all",
+            sample_area_ids=("0201", "0206", "0208", "0213", "0218", "0217"),
+        )
+        self.assertTrue(ver_map["all_match"], f"Rozbieżność mapy z bezpośrednim modelem: {ver_map}")
+        self.assertEqual(ver_map["checked_counties_count"], 6)
+
+        saved_report = json.loads(ver_report_path.read_text(encoding="utf-8"))
+        self.assertTrue(saved_report["verification_map_vs_direct_model_precomputed_2025_10_19_all"]["all_match"])
+        self.assertTrue(saved_report["verification_map_vs_direct_model_live_h2_2025_10_25_borowik"]["all_match"])
+        self.assertTrue(saved_report["source_separation_check"]["sources_strictly_separated"])
 
 
 if __name__ == "__main__":

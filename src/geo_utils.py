@@ -11,7 +11,35 @@ from typing import Any
 
 import pandas as pd
 
-from src.config import ABUNDANCE_CLASSES
+from src.config import (
+    ABUNDANCE_CLASSES,
+    PREDICTION_SOURCE_METADATA,
+    YIELD_COLOR_SCALE_BINS,
+)
+
+
+def yield_pcs_per_h_to_rgba(yield_val: float | None) -> tuple[list[int], str]:
+    """
+    Mapuje ciągłą prognozę wydajności zbioru w jednostce `szt./h` na 5-stopniową
+    skalę kolorów kartograficznych zgodną z progami 5.0 i 20.0 szt./h ([GRZ-16]).
+    Dla `None` zwraca neutralną szarość oznaczającą obszar niedostępny.
+    """
+    if yield_val is None or pd.isna(yield_val):
+        info = ABUNDANCE_CLASSES["NIEDOSTEPNY"]
+        return list(info["rgba"]), str(info["label"])  # type: ignore[arg-type]
+
+    val = float(yield_val)
+    for b in YIELD_COLOR_SCALE_BINS:
+        min_v = float(b["min_val"])  # type: ignore[arg-type]
+        max_v = b["max_val"]
+        if max_v is None:
+            if val > min_v:
+                return list(b["rgba"]), str(b["label"])  # type: ignore[arg-type]
+        else:
+            if min_v <= val <= float(max_v):  # type: ignore[arg-type]
+                return list(b["rgba"]), str(b["label"])  # type: ignore[arg-type]
+    low_bin = YIELD_COLOR_SCALE_BINS[-1]
+    return list(low_bin["rgba"]), str(low_bin["label"])  # type: ignore[arg-type]
 
 
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -279,6 +307,7 @@ def enrich_geojson_with_predictions(
 
         rec = records_by_area.get(area_id)
         in_radius = bool(rec.get("in_radius", True)) if rec else True
+        is_available = bool(rec.get("is_available", True)) if rec else False
 
         total_area = props.get("total_area_km2")
         props["total_area_km2_label"] = (
@@ -315,11 +344,33 @@ def enrich_geojson_with_predictions(
             else ("Profil drzewostanowy BDL" if has_bdl else "Tylko granice PRG (brak szczegółów BDL)")
         )
 
-        if rec and in_radius and rec.get("predicted_yield_pcs_per_h") is not None:
+        pred_source = str((rec or {}).get("prediction_source") or ("DEMO_MOCK" if (rec or {}).get("is_demo") else "ML_MODEL"))
+        source_badge = PREDICTION_SOURCE_METADATA.get(pred_source, {}).get("badge", pred_source)
+        target_date_str = str((rec or {}).get("target_date") or "—")
+        generated_at_str = str((rec or {}).get("generated_at") or "—")
+        model_ver_str = str((rec or {}).get("model_version") or "—")
+        hist_status_str = str((rec or {}).get("history_completeness") or "—")
+
+        props["prediction_source"] = pred_source
+        props["prediction_source_badge"] = source_badge
+        props["target_date"] = target_date_str
+        props["generated_at"] = generated_at_str
+        props["model_version"] = model_ver_str
+        props["history_completeness"] = hist_status_str
+        props["is_available"] = bool(rec is not None and is_available and rec.get("predicted_yield_pcs_per_h") is not None)
+
+        if rec and in_radius and is_available and rec.get("predicted_yield_pcs_per_h") is not None:
+            y_pred = float(rec["predicted_yield_pcs_per_h"])
             abundance = str(rec.get("abundance_class") or "BRAK_DANYCH")
             color_info = ABUNDANCE_CLASSES.get(abundance, ABUNDANCE_CLASSES["BRAK_DANYCH"])
-            props["predicted_yield_label"] = f"{rec['predicted_yield_pcs_per_h']:.1f} szt./h"
-            props["abundance_label"] = str(color_info["label"])
+            scale_rgba, scale_bin_label = yield_pcs_per_h_to_rgba(y_pred)
+
+            props["predicted_yield_pcs_per_h"] = y_pred
+            props["abundance_class"] = abundance
+            props["predicted_yield_label"] = f"{y_pred:.1f} szt./h"
+            props["abundance_label"] = (
+                scale_bin_label if color_mode == "yield_scale" else str(color_info["label"])
+            )
             props["confidence_score"] = rec.get("confidence_score")
             props["confidence_label"] = (
                 f"{rec['confidence_score']:.2f}"
@@ -335,25 +386,50 @@ def enrich_geojson_with_predictions(
                 rec.get("habitat_match_note")
                 or "Brak dodatkowego opisu dopasowania siedliska"
             )
-            pred_fill = color_info["rgba"]
+            pred_fill = scale_rgba if color_mode == "yield_scale" else color_info["rgba"]
             pred_line = [30, 50, 35, 230]
-        else:
-            color_info = ABUNDANCE_CLASSES["BRAK_DANYCH"]
-            props["predicted_yield_label"] = (
-                "poza promieniem" if (rec and not in_radius) else "brak prognozy (granice regionu)"
-            )
+        elif rec and in_radius and not is_available:
+            color_info = ABUNDANCE_CLASSES["NIEDOSTEPNY"]
+            props["predicted_yield_pcs_per_h"] = None
+            props["abundance_class"] = "NIEDOSTEPNY"
+            props["predicted_yield_label"] = "NIEDOSTĘPNY (brak wystarczających danych)"
             props["abundance_label"] = str(color_info["label"])
+            props["confidence_score"] = None
             props["confidence_label"] = "—"
             props["distance_label"] = (
                 f"{rec['distance_km']:.1f} km"
-                + (" (poza promieniem)" if not in_radius else "")
+                if rec.get("distance_km") is not None
+                else "—"
+            )
+            props["habitat_match_note"] = (
+                rec.get("unavailable_reason")
+                or rec.get("habitat_match_note")
+                or f"Brak pełnej historii pogodowej (status: {hist_status_str})"
+            )
+            pred_fill = color_info["rgba"]
+            pred_line = [90, 95, 95, 200]
+        else:
+            color_info = ABUNDANCE_CLASSES["BRAK_DANYCH"]
+            props["predicted_yield_pcs_per_h"] = None
+            props["abundance_class"] = "BRAK_DANYCH"
+            props["predicted_yield_label"] = (
+                "poza filtrem (promień / powiat)"
+                if (rec and not in_radius)
+                else "brak prognozy (granice regionu)"
+            )
+            props["abundance_label"] = str(color_info["label"])
+            props["confidence_score"] = None
+            props["confidence_label"] = "—"
+            props["distance_label"] = (
+                f"{rec['distance_km']:.1f} km"
+                + (" (poza filtrem)" if not in_radius else "")
                 if rec and rec.get("distance_km") is not None
                 else "—"
             )
             props["habitat_match_note"] = (
                 f"Powierzchnia powiatu: {props['total_area_km2_label']} | Status BDL: {props['bdl_status_label']}"
             )
-            pred_fill = color_info["rgba"]
+            pred_fill = [165, 165, 160, 85] if (rec and not in_radius) else color_info["rgba"]
             pred_line = [90, 105, 95, 195]
 
         if color_mode == "region_bdl":
@@ -365,13 +441,26 @@ def enrich_geojson_with_predictions(
             props["fill_color"] = pred_fill
             props["line_color"] = pred_line
 
+        p21 = (rec or {}).get("precip_lag_21d_mm")
+        soil_m = (rec or {}).get("soil_moisture_0_7cm_m3m3")
+        tmin = (rec or {}).get("temp_min_night_c")
+        weather_snippet = (
+            f"Opad 21d: <b>{float(p21):.1f} mm</b> | "
+            f"Wilg. gleby: <b>{float(soil_m):.3f} m³/m³</b> | "
+            f"Temp. min: <b>{float(tmin):.1f} °C</b><br/>"
+            if (p21 is not None and soil_m is not None and tmin is not None)
+            else ""
+        )
+
         props["tooltip_header"] = f"{area_name} (TERYT: {area_id})"
         props["tooltip_sub"] = (
+            f"Źródło: <b>[{source_badge}] {model_ver_str}</b> | Data docelowa: <b>{target_date_str}</b> (odcięcie: {generated_at_str})<br/>"
             f"Powierzchnia: {props['total_area_km2_label']} | Odległość: {props['distance_label']}<br/>"
             f"Prognoza: <b>{props['predicted_yield_label']}</b> ({props['abundance_label']}) | "
-            f"Dopasowanie: <b>{props['confidence_label']}</b>"
+            f"Pewność: <b>{props['confidence_label']}</b>"
         )
         props["tooltip_bdl"] = (
+            f"{weather_snippet}"
             f"Lesistość: <b>{props['forest_cover_pct_label']}</b> | "
             f"Sosna: <b>{props['pine_share_pct_label']}</b> | "
             f"Dąb/Buk: <b>{props['oak_beech_share_pct_label']}</b> | "

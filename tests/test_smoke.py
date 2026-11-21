@@ -1309,6 +1309,73 @@ class TestAppSkeletonAndRegionSmoke(unittest.TestCase):
         self.assertIn("skalibrowanego prawdopodobieństwa", app_text)
         self.assertIn("N = 127", app_text)
 
+    def test_refresh_pipeline_and_staleness_grz20(self) -> None:
+        """
+        Weryfikuje bezpieczne odświeżanie danych i prognoz przed demonstracją [GRZ-20]:
+        1. Obecność `refresh_manifest.json` oraz `docs/refresh_procedure.md`.
+        2. Atomowy zapis nie nadpisuje poprawnych plików w razie błędu pobierania / pustych danych.
+        3. Stare prognozy są jawnie oznaczane jako `STALE_ARCHIVE` (`is_stale = True`).
+        4. Prognozy mają datę wystawienia (`generated_at`), datę docelową (`target_date`) i `model_version`.
+        """
+        import json
+        import tempfile
+        import pandas as pd
+        from src.refresh_pipeline import (
+            assess_predictions_freshness,
+            atomic_write_via_temp,
+            safe_refresh_weather_step,
+        )
+
+        manifest_path = PROCESSED_DIR / "refresh_manifest.json"
+        doc_path = ROOT_DIR / "docs" / "refresh_procedure.md"
+        preds_path = PROCESSED_DIR / "predictions.csv"
+
+        self.assertTrue(manifest_path.exists(), "Brak refresh_manifest.json")
+        self.assertTrue(doc_path.exists(), "Brak docs/refresh_procedure.md")
+
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(manifest["predictions_step"]["rows_count"], 4500)
+        self.assertEqual(manifest["predictions_step"]["model_version"], "rf_pipeline_v1.0")
+        self.assertIn("issued_at_max", manifest["predictions_step"])
+        self.assertIn("target_date_max", manifest["predictions_step"])
+
+        # Test oznaczania starych vs bieżących wyników
+        stale_res = assess_predictions_freshness(preds_path, reference_date="2025-11-20")
+        self.assertTrue(stale_res["is_stale"])
+        self.assertEqual(stale_res["freshness_status"], "STALE_ARCHIVE")
+        self.assertIsNotNone(stale_res["warning_message"])
+
+        current_res = assess_predictions_freshness(preds_path, reference_date="2025-11-05")
+        self.assertFalse(current_res["is_stale"])
+        self.assertEqual(current_res["freshness_status"], "CURRENT")
+
+        # Test atomowości: awaria zapisu/pobierania NIE nadpisuje poprawnego pliku
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_dir = Path(tmpdir)
+            target = tmp_dir / "valid.txt"
+            target.write_text("POPRAWNE_DANE", encoding="utf-8")
+
+            with self.assertRaises(RuntimeError):
+                def _failing_writer(p: Path) -> None:
+                    p.write_text("USZKODZONE", encoding="utf-8")
+                    raise RuntimeError("Symulowana awaria sieci")
+                atomic_write_via_temp(target, _failing_writer)
+
+            self.assertEqual(target.read_text(encoding="utf-8"), "POPRAWNE_DANE")
+
+            # Test safe_refresh_weather_step przy pustym DataFrame
+            weather_parquet = tmp_dir / "weather_daily.parquet"
+            pd.DataFrame({"area_id": ["0201"], "date": ["2025-10-01"]}).to_parquet(weather_parquet, index=False)
+
+            fail_status = safe_refresh_weather_step(
+                fetcher_fn=lambda: pd.DataFrame(),
+                weather_daily_path=weather_parquet,
+                min_expected_rows=10,
+            )
+            self.assertEqual(fail_status["status"], "FAILED_PRESERVED_EXISTING")
+            self.assertTrue(fail_status["preserved_existing"])
+            self.assertEqual(len(pd.read_parquet(weather_parquet)), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

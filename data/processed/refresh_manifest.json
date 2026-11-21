@@ -1,0 +1,41 @@
+{
+  "task_id": "GRZ-20",
+  "refreshed_at_utc": "2026-11-21T16:28:58+00:00",
+  "mode": "offline_recompute",
+  "weather_step": {
+    "status": "SKIPPED_OFFLINE_USING_CACHE",
+    "rows_after": 2910,
+    "preserved_existing": true,
+    "error": null
+  },
+  "features_step": {
+    "status": "REBUILT_ATOMICALLY",
+    "rows_count": 513,
+    "columns_count": 70
+  },
+  "predictions_step": {
+    "status": "REBUILT_ATOMICALLY",
+    "rows_count": 4500,
+    "model_version": "rf_pipeline_v1.0",
+    "target_date_min": "2025-10-13",
+    "target_date_max": "2025-11-06",
+    "issued_at_min": "2025-10-12",
+    "issued_at_max": "2025-11-05"
+  },
+  "freshness": {
+    "exists": true,
+    "rows_count": 4500,
+    "reference_date": "2026-11-21",
+    "target_date_min": "2025-10-13",
+    "target_date_max": "2025-11-06",
+    "issued_at_min": "2025-10-12",
+    "issued_at_max": "2025-11-05",
+    "model_versions": [
+      "rf_pipeline_v1.0"
+    ],
+    "age_days_since_max_target": 380,
+    "is_stale": true,
+    "freshness_status": "STALE_ARCHIVE",
+    "warning_message": "UWAGA: Zapisane prognozy są przestarzałe / archiwalne (ostatnia data docelowa: 2025-11-06, sprzed 380 dni względem 2026-11-21). Nie przedstawiać ich jako prognoz bieżących bez aktualizacji pogody."
+  }
+}

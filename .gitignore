@@ -52,6 +52,7 @@ data/processed/*
 !data/processed/predictions.csv
 !data/processed/predictions_verification_report.json
 !data/processed/heldout_error_analysis.json
+!data/processed/refresh_manifest.json
 *.shp
 *.shx
 *.dbf
